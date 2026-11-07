@@ -289,6 +289,40 @@
   }
   .tile[data-wide] .value { font-size: .875rem; letter-spacing: 0; }
 
+  /* visitors */
+  .visitors { margin-top: 4.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .visitor-board {
+    margin-top: .85rem; overflow: hidden;
+    border: 1px solid var(--line); border-radius: .9rem;
+    background: rgba(255, 255, 255, .62);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  .visit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .visit {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .75rem;
+    max-height: 4.5rem; padding: .72rem 1rem;
+    border-bottom: 1px solid var(--line);
+    opacity: var(--o, 1);
+    transition: opacity 1.4s ease, max-height 1.4s ease, padding 1.4s ease, transform 1.4s ease, border-color 1.4s ease;
+  }
+  .visit:last-child { border-bottom: 0; }
+  .visit-flag { font-size: 1rem; line-height: 1; }
+  .visit-place { display: flex; align-items: baseline; gap: .45rem; min-width: 0; }
+  .visit-city { font-size: .8125rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .visit-country {
+    font-family: var(--mono); font-size: .625rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .visit-ago { font-family: var(--mono); font-size: .625rem; letter-spacing: .08em; color: var(--subtle); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .visit.entering { animation: visit-in .8s cubic-bezier(.2, .8, .2, 1) both; }
+  .visit.leaving { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; border-color: transparent; transform: translateY(-4px); }
+  @keyframes visit-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: var(--o, 1); transform: none; } }
+  .visit-empty {
+    margin: 0; padding: 1.1rem 1rem;
+    font-family: var(--mono); font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: var(--subtle);
+  }
+  .visit-empty[hidden] { display: none; }
+
   footer {
     display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.5rem;
     margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
@@ -412,6 +446,17 @@
     </div>
   </section>
 
+  <section class="visitors" aria-labelledby="visitors-heading">
+    <div class="section-head">
+      <h2 id="visitors-heading">Recent visitors</h2>
+      <span>city-level · live · last 10</span>
+    </div>
+    <div class="visitor-board">
+      <ol class="visit-list" id="visit-list" aria-live="polite"></ol>
+      <p class="visit-empty" id="visit-empty">Locating the last ten visitors…</p>
+    </div>
+  </section>
+
   <section class="stats" aria-labelledby="stats-heading">
     <div class="stats-head">
       <div class="stats-title">
@@ -468,11 +513,18 @@
   </footer>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
 <script>
 (() => {
   const STATS_URL = 'https://1.rabta.space/api/v1/stats';
   const NODE_URL = 'https://1.rabta.space';
+  const RELAY = NODE_URL;
+  const VISITS_COLLECTION = 'site/visits';
+  const VISITS_LIMIT = 10;
+  const VISIT_TTL = 7 * 24 * 60 * 60;
+  const STORE_IDENTITY = 'rabta.canvas.identity.v1';
+  const STORE_VISIT_SENT = 'rabta.visit.sent.v1';
   const MIN_DELAY = 1000;
   const MAX_DELAY = 10000;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -599,6 +651,279 @@
     updatedEl.textContent = ago(Date.now() - lastOk);
   };
 
+  /* ---------- recent visitors ---------- */
+  const visitList = $('visit-list');
+  const visitEmpty = $('visit-empty');
+  const visitSeen = new Set();
+  let visitClockOffset = 0;
+  let visitStream = null;
+  let visitReconnect = null;
+
+  const visitNow = () => Math.floor(Date.now() / 1000) + visitClockOffset;
+
+  const syncVisitClock = (response) => {
+    const date = response && response.headers ? response.headers.get('date') : null;
+    if (!date) return;
+    const seconds = Math.floor(Date.parse(date) / 1000);
+    if (!Number.isFinite(seconds)) return;
+    visitClockOffset = Math.min(86400, Math.max(-86400, seconds - Math.floor(Date.now() / 1000)));
+  };
+
+  const readText = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
+  const writeText = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
+
+  const bytesToHex = (bytes) => {
+    let out = '';
+    for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, '0');
+    return out;
+  };
+  const bytesToBase64 = (bytes) => {
+    let raw = '';
+    for (let i = 0; i < bytes.length; i++) raw += String.fromCharCode(bytes[i]);
+    return btoa(raw);
+  };
+  const base64ToBytes = (value) => {
+    const raw = atob(value);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  };
+  const canonical = (value) => {
+    if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
+    if (value && typeof value === 'object') {
+      return '{' + Object.keys(value).sort().map((key) => JSON.stringify(key) + ':' + canonical(value[key])).join(',') + '}';
+    }
+    return JSON.stringify(value);
+  };
+
+  const loadIdentity = () => {
+    const make = (secretKey, publicKey) => {
+      const publicHex = bytesToHex(publicKey);
+      return { secretKey, publicKey, publicHex, owner: 'ed25519:' + publicHex };
+    };
+    try {
+      const saved = JSON.parse(readText(STORE_IDENTITY) || 'null');
+      if (saved && typeof saved.secret === 'string' && typeof saved.public === 'string') {
+        const secretKey = base64ToBytes(saved.secret);
+        const publicKey = base64ToBytes(saved.public);
+        if (secretKey.length === 64 && publicKey.length === 32) return make(secretKey, publicKey);
+      }
+    } catch {}
+    const pair = nacl.sign.keyPair();
+    writeText(STORE_IDENTITY, JSON.stringify({ secret: bytesToBase64(pair.secretKey), public: bytesToBase64(pair.publicKey) }));
+    return make(pair.secretKey, pair.publicKey);
+  };
+
+  const parseVisit = (event) => {
+    if (!event || typeof event !== 'object') return null;
+    const labels = Array.isArray(event.labels) ? event.labels : [];
+    if (!labels.includes('visit')) return null;
+    const data = event.data || {};
+    if (data.v !== 1) return null;
+    const city = String(data.city || '').trim().slice(0, 64);
+    const country = String(data.country || '').trim().slice(0, 64);
+    const cc = String(data.cc || '').toUpperCase();
+    const at = Number(event.created_at);
+    if (!city || !country || !/^[A-Z]{2}$/.test(cc) || !Number.isFinite(at)) return null;
+    return { id: String(event.id || ''), city, country, cc, at };
+  };
+
+  const flagFor = (cc) => {
+    try { return String.fromCodePoint(...[...cc].map((c) => 0x1F1E6 + c.charCodeAt(0) - 65)); } catch { return '🌍'; }
+  };
+
+  const visitAgo = (at) => {
+    const s = Math.max(0, visitNow() - at);
+    if (s < 10) return 'just now';
+    if (s < 60) return s + 's ago';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+  };
+
+  const makeVisitRow = (visit) => {
+    const row = document.createElement('li');
+    row.className = 'visit';
+    row.dataset.at = String(visit.at);
+    row.dataset.id = visit.id;
+
+    const flag = document.createElement('span');
+    flag.className = 'visit-flag';
+    flag.setAttribute('aria-hidden', 'true');
+    flag.textContent = flagFor(visit.cc);
+
+    const place = document.createElement('span');
+    place.className = 'visit-place';
+    const city = document.createElement('span');
+    city.className = 'visit-city';
+    city.textContent = visit.city;
+    const country = document.createElement('span');
+    country.className = 'visit-country';
+    country.textContent = visit.country;
+    place.append(city, country);
+
+    const when = document.createElement('span');
+    when.className = 'visit-ago';
+    when.textContent = visitAgo(visit.at);
+    when.title = new Date(visit.at * 1000).toLocaleString();
+
+    row.append(flag, place, when);
+    return row;
+  };
+
+  const decorateVisits = () => {
+    Array.from(visitList.children).forEach((row, i) => {
+      row.style.setProperty('--o', Math.max(.55, 1 - i * .05).toFixed(2));
+      const when = row.querySelector('.visit-ago');
+      if (when) when.textContent = visitAgo(Number(row.dataset.at));
+    });
+    const empty = visitList.children.length === 0;
+    if (empty) visitEmpty.textContent = 'Nobody here yet — you could be first.';
+    visitEmpty.hidden = !empty;
+  };
+
+  const hydrateVisits = (events) => {
+    const parsed = events.map(parseVisit).filter(Boolean).sort((a, b) => a.at - b.at).slice(-VISITS_LIMIT);
+    visitList.textContent = '';
+    visitSeen.clear();
+    parsed.reverse().forEach((visit) => {
+      visitSeen.add(visit.id);
+      visitList.appendChild(makeVisitRow(visit));
+    });
+    decorateVisits();
+  };
+
+  const pushVisit = (visit, animate) => {
+    if (!visit || !visit.id || visitSeen.has(visit.id)) return;
+    visitSeen.add(visit.id);
+    const row = makeVisitRow(visit);
+    if (animate !== false) row.classList.add('entering');
+    visitList.prepend(row);
+    const rows = Array.from(visitList.children);
+    if (rows.length > VISITS_LIMIT) {
+      const old = rows[rows.length - 1];
+      old.classList.remove('entering');
+      old.classList.add('leaving');
+      const drop = () => old.remove();
+      old.addEventListener('transitionend', drop, { once: true });
+      setTimeout(drop, 1600);
+    }
+    decorateVisits();
+  };
+
+  const loadVisits = async () => {
+    const res = await fetch(RELAY + '/api/v1/events?collection=' + encodeURIComponent(VISITS_COLLECTION) + '&limit=50', { cache: 'no-store' });
+    syncVisitClock(res);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const body = await res.json();
+    hydrateVisits(Array.isArray(body.events) ? body.events : []);
+  };
+
+  const connectVisits = () => {
+    if (visitStream) { visitStream.close(); visitStream = null; }
+    clearTimeout(visitReconnect);
+    try {
+      visitStream = new EventSource(RELAY + '/api/v1/events/stream?collection=' + encodeURIComponent(VISITS_COLLECTION));
+    } catch {
+      visitReconnect = setTimeout(() => { if (!document.hidden) connectVisits(); }, 5000);
+      return;
+    }
+    visitStream.onmessage = (event) => {
+      try { pushVisit(parseVisit(JSON.parse(event.data)), true); } catch {}
+    };
+    visitStream.onerror = () => {
+      if (!visitStream) return;
+      if (visitStream.readyState === EventSource.CLOSED) {
+        visitStream = null;
+        clearTimeout(visitReconnect);
+        visitReconnect = setTimeout(() => { if (!document.hidden) connectVisits(); }, 5000);
+      }
+    };
+  };
+
+  const fetchGeo = async (url) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    try {
+      const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
+
+  const countryName = (raw, cc) => {
+    if (typeof raw === 'string' && raw.trim().length > 2) return raw.trim();
+    try { return new Intl.DisplayNames(['en'], { type: 'region' }).of(cc) || cc; } catch { return cc; }
+  };
+
+  const normalizePlace = (raw) => {
+    if (!raw || typeof raw !== 'object' || raw.success === false) return null;
+    const city = typeof raw.city === 'string' ? raw.city.trim() : '';
+    const rawCountry = typeof raw.country === 'string' ? raw.country.trim() : '';
+    const cc = String(raw.country_code || (rawCountry.length === 2 ? rawCountry : '')).toUpperCase();
+    if (!city || !/^[A-Z]{2}$/.test(cc)) return null;
+    const country = countryName(raw.country_name || (rawCountry.length > 2 ? rawCountry : ''), cc);
+    return { city: city.slice(0, 64), country: country.slice(0, 64), cc };
+  };
+
+  const locate = async () => {
+    const sources = [
+      'https://ipwho.is/',
+      'https://ipapi.co/json/',
+      'https://ipinfo.io/json',
+      'https://get.geojs.io/v1/ip/geo.json'
+    ];
+    const tasks = sources.map((url) => fetchGeo(url).then((raw) => {
+      const place = normalizePlace(raw);
+      return place || Promise.reject(new Error('no city'));
+    }));
+    try { return await Promise.any(tasks); } catch { return null; }
+  };
+
+  const postVisit = async (place) => {
+    if (readText(STORE_VISIT_SENT)) return null;
+    if (!window.nacl) throw new Error('nacl unavailable');
+    if (!window.crypto || !window.crypto.subtle) throw new Error('crypto unavailable');
+    const identity = loadIdentity();
+    const at = visitNow();
+    const fields = {
+      collection: VISITS_COLLECTION,
+      created_at: at,
+      expires_at: at + VISIT_TTL,
+      owner: identity.owner,
+      labels: ['visit'],
+      data: { v: 1, city: place.city, country: place.country, cc: place.cc }
+    };
+    const bytes = new TextEncoder().encode(canonical(fields));
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    const signature = nacl.sign.detached(digest, identity.secretKey);
+    const envelope = { ...fields, id: bytesToHex(digest), sig: bytesToHex(signature) };
+    const res = await fetch(RELAY + '/api/v1/events', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(envelope)
+    });
+    syncVisitClock(res);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const body = await res.json().catch(() => null);
+    writeText(STORE_VISIT_SENT, '1');
+    return { id: (body && body.id) || envelope.id, city: place.city, country: place.country, cc: place.cc, at };
+  };
+
+  const initVisitors = async () => {
+    if (!visitList) return;
+    try { await loadVisits(); } catch {}
+    connectVisits();
+    try {
+      const place = await locate();
+      const own = place ? await postVisit(place) : null;
+      if (own) pushVisit(own, true);
+    } catch {}
+    setInterval(decorateVisits, 15000);
+  };
+
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       clearTimeout(timer);
@@ -644,13 +969,15 @@
       .from('.ticker', { opacity: 0, duration: .5 }, '-=.35')
       .from('.demos .section-head', { y: 12, opacity: 0, duration: .5 }, '-=.2')
       .from('.card', { y: 28, opacity: 0, stagger: .09, duration: .65 }, '-=.25')
+      .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.25')
       .from('.stats-head, .tile', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.35')
       .from('footer', { opacity: 0, duration: .4 }, '-=.4');
   };
 
   const boot = () => {
-    if (document.readyState === 'complete') hero();
-    else window.addEventListener('load', hero, { once: true });
+    const start = () => { hero(); initVisitors(); };
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
   };
 
   load();
