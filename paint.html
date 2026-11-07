@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="dark" />
 <title>Rabta Canvas — live, signed, 1000×1000</title>
-<meta name="description" content="Rabta Canvas is a realtime collaborative board on Rabta. Every stroke is signed with an Ed25519 key stored in your browser and streamed to every viewer over SSE." />
-<meta name="keywords" content="Rabta, rabta.space, Rabta Canvas, collaborative canvas, realtime drawing, Ed25519 signed strokes, SSE streaming, self-hosted whiteboard, no accounts" />
+<meta name="description" content="Rabta Canvas is a realtime collaborative board on Rabta. Every stroke is signed with an Ed25519 key stored in your browser and polled by every viewer." />
+<meta name="keywords" content="Rabta, rabta.space, Rabta Canvas, collaborative canvas, realtime drawing, Ed25519 signed strokes, live polling, self-hosted whiteboard, no accounts" />
 <link rel="canonical" href="https://rabta.space/paint.html" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Rabta" />
 <meta property="og:title" content="Rabta Canvas — live, signed, 1000×1000" />
-<meta property="og:description" content="A realtime collaborative 1000×1000 board where every stroke is Ed25519-signed in your browser and streamed over SSE." />
+<meta property="og:description" content="A realtime collaborative 1000×1000 board where every stroke is Ed25519-signed in your browser and synced to every viewer." />
 <meta property="og:url" content="https://rabta.space/paint.html" />
 <meta property="og:image" content="https://rabta.space/og-canvas.jpg" />
 <meta property="og:image:width" content="1200" />
@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="rabta canvas — signed strokes, live" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Rabta Canvas — live, signed, 1000×1000" />
-<meta name="twitter:description" content="A realtime collaborative board where every stroke is Ed25519-signed and streamed over SSE." />
+<meta name="twitter:description" content="A realtime collaborative board where every stroke is Ed25519-signed and synced to every viewer." />
 <meta name="twitter:image" content="https://rabta.space/og-canvas.jpg" />
 <meta name="twitter:image:alt" content="rabta canvas — signed strokes, live" />
 <link rel="alternate" type="text/plain" href="llms.txt" />
@@ -191,7 +191,7 @@
           <span class="text-[13px] font-medium tracking-[.24em] text-white/30">CANVAS</span>
         </div>
         <div class="mt-1.5 hidden items-center gap-1.5 text-[9px] uppercase tracking-[.2em] text-white/25 sm:flex">
-          <span>ed25519</span><span class="text-white/10">/</span><span>sse</span><span class="text-white/10">/</span><span>30d ttl</span>
+          <span>ed25519</span><span class="text-white/10">/</span><span>polling</span><span class="text-white/10">/</span><span>30d ttl</span>
         </div>
       </div>
     </div>
@@ -204,7 +204,7 @@
     </div>
 
     <div class="flex shrink-0 items-center gap-2">
-      <div class="flex items-center gap-2 rounded-full border border-white/[.07] bg-white/[.025] px-2.5 py-1.5 sm:px-3" :title="'Live event stream: ' + connLabel">
+      <div class="flex items-center gap-2 rounded-full border border-white/[.07] bg-white/[.025] px-2.5 py-1.5 sm:px-3" :title="'Live relay polling: ' + connLabel">
         <span class="relative flex h-1.5 w-1.5">
           <span class="pulse-dot absolute inset-0 rounded-full opacity-60" :style="{ backgroundColor: connColor }"></span>
           <span class="relative h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: connColor }"></span>
@@ -299,7 +299,7 @@
         <div v-if="!recentStrokes.length" class="px-3.5 py-5 text-center text-[9px] uppercase tracking-[.18em] text-white/20">Waiting for a stroke</div>
       </div>
       <div class="border-t border-white/[.06] px-3.5 py-2 font-mono text-[8px] uppercase tracking-[.16em] text-white/20">
-        ed25519 → rabta → sse
+        ed25519 → rabta → poll
       </div>
     </div>
   </aside>
@@ -1135,6 +1135,7 @@
           expires_at: timestamp + TTL_SECONDS,
           owner: identity.value.owner,
           labels: ['stroke'],
+          blobs: [],
           data
         };
         const canonicalBytes = new TextEncoder().encode(canonical(fields));
@@ -1222,9 +1223,14 @@
         let pages = 0;
         try {
           do {
-            const params = new URLSearchParams({ collection: collection.value, limit: '100' });
-            if (cursor) params.set('cursor', cursor);
-            const response = await fetch(relay.value + '/api/v1/events?' + params.toString(), { cache: 'no-store' });
+            const query = { collection: collection.value, limit: 100 };
+            if (cursor) query.cursor = cursor;
+            const response = await fetch(relay.value + '/api/v1/events/query', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify(query),
+              cache: 'no-store'
+            });
             syncClock(response);
             if (!response.ok) {
               let body = null;
@@ -1252,46 +1258,75 @@
         }
       }
 
-      let stream = null;
-      let reconnectTimer = null;
-      function scheduleReconnect() {
-        clearTimeout(reconnectTimer);
-        reconnectTimer = setTimeout(() => {
-          if (!document.hidden) connectStream();
-        }, 5000);
+      let pollTimer = null;
+      let pollBusy = false;
+
+      function stopPolling() {
+        clearTimeout(pollTimer);
+        pollTimer = null;
       }
 
-      function connectStream() {
-        if (stream) {
-          stream.close();
-          stream = null;
-        }
-        clearTimeout(reconnectTimer);
-        conn.value = 'connecting';
-        try {
-          stream = new EventSource(relay.value + '/api/v1/events/stream?collection=' + encodeURIComponent(collection.value));
-        } catch (error) {
-          conn.value = 'offline';
-          scheduleReconnect();
+      function schedulePoll(delay) {
+        clearTimeout(pollTimer);
+        pollTimer = setTimeout(pollEvents, delay);
+      }
+
+      async function pollEvents() {
+        clearTimeout(pollTimer);
+        if (document.hidden) {
+          schedulePoll(5000);
           return;
         }
-        stream.onopen = () => { conn.value = 'live'; };
-        stream.onmessage = (event) => {
-          try {
-            const payload = JSON.parse(event.data);
-            addEvent(payload);
-            conn.value = 'live';
-          } catch {}
-        };
-        stream.onerror = () => {
-          if (!stream) return;
-          if (stream.readyState === EventSource.CLOSED) {
-            conn.value = 'offline';
-            scheduleReconnect();
-          } else {
-            conn.value = 'retrying';
+        if (pollBusy) {
+          schedulePoll(1000);
+          return;
+        }
+        pollBusy = true;
+        let added = false;
+        try {
+          const collected = [];
+          let cursor = null;
+          let pages = 0;
+          let unseen = true;
+          do {
+            const query = { collection: collection.value, limit: 100 };
+            if (cursor) query.cursor = cursor;
+            const response = await fetch(relay.value + '/api/v1/events/query', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify(query),
+              cache: 'no-store'
+            });
+            syncClock(response);
+            if (!response.ok) {
+              let body = null;
+              try { body = await response.json(); } catch {}
+              throw new Error((body && body.code) || ('HTTP ' + response.status));
+            }
+            const body = await response.json();
+            const events = Array.isArray(body.events) ? body.events : [];
+            collected.push(...events);
+            unseen = events.some((event) => !seen.has(String(event && event.id)));
+            cursor = unseen ? (body.next_cursor || null) : null;
+            pages += 1;
+          } while (cursor && pages < 5);
+
+          collected.sort(compareRawEvents);
+          for (const event of collected) {
+            if (addEvent(event)) added = true;
           }
-        };
+          conn.value = 'live';
+        } catch {
+          conn.value = 'offline';
+        } finally {
+          pollBusy = false;
+          schedulePoll(added ? 2000 : 3000);
+        }
+      }
+
+      function startPolling() {
+        if (conn.value !== 'live') conn.value = 'connecting';
+        schedulePoll(0);
       }
 
       async function fetchHealth() {
@@ -1358,8 +1393,9 @@
         } catch {}
         resetCanvas();
         closeModal();
-        connectStream();
-        loadHistory();
+        stopPolling();
+        conn.value = 'connecting';
+        loadHistory().finally(startPolling);
         fetchHealth();
         showToast('Relay switched to ' + relayHost.value + '.', 'info');
       }
@@ -1430,11 +1466,15 @@
 
       function onOnline() {
         scheduleFlush(400);
-        if (!stream || stream.readyState === EventSource.CLOSED) connectStream();
+        if (!loadingHistory.value) pollEvents();
       }
 
       let resizeObserver = null;
       let clockTimer = null;
+
+      function onVisibility() {
+        if (!document.hidden && !loadingHistory.value) pollEvents();
+      }
 
       onMounted(() => {
         measureCanvas();
@@ -1452,19 +1492,18 @@
         window.addEventListener('pointercancel', onWindowPointerUp);
         document.addEventListener('fullscreenchange', onFullscreenChange);
         document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('visibilitychange', onVisibility);
         clockTimer = setInterval(() => {
           nowTick.value = Math.floor(Date.now() / 1000);
         }, 15000);
-        connectStream();
-        loadHistory();
+        loadHistory().finally(startPolling);
       });
 
       onBeforeUnmount(() => {
         if (resizeObserver) resizeObserver.disconnect();
-        if (stream) stream.close();
+        stopPolling();
         if (clockTimer) clearInterval(clockTimer);
         if (toastTimer) clearTimeout(toastTimer);
-        clearTimeout(reconnectTimer);
         clearTimeout(flushTimer);
         cancelAnimationFrame(drawRaf);
         window.removeEventListener('resize', measureCanvas);
@@ -1473,6 +1512,7 @@
         window.removeEventListener('pointercancel', onWindowPointerUp);
         document.removeEventListener('fullscreenchange', onFullscreenChange);
         document.removeEventListener('keydown', onKeyDown);
+        document.removeEventListener('visibilitychange', onVisibility);
       });
 
       return {
