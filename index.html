@@ -153,6 +153,31 @@
   }
   .section-head span { font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle); }
 
+  /* features */
+  .feature-grid { display: grid; gap: .75rem; }
+  @media (min-width: 46rem) { .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 70rem) { .feature-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .feature {
+    display: flex; flex-direction: column; gap: .55rem;
+    min-height: 12.5rem; padding: 1.15rem;
+    border: 1px solid var(--line); border-radius: .9rem;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+  }
+  .feature-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .feature-icon {
+    display: grid; place-items: center; width: 2.1rem; height: 2.1rem;
+    border: 1px solid var(--line); border-radius: .6rem; background: #fff; color: var(--tone);
+  }
+  .feature-icon svg { width: 1rem; height: 1rem; }
+  .feature code { font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle); }
+  .feature h3 { margin: .35rem 0 0; font-size: 1.125rem; font-weight: 600; line-height: 1.25; letter-spacing: -.02em; }
+  .feature p { margin: 0; color: var(--muted); font-size: .9375rem; line-height: 1.55; }
+  .feature[data-tone="emerald"] { --tone: #10b981; }
+  .feature[data-tone="sky"] { --tone: #0ea5e9; }
+  .feature[data-tone="violet"] { --tone: #8b5cf6; }
+  .feature[data-tone="amber"] { --tone: #d97706; }
+
   /* cards */
   .cards { display: grid; gap: .75rem; }
   @media (min-width: 46rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -383,10 +408,51 @@
     </div>
   </div>
 
+  <section class="section features" aria-labelledby="features-heading">
+    <div class="section-head">
+      <h2 id="features-heading">Capabilities</h2>
+      <span>signed · realtime · durable · self-hosted</span>
+    </div>
+    <div class="feature-grid">
+      <article class="feature" data-tone="emerald">
+        <div class="feature-top">
+          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M14 9l3 3"/></svg></span>
+          <code>ed25519</code>
+        </div>
+        <h3>Signed events</h3>
+        <p>Every event is canonical JSON, hashed with SHA-256 and signed with Ed25519. Identity is a keypair — no accounts, no sessions, no passwords.</p>
+      </article>
+      <article class="feature" data-tone="sky">
+        <div class="feature-top">
+          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7"/><path d="M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/></svg></span>
+          <code>sse</code>
+        </div>
+        <h3>Realtime streams</h3>
+        <p>Subscribe to any collection over Server-Sent Events. Last-Event-ID resumes after a drop, and 15-second keepalives hold the line open.</p>
+      </article>
+      <article class="feature" data-tone="violet">
+        <div class="feature-top">
+          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span>
+          <code>sha-256</code>
+        </div>
+        <h3>Content-addressed blobs</h3>
+        <p>Uploads return their SHA-256, dedupe automatically and expire with the signed events that claim them. Encrypt client-side and the relay only sees ciphertext.</p>
+      </article>
+      <article class="feature" data-tone="amber">
+        <div class="feature-top">
+          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></span>
+          <code>rust · sqlite</code>
+        </div>
+        <h3>Yours to run</h3>
+        <p>One Rust binary, one SQLite file, one container. No database server, no cloud dependency, no per-user pricing — deploy it anywhere.</p>
+      </article>
+    </div>
+  </section>
+
   <section class="section demos" aria-labelledby="demos-heading">
     <div class="section-head">
       <h2 id="demos-heading">Demos</h2>
-      <span>three primitives · one relay</span>
+      <span>hands-on · live on the relay</span>
     </div>
     <div class="cards">
       <a class="card" href="paint.html" data-tone="violet">
@@ -1137,7 +1203,8 @@
       .from('.hero-actions .btn', { y: 12, opacity: 0, stagger: .08, duration: .45 }, '-=.35')
       .from('.hero-meta span', { opacity: 0, stagger: .05, duration: .3 }, '-=.3')
       .from('.ticker', { opacity: 0, duration: .5 }, '-=.35')
-      .from('.demos .section-head', { y: 12, opacity: 0, duration: .5 }, '-=.2')
+      .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .05, duration: .5 }, '-=.3')
+      .from('.demos .section-head', { y: 12, opacity: 0, duration: .5 }, '-=.25')
       .from('.card', { y: 28, opacity: 0, stagger: .09, duration: .65 }, '-=.25')
       .from('.shoutbox .section-head, .shout-form, .shout-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.25')
       .from('.stats-head, .tile', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.35')
