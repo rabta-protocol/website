@@ -180,7 +180,7 @@
 
   /* cards */
   .cards { display: grid; gap: .75rem; }
-  @media (min-width: 46rem) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 46rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .card {
     position: relative; isolation: isolate;
     display: flex; flex-direction: column; gap: .25rem;
@@ -217,61 +217,6 @@
   .card-arrow { color: var(--subtle); transform: translateX(-3px); opacity: .35; transition: transform .3s, opacity .3s, color .3s; }
   .card:hover .card-arrow { transform: translateX(0); opacity: 1; color: var(--ink); }
   @media (max-width: 45.99rem) { .card { min-height: 0; } }
-
-  /* shoutbox */
-  .shoutbox { margin-top: 4.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
-  .shout-form { display: flex; gap: .5rem; margin-top: .85rem; }
-  .shout-input {
-    flex: 1; min-width: 0; padding: .8rem 1rem;
-    border: 1px solid var(--line-strong); border-radius: .7rem;
-    background: #fff; color: var(--ink);
-    font: inherit; font-size: 1rem;
-    transition: border-color .2s, box-shadow .2s;
-  }
-  .shout-input::placeholder { color: var(--subtle); }
-  .shout-input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(14, 14, 16, .08); }
-  .shout-send {
-    flex: none; padding: .8rem 1.25rem;
-    border: 1px solid var(--ink); border-radius: .7rem;
-    background: var(--ink); color: #fff;
-    font: inherit; font-size: 1rem; font-weight: 500; cursor: pointer;
-    transition: transform .25s cubic-bezier(.2, .8, .2, 1), opacity .2s;
-  }
-  .shout-send:hover:not(:disabled) { transform: translateY(-2px); }
-  .shout-send:disabled { opacity: .5; cursor: wait; }
-  .shout-send:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-  .shout-status {
-    min-height: 1.25rem; margin: .45rem 0 0;
-    font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle);
-  }
-  .shout-status[data-error="1"] { color: #be123c; }
-  .shout-board { margin-top: .85rem; }
-  .shout-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: .75rem; }
-  @media (min-width: 46rem) { .shout-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  .shout {
-    display: flex; flex-direction: column; gap: 1rem;
-    min-height: 9rem; padding: 1.1rem;
-    border: 1px solid var(--line); border-radius: .9rem;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
-    transition: opacity 1s ease, transform 1s ease;
-  }
-  .shout-text { flex: 1; margin: 0; font-size: 1.0625rem; line-height: 1.5; overflow-wrap: anywhere; }
-  .shout-ago { font-family: var(--mono); font-size: .75rem; color: var(--subtle); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .shout.entering { animation: shout-in .7s cubic-bezier(.2, .8, .2, 1) both; }
-  .shout.leaving { opacity: 0; transform: translateY(-4px) scale(.98); }
-  @keyframes shout-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-  .shout-empty {
-    margin: 0; padding: 1.5rem 1rem;
-    border: 1px dashed var(--line-strong); border-radius: .9rem;
-    font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle);
-    text-align: center;
-  }
-  .shout-empty[hidden] { display: none; }
-  @media (max-width: 30rem) {
-    .shout-form { flex-direction: column; }
-    .shout-send { width: 100%; }
-  }
 
   /* stats */
   .stats { margin-top: 4.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
@@ -452,7 +397,7 @@
   <section class="section demos" aria-labelledby="demos-heading">
     <div class="section-head">
       <h2 id="demos-heading">Demos</h2>
-      <span>three demos · one relay</span>
+      <span>four demos · one relay</span>
     </div>
     <div class="cards">
       <a class="card" href="paint.html" data-tone="violet">
@@ -491,23 +436,18 @@
           <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
         </div>
       </a>
-    </div>
-  </section>
-
-  <section class="shoutbox" aria-labelledby="shoutbox-heading">
-    <div class="section-head">
-      <h2 id="shoutbox-heading">Shoutbox</h2>
-      <span>public · live · last 3</span>
-    </div>
-    <form class="shout-form" id="shout-form" autocomplete="off">
-      <label class="sr-only" for="shout-input">Your shout</label>
-      <input class="shout-input" id="shout-input" name="shout" type="text" maxlength="140" aria-label="Your shout" placeholder="Say anything — it's public and signed in your browser." required />
-      <button class="shout-send" id="shout-send" type="submit">Shout</button>
-    </form>
-    <p class="shout-status" id="shout-status" role="status" aria-live="polite"></p>
-    <div class="shout-board">
-      <ol class="shout-list" id="shout-list" aria-live="polite"></ol>
-      <p class="shout-empty" id="shout-empty">No shouts yet — start it.</p>
+      <a class="card" href="shout.html" data-tone="amber">
+        <div class="card-top">
+          <span class="card-index">04</span>
+          <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg></span>
+        </div>
+        <h3>Shoutbox</h3>
+        <p>A public board where every message is signed in your browser and polled live by everyone else on the page.</p>
+        <div class="card-foot">
+          <code>site/shouts</code>
+          <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -588,10 +528,6 @@
   const VISITS_COLLECTION = 'site/visits';
   const VISITS_LIMIT = 10;
   const VISIT_TTL = 7 * 24 * 60 * 60;
-  const SHOUTS_COLLECTION = 'site/shouts';
-  const SHOUTS_LIMIT = 3;
-  const SHOUT_TTL = 7 * 24 * 60 * 60;
-  const SHOUT_MAX = 140;
   const STORE_IDENTITY = 'rabta.canvas.identity.v1';
   const STORE_VISIT_SENT = 'rabta.visit.sent.v1';
   const MIN_DELAY = 1000;
@@ -1008,202 +944,12 @@
     setInterval(decorateVisits, 15000);
   };
 
-  /* ---------- shoutbox ---------- */
-  const shoutForm = $('shout-form');
-  const shoutInput = $('shout-input');
-  const shoutSend = $('shout-send');
-  const shoutList = $('shout-list');
-  const shoutEmpty = $('shout-empty');
-  const shoutStatus = $('shout-status');
-  const shoutSeen = new Set();
-  let shoutTimer = null;
-  let shoutBusy = false;
-  let shoutPosting = false;
-  let shoutStatusTimer = null;
-
-  const cleanShout = (value) => Array.from(String(value).replace(/\s+/g, ' ').trim()).slice(0, SHOUT_MAX).join('');
-  const shoutIdle = () => shoutInput.value.length + '/' + SHOUT_MAX + ' · public · signed in your browser';
-
-  const setShoutStatus = (message, error) => {
-    clearTimeout(shoutStatusTimer);
-    shoutStatus.textContent = message;
-    if (error) shoutStatus.dataset.error = '1';
-    else delete shoutStatus.dataset.error;
-  };
-
-  const parseShout = (event) => {
-    if (!event || typeof event !== 'object') return null;
-    const labels = Array.isArray(event.labels) ? event.labels : [];
-    if (!labels.includes('shout')) return null;
-    const data = event.data || {};
-    if (data.v !== 1 || typeof data.text !== 'string') return null;
-    const text = cleanShout(data.text);
-    const at = Number(event.created_at);
-    const id = typeof event.id === 'string' ? event.id : '';
-    if (!text || !id || !Number.isFinite(at)) return null;
-    return { id, text, at };
-  };
-
-  const makeShoutRow = (shout) => {
-    const row = document.createElement('li');
-    row.className = 'shout';
-    row.dataset.at = String(shout.at);
-    row.dataset.id = shout.id;
-
-    const text = document.createElement('p');
-    text.className = 'shout-text';
-    text.textContent = shout.text;
-
-    const when = document.createElement('span');
-    when.className = 'shout-ago';
-    when.textContent = secondsAgo(shout.at);
-    when.title = new Date(shout.at * 1000).toLocaleString();
-
-    row.append(text, when);
-    return row;
-  };
-
-  const decorateShouts = () => {
-    Array.from(shoutList.children).forEach((row) => {
-      const when = row.querySelector('.shout-ago');
-      if (when) when.textContent = secondsAgo(Number(row.dataset.at));
-    });
-    const empty = shoutList.children.length === 0;
-    if (empty) shoutEmpty.textContent = 'No shouts yet — start it.';
-    shoutEmpty.hidden = !empty;
-  };
-
-  const hydrateShouts = (events) => {
-    const parsed = events
-      .map(parseShout)
-      .filter(Boolean)
-      .sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1))
-      .slice(-SHOUTS_LIMIT);
-    shoutList.textContent = '';
-    shoutSeen.clear();
-    parsed.reverse().forEach((shout) => {
-      shoutSeen.add(shout.id);
-      shoutList.appendChild(makeShoutRow(shout));
-    });
-    decorateShouts();
-  };
-
-  const pushShout = (shout, animate) => {
-    if (!shout || !shout.id || shoutSeen.has(shout.id)) return;
-    shoutSeen.add(shout.id);
-    const row = makeShoutRow(shout);
-    if (animate !== false) row.classList.add('entering');
-    shoutList.prepend(row);
-    const rows = Array.from(shoutList.children);
-    if (rows.length > SHOUTS_LIMIT) {
-      const old = rows[rows.length - 1];
-      old.classList.remove('entering');
-      old.classList.add('leaving');
-      const drop = () => old.remove();
-      old.addEventListener('transitionend', drop, { once: true });
-      setTimeout(drop, 1300);
-    }
-    decorateShouts();
-  };
-
-  const loadShouts = async () => {
-    const body = await queryEvents(SHOUTS_COLLECTION, 50);
-    hydrateShouts(Array.isArray(body.events) ? body.events : []);
-  };
-
-  const pollShouts = async () => {
-    clearTimeout(shoutTimer);
-    if (document.hidden) {
-      shoutTimer = setTimeout(pollShouts, 5000);
-      return;
-    }
-    if (shoutBusy) {
-      shoutTimer = setTimeout(pollShouts, 1000);
-      return;
-    }
-    shoutBusy = true;
-    try {
-      const body = await queryEvents(SHOUTS_COLLECTION, 50);
-      const shouts = (Array.isArray(body.events) ? body.events : [])
-        .map(parseShout)
-        .filter(Boolean)
-        .sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1));
-      shouts.forEach((shout) => pushShout(shout, true));
-    } catch {
-    } finally {
-      shoutBusy = false;
-      shoutTimer = setTimeout(pollShouts, 5000);
-    }
-  };
-
-  const postShout = async (text) => {
-    if (!window.nacl) throw new Error('signing library unavailable');
-    if (!window.crypto || !window.crypto.subtle) throw new Error('crypto unavailable');
-    const identity = loadIdentity();
-    const at = visitNow();
-    const fields = {
-      collection: SHOUTS_COLLECTION,
-      created_at: at,
-      expires_at: at + SHOUT_TTL,
-      owner: identity.owner,
-      labels: ['shout'],
-      blobs: [],
-      data: { v: 1, text }
-    };
-    const bytes = new TextEncoder().encode(canonical(fields));
-    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
-    const signature = nacl.sign.detached(digest, identity.secretKey);
-    const envelope = { ...fields, id: bytesToHex(digest), sig: bytesToHex(signature) };
-    const res = await fetch(RELAY + '/api/v1/events', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(envelope)
-    });
-    syncRelayClock(res);
-    const body = await res.json().catch(() => null);
-    if (!res.ok) throw new Error((body && (body.code || body.error)) || ('HTTP ' + res.status));
-    return { id: (body && body.id) || envelope.id, text, at };
-  };
-
-  const initShouts = async () => {
-    if (!shoutForm) return;
-    setShoutStatus(shoutIdle(), false);
-    shoutInput.addEventListener('input', () => setShoutStatus(shoutIdle(), false));
-    shoutForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      if (shoutPosting) return;
-      const text = cleanShout(shoutInput.value);
-      if (!text) { shoutInput.focus(); return; }
-      shoutPosting = true;
-      shoutSend.disabled = true;
-      shoutSend.textContent = 'Sending…';
-      try {
-        const shout = await postShout(text);
-        pushShout(shout, true);
-        shoutInput.value = '';
-        setShoutStatus('Sent — live on the relay.', false);
-        shoutStatusTimer = setTimeout(() => setShoutStatus(shoutIdle(), false), 2200);
-      } catch (error) {
-        setShoutStatus('Could not send: ' + (error && error.message ? error.message : 'relay unreachable'), true);
-      } finally {
-        shoutPosting = false;
-        shoutSend.disabled = false;
-        shoutSend.textContent = 'Shout';
-        shoutInput.focus();
-      }
-    });
-    try { await loadShouts(); } catch {}
-    pollShouts();
-    setInterval(decorateShouts, 15000);
-  };
-
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       clearTimeout(timer);
     } else {
       load();
       pollVisits();
-      pollShouts();
     }
   });
 
@@ -1236,14 +982,13 @@
       .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .05, duration: .5 }, '-=.3')
       .from('.demos .section-head', { y: 12, opacity: 0, duration: .5 }, '-=.25')
       .from('.card', { y: 28, opacity: 0, stagger: .09, duration: .65 }, '-=.25')
-      .from('.shoutbox .section-head, .shout-form, .shout-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.25')
       .from('.stats-head, .tile', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.35')
       .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.35')
       .from('footer', { opacity: 0, duration: .4 }, '-=.4');
   };
 
   const boot = () => {
-    const start = () => { hero(); initVisitors(); initShouts(); };
+    const start = () => { hero(); initVisitors(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };

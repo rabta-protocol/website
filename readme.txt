@@ -4,7 +4,8 @@ Rabta website
 Static demos for Rabta, served from rabta.space via GitHub Pages.
 
 Files
-  index.html   overview, capabilities, shoutbox, recent visitors, live node stats
+  index.html   overview, capabilities, visitor feed, live node stats
+  shout.html   public signed shoutbox, last 24 shouts
   paint.html   collaborative canvas
   share.html   encrypted file drop
   world.html   signed comments on a world map
