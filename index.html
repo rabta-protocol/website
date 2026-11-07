@@ -85,33 +85,6 @@
   main { position: relative; z-index: 1; width: 100%; max-width: 72rem; margin: 0 auto; padding: 1.25rem 1.5rem 3rem; }
   @media (min-width: 48rem) { main { padding: 1.75rem 2.5rem 4rem; } }
 
-  /* header */
-  .top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-  .brand { display: inline-flex; align-items: center; gap: .6rem; text-decoration: none; color: inherit; }
-  .brand-tile {
-    display: grid; place-items: center; width: 1.85rem; height: 1.85rem;
-    border-radius: .45rem; background: var(--ink); color: #fff;
-    font-family: var(--mono); font-size: .8rem; font-weight: 600; letter-spacing: -.04em;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .18);
-  }
-  .brand-name { font-family: var(--mono); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: #3f3f46; }
-  .top-actions { display: flex; align-items: center; gap: .5rem; }
-  .pill {
-    display: inline-flex; align-items: center; gap: .45rem;
-    padding: .5rem .9rem;
-    border: 1px solid var(--line-strong); border-radius: 999px;
-    background: rgba(255, 255, 255, .7); color: var(--ink);
-    font-family: var(--sans); font-size: .8125rem; font-weight: 500; text-decoration: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-    transition: transform .25s cubic-bezier(.2, .8, .2, 1), background .2s, border-color .2s, box-shadow .25s;
-  }
-  .pill:hover, .pill:focus-visible {
-    transform: translateY(-1px); background: #fff; border-color: var(--ink);
-    box-shadow: 0 8px 20px -14px rgba(0, 0, 0, .5); outline: none;
-  }
-  .pill svg { width: 1rem; height: 1rem; }
-
   /* hero */
   .hero { padding: 3.5rem 0 0; }
   @media (min-width: 48rem) { .hero { padding: 5.5rem 0 0; } }
@@ -169,6 +142,7 @@
   .btn-ghost { border-color: var(--line-strong); background: rgba(255, 255, 255, .7); color: var(--ink); }
   .btn-ghost:hover { transform: translateY(-2px); border-color: var(--ink); background: #fff; }
   .btn .spark { width: .45rem; height: .45rem; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(16, 185, 129, .14); }
+  .btn-github svg { width: 1rem; height: 1rem; }
   .hero-meta {
     display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .75rem;
     margin-top: 1.75rem;
@@ -347,19 +321,6 @@
 </div>
 
 <main>
-  <header class="top">
-    <a class="brand" href="index.html">
-      <span class="brand-tile">r</span>
-      <span class="brand-name">rabta</span>
-    </a>
-    <div class="top-actions">
-      <a class="pill" href="https://github.com/rabta-protocol/rabta" target="_blank" rel="noreferrer">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-        GitHub
-      </a>
-    </div>
-  </header>
-
   <section class="hero">
     <button class="eyebrow node-chip" type="button" title="Copy node URL">
       <span class="live-dot" aria-hidden="true"></span>
@@ -374,6 +335,10 @@
         <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
       <a class="btn btn-ghost" href="llms.txt">teach your ai agent</a>
+      <a class="btn btn-ghost btn-github" href="https://github.com/rabta-protocol/rabta" target="_blank" rel="noreferrer">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        GitHub
+      </a>
     </div>
     <div class="hero-meta">
       <span>ed25519</span><span>sse</span><span>sqlite</span><span>7d ttl</span>
@@ -959,8 +924,7 @@
   const hero = () => {
     if (!window.gsap || reduce) return;
     const tl = window.gsap.timeline({ defaults: { ease: 'power3.out', duration: .7 } });
-    tl.from('.brand, .top-actions .pill', { y: -8, opacity: 0, stagger: .08, duration: .5 })
-      .from('.eyebrow', { y: 10, opacity: 0, duration: .45 }, '-=.25')
+    tl.from('.eyebrow', { y: 10, opacity: 0, duration: .45 })
       .from('.hero-title .word', { y: 34, opacity: 0, duration: .85 }, '-=.2')
       .from('.pron', { opacity: 0, x: -8, duration: .5 }, '-=.55')
       .from('.lede', { y: 16, opacity: 0, duration: .6 }, '-=.45')
