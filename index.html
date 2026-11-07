@@ -112,13 +112,8 @@
     transition: transform .25s cubic-bezier(.2, .8, .2, 1), background .2s, border-color .2s, box-shadow .25s, color .2s;
   }
   .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-  .btn-primary { background: var(--ink); color: #fff; box-shadow: 0 10px 24px -16px rgba(0, 0, 0, .8); }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -18px rgba(0, 0, 0, .9); }
-  .btn-primary .arrow { transition: transform .25s; }
-  .btn-primary:hover .arrow { transform: translateX(3px); }
   .btn-ghost { border-color: var(--line-strong); background: #fff; color: var(--ink); }
   .btn-ghost:hover { transform: translateY(-2px); border-color: var(--ink); background: #fff; }
-  .btn .spark { width: .45rem; height: .45rem; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(16, 185, 129, .14); }
   .btn-github svg { width: 1rem; height: 1rem; }
   .btn-agent { border-color: rgba(16, 185, 129, .38); }
   .btn-agent .agent-icon { width: 1rem; height: 1rem; color: #059669; }
@@ -297,11 +292,6 @@
     <p class="pron">raa-b-ta</p>
     <p class="lede">Stop trusting corporations. <b>Build your own apps.</b> <b>Encrypt everything.</b> Push once — access it everywhere. Every demo below is signed in your browser and streamed by a live Rabta node — no accounts, no database server, no cloud.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="chat.html">
-        <span class="spark" aria-hidden="true"></span>
-        Try the live chat
-        <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
       <a class="btn btn-ghost btn-agent" href="llms.txt" title="Open llms.txt — a compact, machine-readable summary for AI agents">
         <svg class="agent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z"/><path d="M18.5 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/><path d="M5 15l.6 1.6L7.2 17l-1.6.6L5 19.2l-.6-1.6L2.8 17l1.6-.4L5 15Z"/></svg>
         Teach your AI agent
