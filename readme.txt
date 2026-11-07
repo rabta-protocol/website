@@ -7,6 +7,8 @@ Files
   index.html   overview, capabilities, shoutbox, recent visitors, live node stats
   paint.html   collaborative canvas
   share.html   encrypted file drop
+  world.html   signed comments on a world map
+  world-map.svg  equirectangular land silhouette
   llms.txt     agent-readable project summary
   og*.jpg      1200x630 social cards
 

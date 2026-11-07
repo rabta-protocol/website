@@ -4,10 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
-<meta name="theme-color" content="#fafaf9" />
+<meta name="theme-color" content="#ffffff" />
 <title>Rabta — signed events, realtime streaming, file blobs</title>
-<meta name="description" content="Rabta is a self-hosted backend for signed events, realtime SSE streaming and content-addressed file uploads. One Rust binary, one SQLite file, one container. Live shoutbox, canvas and encrypted share demos on rabta.space." />
-<meta name="keywords" content="Rabta, rabta.space, rabta protocol, rabta relay, self-hosted backend, Ed25519 signed events, SSE streaming, content-addressed storage, realtime shoutbox, collaborative canvas, encrypted file sharing, Rust backend, SQLite" />
+<meta name="description" content="Rabta is a self-hosted backend for signed events, realtime SSE streaming and content-addressed file uploads. One Rust binary, one SQLite file, one container. Live shoutbox, canvas, encrypted share and world-map comment demos on rabta.space." />
+<meta name="keywords" content="Rabta, rabta.space, rabta protocol, rabta relay, self-hosted backend, Ed25519 signed events, SSE streaming, content-addressed storage, realtime shoutbox, collaborative canvas, encrypted file sharing, world map comments, Rust backend, SQLite" />
 <meta name="author" content="Rabta" />
 <link rel="canonical" href="https://rabta.space/" />
 <meta property="og:type" content="website" />
@@ -180,7 +180,7 @@
 
   /* cards */
   .cards { display: grid; gap: .75rem; }
-  @media (min-width: 46rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 46rem) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .card {
     position: relative; isolation: isolate;
     display: flex; flex-direction: column; gap: .25rem;
@@ -452,7 +452,7 @@
   <section class="section demos" aria-labelledby="demos-heading">
     <div class="section-head">
       <h2 id="demos-heading">Demos</h2>
-      <span>hands-on · live on the relay</span>
+      <span>three demos · one relay</span>
     </div>
     <div class="cards">
       <a class="card" href="paint.html" data-tone="violet">
@@ -476,6 +476,18 @@
         <p>Up to 8 files and a note, encrypted in the browser. The key lives in the link fragment — the relay never sees it.</p>
         <div class="card-foot">
           <code>share/rabta</code>
+          <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+        </div>
+      </a>
+      <a class="card" href="world.html" data-tone="emerald">
+        <div class="card-top">
+          <span class="card-index">03</span>
+          <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18"/><path d="M12 3a15 15 0 0 0 0 18"/></svg></span>
+        </div>
+        <h3>World</h3>
+        <p>A world map where anyone can pin a signed comment to exact coordinates. Every note streams live.</p>
+        <div class="card-foot">
+          <code>world/comments</code>
           <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
         </div>
       </a>

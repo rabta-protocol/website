@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#ffffff" />
+<title>Rabta World — signed comments on a world map</title>
+<meta name="description" content="Leave a comment anywhere on Earth. Every note is Ed25519-signed in your browser, pinned to exact coordinates and streamed live from a Rabta relay." />
+<meta name="keywords" content="Rabta, rabta.space, world map, comments on a map, signed events, Ed25519, SSE streaming, realtime map, anonymous comments, self-hosted" />
+<link rel="canonical" href="https://rabta.space/world.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Rabta" />
+<meta property="og:title" content="Rabta World — signed comments on a world map" />
+<meta property="og:description" content="Click anywhere on Earth, write a comment, and it becomes a signed Rabta event at those coordinates. Live for everyone." />
+<meta property="og:url" content="https://rabta.space/world.html" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Rabta World — signed comments on a world map" />
+<meta name="twitter:description" content="Click anywhere on Earth, write a comment, and it becomes a signed Rabta event at those coordinates." />
+<link rel="alternate" type="text/plain" href="llms.txt" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://1.rabta.space" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
+<style>
+  :root {
+    --ink: #0e0e10;
+    --muted: #52525b;
+    --subtle: #8a8a93;
+    --line: rgba(14, 14, 16, .08);
+    --line-strong: rgba(14, 14, 16, .18);
+    --live: #10b981;
+    --error: #be123c;
+    --sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: light; scroll-behavior: smooth; }
+  body {
+    margin: 0; background: #fff; color: var(--ink);
+    font-family: var(--sans); font-size: 16px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  a { color: inherit; text-decoration: none; }
+  button, textarea, input { font: inherit; }
+  ::selection { background: rgba(14, 14, 16, .1); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* header */
+  .bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    height: 4rem; padding: 0 1.25rem; border-bottom: 1px solid var(--line); background: #fff;
+  }
+  .brand { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+  .brand-mark {
+    display: grid; place-items: center; width: 2rem; height: 2rem; flex: none;
+    border-radius: .45rem; background: var(--ink); color: #fff;
+    font-family: var(--mono); font-size: .875rem; font-weight: 600; letter-spacing: -.05em;
+  }
+  .brand-text { display: flex; flex-direction: column; line-height: 1; min-width: 0; }
+  .brand-line { display: flex; align-items: baseline; gap: .5rem; }
+  .brand-name { font-size: .8125rem; font-weight: 600; letter-spacing: .18em; }
+  .brand-sub { font-size: .8125rem; font-weight: 500; letter-spacing: .18em; color: var(--subtle); }
+  .brand-meta {
+    display: flex; align-items: center; gap: .35rem; margin-top: .4rem;
+    font-family: var(--mono); font-size: .5938rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--subtle); white-space: nowrap;
+  }
+  .bar-right { display: flex; align-items: center; gap: .5rem; }
+  .chip {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .45rem .7rem; border: 1px solid var(--line); border-radius: 999px;
+    background: #fff; font-family: var(--mono); font-size: .5938rem;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  }
+  .chip-dot {
+    width: .4rem; height: .4rem; flex: none; border-radius: 50%;
+    background: #a1a1aa; transition: background .25s, box-shadow .25s;
+  }
+  .chip-dot[data-state="live"] { background: var(--live); box-shadow: 0 0 0 3px rgba(16, 185, 129, .14); }
+  .chip-dot[data-state="connecting"] { background: #d97706; box-shadow: 0 0 0 3px rgba(217, 119, 6, .13); }
+  .chip-dot[data-state="offline"] { background: var(--error); box-shadow: 0 0 0 3px rgba(190, 18, 60, .12); }
+  .nav-pill {
+    padding: .45rem .75rem; border: 1px solid var(--line); border-radius: 999px;
+    background: #fff; font-family: var(--mono); font-size: .5938rem;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+    transition: background .2s, border-color .2s, color .2s;
+  }
+  .nav-pill:hover { background: #fafafa; border-color: var(--line-strong); color: var(--ink); }
+
+  /* page */
+  main { width: min(100%, 76rem); margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+  .intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+  .intro-copy { min-width: 0; flex: 1 1 34rem; }
+  .eyebrow {
+    margin: 0 0 .8rem; font-family: var(--mono); font-size: .6875rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--subtle);
+  }
+  h1 {
+    margin: 0; max-width: 15ch; font-size: clamp(2.1rem, 4.4vw, 3.4rem);
+    font-weight: 600; line-height: 1.02; letter-spacing: -.045em;
+  }
+  .lede { max-width: 42rem; margin: 1.1rem 0 0; font-size: 1.0625rem; line-height: 1.6; color: var(--muted); }
+  .lede b { color: var(--ink); font-weight: 500; }
+  .counters { display: flex; align-items: flex-end; gap: 1.75rem; padding-bottom: .3rem; }
+  .counter strong {
+    display: block; font-size: 1.75rem; font-weight: 600; line-height: 1;
+    letter-spacing: -.04em; font-variant-numeric: tabular-nums;
+  }
+  .counter span {
+    display: block; margin-top: .4rem; font-family: var(--mono); font-size: .5938rem;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--subtle);
+  }
+
+  /* workspace */
+  .workspace {
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem;
+    align-items: start; margin-top: 2.25rem;
+  }
+  @media (min-width: 62rem) {
+    .workspace { grid-template-columns: minmax(0, 1fr) 21rem; }
+    .panel { position: sticky; top: 1rem; }
+  }
+
+  .map-card {
+    overflow: hidden; border: 1px solid var(--line); border-radius: 1rem;
+    background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+  }
+  .map-toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .7rem 1rem; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: .5938rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--subtle);
+  }
+  .map-toolbar span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .map-coords { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .map-scroll { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: rgba(0, 0, 0, .16) transparent; }
+  .map-scroll::-webkit-scrollbar { height: 6px; }
+  .map-scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .16); border-radius: 999px; }
+  .map-wrap {
+    position: relative; aspect-ratio: 2 / 1; min-width: 100%;
+    cursor: crosshair; touch-action: manipulation; background: #fff;
+  }
+  @media (max-width: 48rem) { .map-wrap { min-width: 36rem; } }
+  .map-wrap img {
+    display: block; width: 100%; height: 100%;
+    pointer-events: none; user-select: none; -webkit-user-drag: none;
+  }
+  .markers { position: absolute; inset: 0; pointer-events: none; }
+
+  .pin {
+    position: absolute; transform: translate(-50%, -50%);
+    display: grid; place-items: center; width: 1.05rem; height: 1.05rem; padding: 0;
+    border: 2px solid #fff; border-radius: 999px;
+    background: var(--ink); color: #fff; cursor: pointer; pointer-events: auto;
+    font-family: var(--mono); font-size: .5625rem; font-weight: 600; line-height: 1;
+    box-shadow: 0 0 0 1px rgba(14, 14, 16, .28), 0 3px 8px rgba(0, 0, 0, .22);
+    transition: transform .16s cubic-bezier(.2, .8, .2, 1), background .16s, box-shadow .16s;
+  }
+  .pin.has-count { width: auto; min-width: 1.3rem; height: 1.3rem; padding: 0 .3rem; }
+  .pin:hover { transform: translate(-50%, -50%) scale(1.16); z-index: 3; }
+  .pin.is-active {
+    background: var(--live);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, .28), 0 3px 10px rgba(16, 185, 129, .38);
+    z-index: 2;
+  }
+  .pin-label:empty { display: none; }
+
+  .pending {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 1.6rem; height: 1.6rem; border: 2px solid rgba(14, 14, 16, .6);
+    border-radius: 50%; pointer-events: none; z-index: 4;
+  }
+  .pending::before {
+    content: ''; position: absolute; inset: -2px; border-radius: 50%;
+    border: 2px solid rgba(14, 14, 16, .32); animation: ping 1.8s ease-out infinite;
+  }
+  .pending::after {
+    content: ''; position: absolute; inset: 35%; border-radius: 50%; background: var(--ink);
+  }
+  .pending[hidden] { display: none; }
+  @keyframes ping { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.3); opacity: 0; } }
+
+  .map-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .65rem 1rem; border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: .5938rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--subtle);
+  }
+  .map-foot span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* panel */
+  .panel {
+    min-height: 18rem; padding: 1.1rem;
+    border: 1px solid var(--line); border-radius: 1rem;
+    background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+  }
+  .panel-view[hidden] { display: none; }
+  .panel-eyebrow {
+    margin: 0; font-family: var(--mono); font-size: .5938rem;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--subtle);
+  }
+  .panel h2 {
+    margin: .4rem 0 0; font-size: 1.3rem; font-weight: 600;
+    line-height: 1.2; letter-spacing: -.03em;
+  }
+  .panel h2.coords { font-family: var(--mono); font-size: 1.0625rem; letter-spacing: -.02em; }
+  .panel-copy { margin: .55rem 0 0; font-size: .875rem; line-height: 1.55; color: var(--muted); }
+  .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+  .icon-btn {
+    display: grid; place-items: center; width: 1.75rem; height: 1.75rem; flex: none;
+    border: 1px solid var(--line); border-radius: .5rem; background: #fff;
+    color: var(--subtle); cursor: pointer; line-height: 1;
+    transition: background .2s, color .2s, border-color .2s;
+  }
+  .icon-btn:hover { background: #fafafa; color: var(--ink); border-color: var(--line-strong); }
+  .icon-btn svg { width: .75rem; height: .75rem; }
+
+  .compose-form { margin-top: .85rem; }
+  .note-input {
+    display: block; width: 100%; min-height: 8.5rem; resize: vertical;
+    padding: .8rem .9rem; border: 1px solid var(--line-strong); border-radius: .7rem;
+    background: #fff; color: var(--ink); font-size: .9375rem; line-height: 1.5;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .note-input::placeholder { color: var(--subtle); }
+  .note-input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(14, 14, 16, .08); }
+  .compose-meta {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    margin-top: .45rem; font-family: var(--mono); font-size: .5938rem;
+    letter-spacing: .05em; color: var(--subtle);
+  }
+  .send {
+    width: 100%; margin-top: .8rem; padding: .75rem 1rem;
+    border: 1px solid var(--ink); border-radius: .65rem;
+    background: var(--ink); color: #fff; font-size: .9375rem; font-weight: 500;
+    cursor: pointer; transition: transform .25s cubic-bezier(.2, .8, .2, 1), opacity .2s;
+  }
+  .send:hover:not(:disabled) { transform: translateY(-2px); }
+  .send:disabled { opacity: .5; cursor: wait; }
+  .status {
+    min-height: 1.2rem; margin: .55rem 0 0;
+    font-family: var(--mono); font-size: .6563rem; line-height: 1.4;
+    letter-spacing: .02em; color: var(--subtle);
+  }
+  .status[data-error="1"] { color: var(--error); }
+
+  .latest { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  .latest-head { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
+  .latest-head h3 {
+    margin: 0; font-family: var(--mono); font-size: .5938rem; font-weight: 500;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--subtle);
+  }
+  .latest-head span { font-family: var(--mono); font-size: .5625rem; color: var(--subtle); }
+  .note-list { list-style: none; margin: .6rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .4rem; }
+  .note-list[hidden] { display: none; }
+  .note-item {
+    display: flex; flex-direction: column; gap: .3rem; width: 100%;
+    padding: .6rem .7rem; border: 1px solid var(--line); border-radius: .6rem;
+    background: #fff; text-align: left; cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+  .note-item:hover { background: #fafafa; border-color: var(--line-strong); }
+  .note-item p {
+    margin: 0; font-size: .8125rem; line-height: 1.4; color: var(--ink);
+    overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .note-item .meta {
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    font-family: var(--mono); font-size: .5625rem; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--subtle);
+  }
+  .empty {
+    margin: .75rem 0 0; padding: 1rem .8rem; text-align: center;
+    border: 1px dashed var(--line-strong); border-radius: .6rem;
+    font-family: var(--mono); font-size: .5938rem; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--subtle);
+  }
+  .empty[hidden] { display: none; }
+
+  .place-list {
+    list-style: none; margin: .8rem 0 0; padding: 0;
+    display: flex; flex-direction: column; gap: .55rem;
+    max-height: 20rem; overflow-y: auto; scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, .16) transparent;
+  }
+  .place-list::-webkit-scrollbar { width: 6px; }
+  .place-list::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .16); border-radius: 999px; }
+  .place-note { padding: .7rem .8rem; border: 1px solid var(--line); border-radius: .65rem; background: #fff; }
+  .place-note p { margin: 0; font-size: .875rem; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; white-space: pre-wrap; }
+  .place-note .meta {
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    margin-top: .45rem; font-family: var(--mono); font-size: .5625rem;
+    letter-spacing: .04em; color: var(--subtle);
+  }
+  .place-note code { font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .write-again { margin-top: .8rem; }
+  .place-meta { margin: .45rem 0 0; font-family: var(--mono); font-size: .6563rem; color: var(--subtle); }
+
+  /* footer */
+  footer {
+    width: min(100%, 76rem); margin: 0 auto; padding: 1.25rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: .6563rem; letter-spacing: .04em; color: var(--subtle);
+  }
+  .footer-links { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  footer a { transition: color .2s; }
+  footer a:hover { color: var(--ink); }
+
+  /* toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 1.5rem; z-index: 50;
+    width: calc(100% - 2rem); max-width: 24rem;
+    padding: .7rem 1rem; border: 1px solid var(--line); border-radius: .65rem;
+    background: #fff; color: var(--ink);
+    font-family: var(--mono); font-size: .6875rem; line-height: 1.45;
+    box-shadow: 0 12px 40px -12px rgba(0, 0, 0, .25);
+    opacity: 0; pointer-events: none; transform: translate(-50%, .5rem);
+    transition: opacity .25s, transform .25s;
+  }
+  .toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 40rem) {
+    .bar { padding: 0 1rem; }
+    .brand-meta { display: none; }
+    .chip { padding: .5rem; }
+    .chip-host { display: none; }
+    .bar-right .nav-pill { display: none; }
+    main { padding: 2.25rem 1rem 3rem; }
+    .intro { gap: 1.5rem; }
+    .counters { gap: 1.5rem; }
+    .counter strong { font-size: 1.5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <a class="brand" href="index.html" aria-label="Rabta home">
+    <span class="brand-mark" aria-hidden="true">R</span>
+    <span class="brand-text">
+      <span class="brand-line"><span class="brand-name">RABTA</span><span class="brand-sub">WORLD</span></span>
+      <span class="brand-meta"><span>ed25519</span><span>/</span><span>sse</span><span>/</span><span>7d ttl</span></span>
+    </span>
+  </a>
+  <div class="bar-right">
+    <span class="chip" id="relay-chip" title="Live event stream" aria-label="Relay connection">
+      <span class="chip-dot" id="chip-dot" data-state="connecting" aria-hidden="true"></span>
+      <span class="chip-host">1.rabta.space</span>
+    </span>
+    <a class="nav-pill" href="paint.html">Canvas</a>
+    <a class="nav-pill" href="share.html">Share</a>
+  </div>
+</header>
+
+<main>
+  <section class="intro" aria-labelledby="world-heading">
+    <div class="intro-copy">
+      <p class="eyebrow">world write · signed · live</p>
+      <h1 id="world-heading">Leave a comment anywhere on Earth.</h1>
+      <p class="lede">Click the map, write what you see, and it becomes an <b>Ed25519-signed</b> Rabta event at those exact coordinates. <b>No account, no backend</b> — every visitor sees it live.</p>
+    </div>
+    <div class="counters" aria-live="polite">
+      <div class="counter"><strong id="stat-comments">—</strong><span>comments</span></div>
+      <div class="counter"><strong id="stat-places">—</strong><span>places</span></div>
+      <div class="counter"><strong>7d</strong><span>ttl</span></div>
+    </div>
+  </section>
+
+  <section class="workspace" aria-label="World map and comment composer">
+    <div class="map-card">
+      <div class="map-toolbar">
+        <span>equirectangular · click to place</span>
+        <span class="map-coords" id="map-coords">—</span>
+      </div>
+      <div class="map-scroll">
+        <div class="map-wrap" id="map-wrap" role="group" aria-label="World map. Click anywhere to leave a comment.">
+          <img src="world-map.svg" alt="World map, equirectangular projection" width="1000" height="500" />
+          <div class="markers" id="markers"></div>
+          <div class="pending" id="pending" hidden aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="map-foot">
+        <span>click a pin to read · click the map to write</span>
+        <span id="map-count">0 comments · 0 places</span>
+      </div>
+    </div>
+
+    <aside class="panel" aria-label="Comment panel">
+      <div class="panel-view" id="view-default">
+        <p class="panel-eyebrow">new comment</p>
+        <h2>Pick a point.</h2>
+        <p class="panel-copy">Click anywhere on the map to drop a pin, then write your comment. It is signed in your browser and published straight to the relay.</p>
+        <div class="latest">
+          <div class="latest-head"><h3>Latest comments</h3><span>live</span></div>
+          <ol class="note-list" id="latest-list" aria-live="polite"></ol>
+          <p class="empty" id="latest-empty">No comments yet — place the first one.</p>
+        </div>
+      </div>
+
+      <div class="panel-view" id="view-compose" hidden>
+        <div class="panel-head">
+          <div>
+            <p class="panel-eyebrow">new comment</p>
+            <h2 class="coords" id="compose-coords">—</h2>
+          </div>
+          <button class="icon-btn" id="compose-close" type="button" title="Cancel" aria-label="Cancel comment">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <p class="panel-copy">What happened here?</p>
+        <form class="compose-form" id="note-form">
+          <label class="sr-only" for="note-text">Your comment</label>
+          <textarea class="note-input" id="note-text" name="comment" maxlength="280" placeholder="Write a comment…" required></textarea>
+          <div class="compose-meta">
+            <span id="note-count">0/280</span>
+            <span>signed in your browser</span>
+          </div>
+          <button class="send" id="note-send" type="submit">Place comment</button>
+          <p class="status" id="note-status" role="status"></p>
+        </form>
+      </div>
+
+      <div class="panel-view" id="view-place" hidden>
+        <div class="panel-head">
+          <div>
+            <p class="panel-eyebrow">comments here</p>
+            <h2 class="coords" id="place-coords">—</h2>
+          </div>
+          <button class="icon-btn" id="place-close" type="button" title="Close" aria-label="Close place">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <p class="place-meta" id="place-meta">—</p>
+        <ol class="place-list" id="place-list" aria-live="polite"></ol>
+        <button class="send write-again" id="write-here" type="button">Write here</button>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<footer>
+  <span>world/comments · ed25519 / sse / 7d ttl</span>
+  <div class="footer-links">
+    <a href="index.html">rabta.space</a>
+    <a href="llms.txt">llms.txt</a>
+    <a href="https://github.com/rabta-protocol/rabta" target="_blank" rel="noreferrer">github</a>
+    <a href="https://1.rabta.space" target="_blank" rel="noreferrer">1.rabta.space</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js" defer></script>
+<script>
+(() => {
+  'use strict';
+
+  const RELAY = 'https://1.rabta.space';
+  const COLLECTION = 'world/comments';
+  const TTL_SECONDS = 7 * 24 * 60 * 60;
+  const MAX_TEXT = 280;
+  const HISTORY_LIMIT = 500;
+  const CLUSTER_DEGREES = 2;
+  const STORE_IDENTITY = 'rabta.canvas.identity.v1';
+
+  const $ = (id) => document.getElementById(id);
+  const mapWrap = $('map-wrap');
+  const markersEl = $('markers');
+  const pendingEl = $('pending');
+  const mapCoords = $('map-coords');
+  const mapCount = $('map-count');
+  const chipDot = $('chip-dot');
+  const chip = $('relay-chip');
+  const statComments = $('stat-comments');
+  const statPlaces = $('stat-places');
+
+  const viewDefault = $('view-default');
+  const viewCompose = $('view-compose');
+  const viewPlace = $('view-place');
+  const composeCoords = $('compose-coords');
+  const composeClose = $('compose-close');
+  const placeCoords = $('place-coords');
+  const placeMeta = $('place-meta');
+  const placeClose = $('place-close');
+  const placeList = $('place-list');
+  const writeHere = $('write-here');
+  const noteForm = $('note-form');
+  const noteText = $('note-text');
+  const noteCount = $('note-count');
+  const noteSend = $('note-send');
+  const noteStatus = $('note-status');
+  const latestList = $('latest-list');
+  const latestEmpty = $('latest-empty');
+  const toastEl = $('toast');
+
+  const comments = new Map();
+  let clusters = new Map();
+  let selectedKey = null;
+  let composePoint = null;
+  let mode = 'default';
+  let stream = null;
+  let reconnectTimer = null;
+  let clockOffset = 0;
+  let posting = false;
+  let toastTimer = null;
+  let loadedOnce = false;
+
+  /* ---------- helpers ---------- */
+  const readText = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
+  const writeText = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
+  const readJSON = (key) => { try { return JSON.parse(readText(key) || 'null'); } catch { return null; } };
+
+  const bytesToHex = (bytes) => {
+    let out = '';
+    for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, '0');
+    return out;
+  };
+  const bytesToBase64 = (bytes) => {
+    let raw = '';
+    for (let i = 0; i < bytes.length; i++) raw += String.fromCharCode(bytes[i]);
+    return btoa(raw);
+  };
+  const base64ToBytes = (value) => {
+    const raw = atob(value);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  };
+  const canonical = (value) => {
+    if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
+    if (value && typeof value === 'object') {
+      return '{' + Object.keys(value).sort().map((key) => JSON.stringify(key) + ':' + canonical(value[key])).join(',') + '}';
+    }
+    return JSON.stringify(value);
+  };
+
+  const now = () => Math.floor(Date.now() / 1000) + clockOffset;
+  const syncClock = (response) => {
+    const date = response && response.headers ? response.headers.get('date') : null;
+    if (!date) return;
+    const seconds = Math.floor(Date.parse(date) / 1000);
+    if (!Number.isFinite(seconds)) return;
+    clockOffset = Math.min(86400, Math.max(-86400, seconds - Math.floor(Date.now() / 1000)));
+  };
+
+  const loadIdentity = () => {
+    if (!window.nacl) throw new Error('signing library unavailable');
+    const make = (secretKey, publicKey) => {
+      const publicHex = bytesToHex(publicKey);
+      return { secretKey, publicKey, publicHex, owner: 'ed25519:' + publicHex };
+    };
+    try {
+      const saved = readJSON(STORE_IDENTITY);
+      if (saved && typeof saved.secret === 'string' && typeof saved.public === 'string') {
+        const secretKey = base64ToBytes(saved.secret);
+        const publicKey = base64ToBytes(saved.public);
+        if (secretKey.length === 64 && publicKey.length === 32) return make(secretKey, publicKey);
+      }
+    } catch {}
+    const pair = nacl.sign.keyPair();
+    writeText(STORE_IDENTITY, JSON.stringify({ secret: bytesToBase64(pair.secretKey), public: bytesToBase64(pair.publicKey) }));
+    return make(pair.secretKey, pair.publicKey);
+  };
+
+  const cleanText = (value) => Array.from(String(value == null ? '' : value)
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()).slice(0, MAX_TEXT).join('');
+
+  const formatCoords = (lat, lon) => {
+    const ns = lat >= 0 ? 'N' : 'S';
+    const ew = lon >= 0 ? 'E' : 'W';
+    return Math.abs(lat).toFixed(2) + '°' + ns + ', ' + Math.abs(lon).toFixed(2) + '°' + ew;
+  };
+
+  const shortOwner = (owner) => {
+    const value = typeof owner === 'string' ? owner : '';
+    const hex = value.indexOf('ed25519:') === 0 ? value.slice(8) : value;
+    if (hex.length >= 12) return 'ed25519:' + hex.slice(0, 6) + '…' + hex.slice(-4);
+    return value || 'signed';
+  };
+
+  const ago = (at) => {
+    const seconds = Math.max(0, now() - at);
+    if (seconds < 5) return 'just now';
+    if (seconds < 60) return seconds + 's ago';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return minutes + 'm ago';
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours + 'h ago';
+    return Math.floor(hours / 24) + 'd ago';
+  };
+
+  const xPct = (lon) => ((lon + 180) / 360) * 100;
+  const yPct = (lat) => ((90 - lat) / 180) * 100;
+  const cellKey = (lat, lon) => Math.floor((lat + 90) / CLUSTER_DEGREES) + ':' + Math.floor((lon + 180) / CLUSTER_DEGREES);
+
+  const setConnection = (state) => {
+    const label = state === 'live' ? 'live' : state === 'connecting' ? 'connecting' : 'offline';
+    chipDot.dataset.state = state;
+    chip.title = 'Event stream: ' + label;
+    chip.setAttribute('aria-label', 'Relay connection: ' + label);
+  };
+
+  const setStatus = (message, error) => {
+    noteStatus.textContent = message;
+    if (error) noteStatus.dataset.error = '1';
+    else delete noteStatus.dataset.error;
+  };
+
+  const showToast = (message) => {
+    clearTimeout(toastTimer);
+    toastEl.textContent = message;
+    toastEl.classList.add('is-on');
+    toastTimer = setTimeout(() => toastEl.classList.remove('is-on'), 3200);
+  };
+
+  const updateCount = () => {
+    noteCount.textContent = Array.from(noteText.value).length + '/' + MAX_TEXT;
+  };
+
+  /* ---------- data ---------- */
+  const parseComment = (event) => {
+    if (!event || typeof event !== 'object') return null;
+    const labels = Array.isArray(event.labels) ? event.labels : [];
+    if (!labels.includes('comment')) return null;
+    const data = event.data || {};
+    if (data.v !== 1) return null;
+    const lat = Number(data.lat);
+    const lon = Number(data.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+    const text = cleanText(data.text);
+    const at = Number(event.created_at);
+    const id = typeof event.id === 'string' ? event.id : '';
+    if (!text || !id || !Number.isFinite(at)) return null;
+    return { id, text, lat, lon, at, owner: typeof event.owner === 'string' ? event.owner : '' };
+  };
+
+  const groupComments = () => {
+    const next = new Map();
+    comments.forEach((comment) => {
+      const key = cellKey(comment.lat, comment.lon);
+      let group = next.get(key);
+      if (!group) {
+        group = { key, comments: [], lat: 0, lon: 0, latest: 0 };
+        next.set(key, group);
+      }
+      group.comments.push(comment);
+    });
+    next.forEach((group) => {
+      group.comments.sort((a, b) => b.at - a.at || (a.id < b.id ? -1 : 1));
+      group.lat = group.comments.reduce((sum, comment) => sum + comment.lat, 0) / group.comments.length;
+      group.lon = group.comments.reduce((sum, comment) => sum + comment.lon, 0) / group.comments.length;
+      group.latest = group.comments[0].at;
+    });
+    clusters = next;
+  };
+
+  /* ---------- rendering ---------- */
+  const renderMarkers = () => {
+    markersEl.textContent = '';
+    const groups = Array.from(clusters.values()).sort((a, b) => a.latest - b.latest);
+    groups.forEach((group) => {
+      const pin = document.createElement('button');
+      pin.type = 'button';
+      pin.className = 'pin' + (group.comments.length > 1 ? ' has-count' : '') + (mode === 'place' && selectedKey === group.key ? ' is-active' : '');
+      pin.style.left = xPct(group.lon) + '%';
+      pin.style.top = yPct(group.lat) + '%';
+      pin.dataset.key = group.key;
+      pin.title = group.comments.length + (group.comments.length === 1 ? ' comment · ' : ' comments · ') + formatCoords(group.lat, group.lon);
+      pin.setAttribute('aria-label', pin.title);
+      const label = document.createElement('span');
+      label.className = 'pin-label';
+      label.textContent = group.comments.length > 1 ? String(group.comments.length) : '';
+      pin.appendChild(label);
+      pin.addEventListener('click', (event) => {
+        event.stopPropagation();
+        selectCluster(group.key);
+      });
+      markersEl.appendChild(pin);
+    });
+  };
+
+  const renderStats = () => {
+    statComments.textContent = String(comments.size);
+    statPlaces.textContent = String(clusters.size);
+    mapCount.textContent = comments.size + (comments.size === 1 ? ' comment · ' : ' comments · ') + clusters.size + (clusters.size === 1 ? ' place' : ' places');
+  };
+
+  const renderLatest = () => {
+    const newest = Array.from(comments.values()).sort((a, b) => b.at - a.at).slice(0, 3);
+    latestList.textContent = '';
+    latestEmpty.hidden = newest.length > 0;
+    latestList.hidden = newest.length === 0;
+    newest.forEach((comment) => {
+      const item = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'note-item';
+      button.dataset.key = cellKey(comment.lat, comment.lon);
+
+      const text = document.createElement('p');
+      text.textContent = comment.text;
+
+      const meta = document.createElement('span');
+      meta.className = 'meta';
+      const where = document.createElement('span');
+      where.textContent = formatCoords(comment.lat, comment.lon);
+      const when = document.createElement('span');
+      when.className = 'js-ago';
+      when.dataset.at = String(comment.at);
+      when.textContent = ago(comment.at);
+      meta.append(where, when);
+
+      button.append(text, meta);
+      button.addEventListener('click', () => selectCluster(button.dataset.key));
+      item.appendChild(button);
+      latestList.appendChild(item);
+    });
+  };
+
+  const renderPlace = () => {
+    const group = selectedKey ? clusters.get(selectedKey) : null;
+    if (!group) return;
+    placeCoords.textContent = formatCoords(group.lat, group.lon);
+    placeMeta.textContent = group.comments.length + (group.comments.length === 1 ? ' comment · latest ' : ' comments · latest ') + ago(group.latest);
+    placeList.textContent = '';
+    group.comments.forEach((comment) => {
+      const item = document.createElement('li');
+      item.className = 'place-note';
+      const text = document.createElement('p');
+      text.textContent = comment.text;
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const owner = document.createElement('code');
+      owner.textContent = shortOwner(comment.owner);
+      owner.title = comment.owner || 'signed';
+      const when = document.createElement('span');
+      when.className = 'js-ago';
+      when.dataset.at = String(comment.at);
+      when.textContent = ago(comment.at);
+      when.title = new Date(comment.at * 1000).toLocaleString();
+      meta.append(owner, when);
+      item.append(text, meta);
+      placeList.appendChild(item);
+    });
+  };
+
+  const setPanel = (view) => {
+    mode = view;
+    if (view !== 'compose') {
+      composePoint = null;
+      pendingEl.hidden = true;
+    }
+    viewDefault.hidden = view !== 'default';
+    viewCompose.hidden = view !== 'compose';
+    viewPlace.hidden = view !== 'place';
+    renderMarkers();
+  };
+
+  const showDefault = () => {
+    selectedKey = null;
+    setPanel('default');
+  };
+
+  const selectCluster = (key) => {
+    const group = clusters.get(key);
+    if (!group) return;
+    selectedKey = key;
+    setPanel('place');
+    renderPlace();
+  };
+
+  const startCompose = (lat, lon, text) => {
+    composePoint = { lat: Number(lat.toFixed(4)), lon: Number(lon.toFixed(4)) };
+    selectedKey = null;
+    pendingEl.style.left = xPct(composePoint.lon) + '%';
+    pendingEl.style.top = yPct(composePoint.lat) + '%';
+    pendingEl.hidden = false;
+    composeCoords.textContent = formatCoords(composePoint.lat, composePoint.lon);
+    noteText.value = text || '';
+    updateCount();
+    setStatus('', false);
+    setPanel('compose');
+    if (window.matchMedia('(pointer: fine)').matches) {
+      noteText.focus({ preventScroll: true });
+    }
+  };
+
+  const rebuild = () => {
+    groupComments();
+    renderMarkers();
+    renderStats();
+    renderLatest();
+    if (mode === 'place' && selectedKey && clusters.has(selectedKey)) renderPlace();
+    else if (mode === 'place' && selectedKey) showDefault();
+  };
+
+  /* ---------- relay ---------- */
+  const loadHistory = async () => {
+    setConnection('connecting');
+    try {
+      const res = await fetch(RELAY + '/api/v1/events?collection=' + encodeURIComponent(COLLECTION) + '&limit=' + HISTORY_LIMIT, { cache: 'no-store' });
+      syncClock(res);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const body = await res.json();
+      const events = Array.isArray(body.events) ? body.events : [];
+      if (!loadedOnce) comments.clear();
+      events.forEach((event) => {
+        const comment = parseComment(event);
+        if (comment) comments.set(comment.id, comment);
+      });
+      loadedOnce = true;
+      rebuild();
+      setConnection('live');
+    } catch (error) {
+      setConnection('offline');
+      if (!comments.size) latestEmpty.textContent = 'Relay unreachable — try again in a moment.';
+      showToast('Could not load comments — the relay is unreachable.');
+    }
+  };
+
+  const connect = () => {
+    if (stream) { stream.close(); stream = null; }
+    clearTimeout(reconnectTimer);
+    try {
+      stream = new EventSource(RELAY + '/api/v1/events/stream?collection=' + encodeURIComponent(COLLECTION));
+    } catch {
+      setConnection('offline');
+      reconnectTimer = setTimeout(connect, 5000);
+      return;
+    }
+    stream.onopen = () => setConnection('live');
+    stream.onmessage = (event) => {
+      try {
+        const comment = parseComment(JSON.parse(event.data));
+        if (!comment) return;
+        if (comments.has(comment.id)) return;
+        comments.set(comment.id, comment);
+        rebuild();
+      } catch {}
+    };
+    stream.onerror = () => {
+      if (!stream) return;
+      setConnection('offline');
+      if (stream.readyState === EventSource.CLOSED) {
+        stream = null;
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(connect, 5000);
+      }
+    };
+  };
+
+  const postComment = async (text, lat, lon) => {
+    if (!window.crypto || !window.crypto.subtle) throw new Error('crypto unavailable');
+    const identity = loadIdentity();
+    const at = now();
+    const fields = {
+      collection: COLLECTION,
+      created_at: at,
+      expires_at: at + TTL_SECONDS,
+      owner: identity.owner,
+      labels: ['comment'],
+      data: { v: 1, lat: Number(lat.toFixed(4)), lon: Number(lon.toFixed(4)), text }
+    };
+    const bytes = new TextEncoder().encode(canonical(fields));
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    const signature = nacl.sign.detached(digest, identity.secretKey);
+    const envelope = { ...fields, id: bytesToHex(digest), sig: bytesToHex(signature) };
+    const res = await fetch(RELAY + '/api/v1/events', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(envelope)
+    });
+    syncClock(res);
+    const body = await res.json().catch(() => null);
+    if (!res.ok) {
+      const code = body && (body.code || body.error);
+      throw new Error(code || ('HTTP ' + res.status));
+    }
+    return { id: (body && body.id) || envelope.id, text, lat: fields.data.lat, lon: fields.data.lon, at, owner: identity.owner };
+  };
+
+  /* ---------- events ---------- */
+  mapWrap.addEventListener('click', (event) => {
+    if (event.target.closest('.pin')) return;
+    const rect = mapWrap.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    startCompose(90 - y * 180, x * 360 - 180);
+  });
+
+  mapWrap.addEventListener('mousemove', (event) => {
+    const rect = mapWrap.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    mapCoords.textContent = formatCoords(90 - y * 180, x * 360 - 180);
+  });
+  mapWrap.addEventListener('mouseleave', () => { mapCoords.textContent = '—'; });
+
+  noteText.addEventListener('input', updateCount);
+  composeClose.addEventListener('click', showDefault);
+  placeClose.addEventListener('click', showDefault);
+
+  writeHere.addEventListener('click', () => {
+    const group = selectedKey ? clusters.get(selectedKey) : null;
+    if (!group) return;
+    const anchor = group.comments[0];
+    startCompose(anchor.lat, anchor.lon);
+  });
+
+  noteForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (posting || !composePoint) return;
+    const text = cleanText(noteText.value);
+    if (!text) {
+      setStatus('Write something first.', true);
+      noteText.focus();
+      return;
+    }
+    posting = true;
+    noteSend.disabled = true;
+    noteSend.textContent = 'Signing…';
+    setStatus('Signing and publishing…', false);
+    try {
+      const comment = await postComment(text, composePoint.lat, composePoint.lon);
+      comments.set(comment.id, comment);
+      const key = cellKey(comment.lat, comment.lon);
+      selectedKey = key;
+      noteText.value = '';
+      updateCount();
+      setStatus('', false);
+      rebuild();
+      setPanel('place');
+      renderPlace();
+      showToast('Comment placed — signed and live.');
+    } catch (error) {
+      setStatus('Could not place: ' + (error && error.message ? error.message : 'relay unreachable'), true);
+    } finally {
+      posting = false;
+      noteSend.disabled = false;
+      noteSend.textContent = 'Place comment';
+    }
+  });
+
+  noteText.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault();
+      noteForm.requestSubmit();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && mode !== 'default') showDefault();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    loadHistory();
+    if (!stream || stream.readyState === EventSource.CLOSED) connect();
+  });
+
+  setInterval(() => {
+    document.querySelectorAll('.js-ago').forEach((el) => {
+      const at = Number(el.dataset.at);
+      if (Number.isFinite(at)) el.textContent = ago(at);
+    });
+  }, 15000);
+
+  updateCount();
+  setConnection('connecting');
+  loadHistory().then(connect);
+})();
+</script>
+</body>
+</html>
