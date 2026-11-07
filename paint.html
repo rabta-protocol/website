@@ -496,7 +496,7 @@
 (() => {
   const { createApp, ref, reactive, computed, shallowReactive, watch, nextTick, onMounted, onBeforeUnmount } = Vue;
 
-  const DEFAULT_RELAY = 'https://rabta.space';
+  const DEFAULT_RELAY = 'https://1.rabta.space';
   const COLLECTION = 'canvas/rabta';
   const TTL_SECONDS = 30 * 24 * 60 * 60;
   const MAX_POINTS = 1200;
@@ -670,7 +670,7 @@
 
       const queryRelay = normalizeRelay(new URLSearchParams(location.search).get('relay') || '');
       const storedRelay = readStore(STORE.relay);
-      const relay = ref(queryRelay || normalizeRelay(storedRelay === 'https://rabta.t3nk.com' ? '' : storedRelay || '') || DEFAULT_RELAY);
+      const relay = ref(queryRelay || normalizeRelay(storedRelay === 'https://rabta.space' ? '' : storedRelay || '') || DEFAULT_RELAY);
       const collection = ref(normalizeCollection(new URLSearchParams(location.search).get('collection')) || COLLECTION);
       const relayHost = computed(() => {
         try { return new URL(relay.value).host; } catch { return relay.value; }

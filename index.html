@@ -9,7 +9,7 @@
 <meta name="description" content="Minimal browser demos for Rabta — chat, collaborative canvas and encrypted file sharing, signed with Ed25519 and streamed over SSE." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preconnect" href="https://rabta.space" crossorigin />
+<link rel="preconnect" href="https://1.rabta.space" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root {
@@ -216,7 +216,7 @@
       <div class="stats-title">
         <span class="dot" id="stats-dot" data-state="loading"></span>
         <h2 id="stats-heading">Node status</h2>
-        <code>rabta.space/api/v1/stats</code>
+        <code>1.rabta.space/api/v1/stats</code>
       </div>
       <div class="stats-meta">
         <span id="stats-state" aria-live="polite">connecting</span>
@@ -259,13 +259,13 @@
 
   <footer>
     <span>ed25519 / sse / 7d ttl</span>
-    <a href="https://rabta.space" target="_blank" rel="noreferrer">rabta.space</a>
+    <a href="https://1.rabta.space" target="_blank" rel="noreferrer">1.rabta.space</a>
   </footer>
 </main>
 
 <script>
 (() => {
-  const STATS_URL = 'https://rabta.space/api/v1/stats';
+  const STATS_URL = 'https://1.rabta.space/api/v1/stats';
   const MIN_DELAY = 1000;
   const MAX_DELAY = 10000;
 

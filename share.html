@@ -9,7 +9,7 @@
 <meta name="description" content="Share up to 8 files and a note as one encrypted Rabta event. The decryption key lives only in the link fragment." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preconnect" href="https://rabta.space" crossorigin />
+<link rel="preconnect" href="https://1.rabta.space" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 <noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -281,7 +281,7 @@
 
   <footer class="flex shrink-0 items-center justify-between gap-3 border-t border-[#eaeaea] px-4 py-4 text-[9px] uppercase tracking-[.14em] text-[#a1a1a1] sm:px-6">
     <span>rabta share · one event · max 8 blobs</span>
-    <a href="https://rabta.space" target="_blank" rel="noreferrer" class="transition hover:text-[#171717]">rabta.space</a>
+    <a href="https://1.rabta.space" target="_blank" rel="noreferrer" class="transition hover:text-[#171717]">1.rabta.space</a>
   </footer>
 
   <transition name="fade">
@@ -293,7 +293,7 @@
 (() => {
   const { createApp, ref, reactive, computed, onMounted } = Vue;
 
-  const DEFAULT_RELAY = 'https://rabta.space';
+  const DEFAULT_RELAY = 'https://1.rabta.space';
   const COLLECTION = 'share/rabta';
   const TTL_SECONDS = 7 * 24 * 60 * 60;
   const MAX_FILES = 8;
@@ -343,6 +343,11 @@
       if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
       return url.origin;
     } catch { return null; }
+  };
+
+  const resolveRelay = (value) => {
+    const normalized = normalizeRelay(value);
+    return normalized === 'https://rabta.space' ? DEFAULT_RELAY : normalized;
   };
 
   const fmtBytes = (n) => {
@@ -400,7 +405,7 @@
     const params = new URLSearchParams(location.hash.replace(/^#/, ''));
     const id = params.get('e') || '';
     const key = params.get('k') || '';
-    const relay = normalizeRelay(params.get('r') || '') || DEFAULT_RELAY;
+    const relay = resolveRelay(params.get('r') || '') || DEFAULT_RELAY;
     if (!/^[0-9a-f]{64}$/.test(id) || !key) return null;
     let keyBytes;
     try { keyBytes = fromB64u(key); } catch { return null; }
@@ -412,7 +417,7 @@
     setup() {
       const share = parseShare();
       const mode = ref(share ? 'view' : 'compose');
-      const relay = ref(share ? share.relay : (normalizeRelay(new URLSearchParams(location.search).get('relay') || '') || DEFAULT_RELAY));
+      const relay = ref(share ? share.relay : (resolveRelay(new URLSearchParams(location.search).get('relay') || '') || DEFAULT_RELAY));
       const relayHost = computed(() => { try { return new URL(relay.value).host; } catch { return relay.value; } });
 
       const note = ref('');
