@@ -218,11 +218,6 @@
         <span class="hidden text-[8px] uppercase tracking-[.16em] text-emerald-300/60 md:inline">local</span>
       </button>
 
-      <a :href="chatHref" class="flex items-center gap-1.5 rounded-full border border-white/[.07] bg-white/[.025] px-2.5 py-2 text-white/35 transition hover:border-white/15 hover:bg-white/[.06] hover:text-white/80" title="Open the public chat">
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a8.5 8.5 0 0 1-8.5 8.5H6l-3 2 1.1-4.2A8.5 8.5 0 1 1 21 12Z" stroke-linecap="round" stroke-linejoin="round" /></svg>
-        <span class="hidden text-[9px] uppercase tracking-[.16em] md:inline">Chat</span>
-      </a>
-
       <button @click="toggleFullscreen" class="grid h-8 w-8 place-items-center rounded-full border border-white/[.07] bg-white/[.025] text-white/35 transition hover:border-white/15 hover:bg-white/[.06] hover:text-white/80" :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
         <svg v-if="!isFullscreen" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3" stroke-linecap="round" /></svg>
         <svg v-else class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3m8 0v-3a2 2 0 0 1 2-2h3" stroke-linecap="round" /></svg>
@@ -692,13 +687,6 @@
       const relayHost = computed(() => {
         try { return new URL(relay.value).host; } catch { return relay.value; }
       });
-      const chatHref = computed(() => {
-        const params = new URLSearchParams();
-        if (relay.value !== DEFAULT_RELAY) params.set('relay', relay.value);
-        const query = params.toString();
-        return 'chat.html' + (query ? '?' + query : '');
-      });
-
       const canvasEl = ref(null);
       const canvasArea = ref(null);
       const canvasSize = ref(520);
@@ -1497,7 +1485,6 @@
         brushSize,
         relay,
         relayHost,
-        chatHref,
         collection,
         relayDraft,
         relayError,

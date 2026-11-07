@@ -6,8 +6,8 @@
 <meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#fafaf9" />
 <title>Rabta — signed events, realtime streaming, file blobs</title>
-<meta name="description" content="Rabta is a self-hosted backend for signed events, realtime SSE streaming and content-addressed file uploads. One Rust binary, one SQLite file, one container. Live chat, canvas and encrypted share demos on rabta.space." />
-<meta name="keywords" content="Rabta, rabta.space, rabta protocol, rabta relay, self-hosted backend, Ed25519 signed events, SSE streaming, content-addressed storage, realtime chat, collaborative canvas, encrypted file sharing, Rust backend, SQLite" />
+<meta name="description" content="Rabta is a self-hosted backend for signed events, realtime SSE streaming and content-addressed file uploads. One Rust binary, one SQLite file, one container. Live shoutbox, canvas and encrypted share demos on rabta.space." />
+<meta name="keywords" content="Rabta, rabta.space, rabta protocol, rabta relay, self-hosted backend, Ed25519 signed events, SSE streaming, content-addressed storage, realtime shoutbox, collaborative canvas, encrypted file sharing, Rust backend, SQLite" />
 <meta name="author" content="Rabta" />
 <link rel="canonical" href="https://rabta.space/" />
 <meta property="og:type" content="website" />
@@ -155,7 +155,7 @@
 
   /* cards */
   .cards { display: grid; gap: .75rem; }
-  @media (min-width: 46rem) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 46rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .card {
     position: relative; isolation: isolate;
     display: flex; flex-direction: column; gap: .25rem;
@@ -389,21 +389,9 @@
       <span>three primitives · one relay</span>
     </div>
     <div class="cards">
-      <a class="card" href="chat.html" data-tone="emerald">
-        <div class="card-top">
-          <span class="card-index">01</span>
-          <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.8 9.8 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 1 1 21 11.5Z"/></svg></span>
-        </div>
-        <h3>Chat</h3>
-        <p>Live public lobby. Every message signed with a local Ed25519 key and verified by the relay — last 20 shown.</p>
-        <div class="card-foot">
-          <code>chat/rabta</code>
-          <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
-        </div>
-      </a>
       <a class="card" href="paint.html" data-tone="violet">
         <div class="card-top">
-          <span class="card-index">02</span>
+          <span class="card-index">01</span>
           <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3Z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5Z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></span>
         </div>
         <h3>Canvas</h3>
@@ -415,7 +403,7 @@
       </a>
       <a class="card" href="share.html" data-tone="sky">
         <div class="card-top">
-          <span class="card-index">03</span>
+          <span class="card-index">02</span>
           <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
         </div>
         <h3>Share</h3>

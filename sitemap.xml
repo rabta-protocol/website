@@ -6,11 +6,6 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://rabta.space/chat.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://rabta.space/paint.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
