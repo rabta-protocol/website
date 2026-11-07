@@ -372,17 +372,6 @@
     </div>
   </section>
 
-  <section class="visitors" aria-labelledby="visitors-heading">
-    <div class="section-head">
-      <h2 id="visitors-heading">Recent visitors</h2>
-      <span>city-level · live · last 10</span>
-    </div>
-    <div class="visitor-board">
-      <ol class="visit-list" id="visit-list" aria-live="polite"></ol>
-      <p class="visit-empty" id="visit-empty">Locating the last ten visitors…</p>
-    </div>
-  </section>
-
   <section class="stats" aria-labelledby="stats-heading">
     <div class="stats-head">
       <div class="stats-title">
@@ -426,6 +415,17 @@
         <span class="value" id="s-version">—</span>
         <span class="sub" id="s-inflight">—</span>
       </div>
+    </div>
+  </section>
+
+  <section class="visitors" aria-labelledby="visitors-heading">
+    <div class="section-head">
+      <h2 id="visitors-heading">Recent visitors</h2>
+      <span>city-level · live · last 10</span>
+    </div>
+    <div class="visitor-board">
+      <ol class="visit-list" id="visit-list" aria-live="polite"></ol>
+      <p class="visit-empty" id="visit-empty">Locating the last ten visitors…</p>
     </div>
   </section>
 
@@ -886,8 +886,8 @@
       .from('.ticker', { opacity: 0, duration: .5 }, '-=.35')
       .from('.demos .section-head', { y: 12, opacity: 0, duration: .5 }, '-=.2')
       .from('.card', { y: 28, opacity: 0, stagger: .09, duration: .65 }, '-=.25')
-      .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.25')
-      .from('.stats-head, .tile', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.35')
+      .from('.stats-head, .tile', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.25')
+      .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.35')
       .from('footer', { opacity: 0, duration: .4 }, '-=.4');
   };
 
