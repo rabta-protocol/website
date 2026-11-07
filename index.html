@@ -5,27 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#ffffff" />
-<title>Rabta — signed events, realtime streaming, file blobs</title>
-<meta name="description" content="Rabta is a self-hosted backend for signed events, realtime SSE streaming and content-addressed file uploads. One Rust binary, one SQLite file, one container. Live shoutbox, canvas, encrypted share and world-map comment demos on rabta.space." />
-<meta name="keywords" content="Rabta, rabta.space, rabta protocol, rabta relay, self-hosted backend, Ed25519 signed events, SSE streaming, content-addressed storage, realtime shoutbox, collaborative canvas, encrypted file sharing, world map comments, Rust backend, SQLite" />
+<title>Rabta — signed events, live queries, file blobs</title>
+<meta name="description" content="Rabta is a self-hosted backend for signed events, live query polling and content-addressed file uploads. One Rust binary, one SQLite file, one container. Live shoutbox, canvas, encrypted share and world-map comment demos on rabta.space." />
+<meta name="keywords" content="Rabta, rabta.space, rabta protocol, rabta relay, self-hosted backend, Ed25519 signed events, live polling, content-addressed storage, realtime shoutbox, collaborative canvas, encrypted file sharing, world map comments, Rust backend, SQLite" />
 <meta name="author" content="Rabta" />
 <link rel="canonical" href="https://rabta.space/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Rabta" />
-<meta property="og:title" content="Rabta — signed events, realtime streaming, file blobs" />
-<meta property="og:description" content="Self-hosted backend for signed events, realtime SSE streaming and content-addressed uploads. One Rust binary, one SQLite file. Live demos running on a Rabta node." />
+<meta property="og:title" content="Rabta — signed events, live queries, file blobs" />
+<meta property="og:description" content="Self-hosted backend for signed events, live query polling and content-addressed uploads. One Rust binary, one SQLite file. Live demos running on a Rabta node." />
 <meta property="og:url" content="https://rabta.space/" />
 <meta property="og:image" content="https://rabta.space/og.jpg" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="rabta — signed events, sse, content-addressed blobs" />
+<meta property="og:image:alt" content="rabta — signed events, live queries, content-addressed blobs" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Rabta — signed events, realtime streaming, file blobs" />
-<meta name="twitter:description" content="Self-hosted backend for signed events, realtime SSE streaming and content-addressed uploads. One Rust binary, one SQLite file." />
+<meta name="twitter:title" content="Rabta — signed events, live queries, file blobs" />
+<meta name="twitter:description" content="Self-hosted backend for signed events, live query polling and content-addressed uploads. One Rust binary, one SQLite file." />
 <meta name="twitter:image" content="https://rabta.space/og.jpg" />
-<meta name="twitter:image:alt" content="rabta — signed events, sse, content-addressed blobs" />
+<meta name="twitter:image:alt" content="rabta — signed events, live queries, content-addressed blobs" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Rabta","alternateName":"raa-b-ta","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, Docker","description":"Self-hosted backend for signed events, realtime SSE streaming and content-addressed file uploads. One Rust binary, one SQLite file, one Docker container.","url":"https://rabta.space/","sameAs":["https://github.com/rabta-protocol/rabta"]}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Rabta","alternateName":"raa-b-ta","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, Docker","description":"Self-hosted backend for signed events, live query polling and content-addressed file uploads. One Rust binary, one SQLite file, one Docker container.","url":"https://rabta.space/","sameAs":["https://github.com/rabta-protocol/rabta"]}
 </script>
 <link rel="alternate" type="text/plain" href="llms.txt" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e0e10'/%3E%3Ctext x='32' y='45' font-family='monospace' font-size='34' font-weight='600' fill='white' text-anchor='middle'%3Er%3C/text%3E%3C/svg%3E" />
@@ -383,7 +383,7 @@
       </a>
     </div>
     <div class="hero-meta">
-      <span>ed25519</span><span>sse</span><span>sqlite</span><span>7d ttl</span>
+      <span>ed25519</span><span>polling</span><span>sqlite</span><span>7d ttl</span>
     </div>
   </section>
 
@@ -391,7 +391,7 @@
     <div class="ticker-track">
       <div class="ticker-group">
         <span class="ticker-item">POST /api/v1/events</span>
-        <span class="ticker-item">GET /api/v1/events/stream</span>
+        <span class="ticker-item">POST /api/v1/events/query</span>
         <span class="ticker-item">PUT /api/v1/blobs</span>
         <span class="ticker-item">ed25519 signed</span>
         <span class="ticker-item">sqlite</span>
@@ -399,7 +399,7 @@
       </div>
       <div class="ticker-group">
         <span class="ticker-item">POST /api/v1/events</span>
-        <span class="ticker-item">GET /api/v1/events/stream</span>
+        <span class="ticker-item">POST /api/v1/events/query</span>
         <span class="ticker-item">PUT /api/v1/blobs</span>
         <span class="ticker-item">ed25519 signed</span>
         <span class="ticker-item">sqlite</span>
@@ -411,7 +411,7 @@
   <section class="section features" aria-labelledby="features-heading">
     <div class="section-head">
       <h2 id="features-heading">Capabilities</h2>
-      <span>signed · realtime · durable · self-hosted</span>
+      <span>signed · live · durable · self-hosted</span>
     </div>
     <div class="feature-grid">
       <article class="feature" data-tone="emerald">
@@ -425,10 +425,10 @@
       <article class="feature" data-tone="sky">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7"/><path d="M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/></svg></span>
-          <code>sse</code>
+          <code>query</code>
         </div>
-        <h3>Realtime streams</h3>
-        <p>Subscribe to any collection over Server-Sent Events. Last-Event-ID resumes after a drop, and 15-second keepalives hold the line open.</p>
+        <h3>Live queries</h3>
+        <p>Poll any collection through a typed JSON query. Filter by labels or owner, and page results with an opaque cursor.</p>
       </article>
       <article class="feature" data-tone="violet">
         <div class="feature-top">
@@ -461,7 +461,7 @@
           <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3Z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5Z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></span>
         </div>
         <h3>Canvas</h3>
-        <p>Realtime 1000×1000 board. Strokes are signed in your browser, then streamed to every viewer over SSE.</p>
+        <p>Realtime 1000×1000 board. Strokes are signed in your browser, then polled by every viewer.</p>
         <div class="card-foot">
           <code>canvas/rabta</code>
           <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
@@ -485,7 +485,7 @@
           <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18"/><path d="M12 3a15 15 0 0 0 0 18"/></svg></span>
         </div>
         <h3>World</h3>
-        <p>A world map where anyone can pin a signed comment to exact coordinates. Every note streams live.</p>
+        <p>A world map where anyone can pin a signed comment to exact coordinates. Every note appears live.</p>
         <div class="card-foot">
           <code>world/comments</code>
           <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
@@ -530,9 +530,9 @@
         <span class="sub" id="s-events-bytes">—</span>
       </div>
       <div class="tile">
-        <span class="label">SSE subscribers</span>
-        <span class="value" id="s-subs">—</span>
-        <span class="sub" id="s-subs-cap">—</span>
+        <span class="label">Unclaimed blobs</span>
+        <span class="value" id="s-unclaimed">—</span>
+        <span class="sub" id="s-unclaimed-cap">—</span>
       </div>
       <div class="tile">
         <span class="label">Live blobs</span>
@@ -569,7 +569,7 @@
   </section>
 
   <footer>
-    <span>ed25519 / sse / 7d ttl</span>
+    <span>ed25519 / polling / 7d ttl</span>
     <div class="footer-links">
       <a href="llms.txt">llms.txt</a>
       <a href="https://github.com/rabta-protocol/rabta" target="_blank" rel="noreferrer">github</a>
@@ -666,15 +666,14 @@
   const paint = (data) => {
     const events = data.events || {};
     const blobs = data.blobs || {};
-    const sse = data.sse || {};
     const storage = data.storage || {};
     const upload = data.upload || {};
     const reaper = data.reaper || {};
 
     animateValue($('s-events'), events.live, fmtCount);
     $('s-events-bytes').textContent = fmtBytes(events.bytes) + ' stored';
-    animateValue($('s-subs'), sse.subscribers, fmtCount);
-    $('s-subs-cap').textContent = 'cap ' + fmtCount(sse.cap);
+    animateValue($('s-unclaimed'), blobs.unclaimed, fmtCount);
+    $('s-unclaimed-cap').textContent = fmtBytes(blobs.unclaimed_bytes) + ' / ' + fmtBytes(blobs.unclaimed_limit_bytes);
     animateValue($('s-blobs'), blobs.live, fmtCount);
     $('s-blobs-bytes').textContent = fmtBytes(blobs.bytes) + ' stored';
     animateValue($('s-store'), storage.store_bytes, fmtBytes);
@@ -725,8 +724,8 @@
   const visitEmpty = $('visit-empty');
   const visitSeen = new Set();
   let visitClockOffset = 0;
-  let visitStream = null;
-  let visitReconnect = null;
+  let visitTimer = null;
+  let visitBusy = false;
 
   const visitNow = () => Math.floor(Date.now() / 1000) + visitClockOffset;
 
@@ -736,6 +735,21 @@
     const seconds = Math.floor(Date.parse(date) / 1000);
     if (!Number.isFinite(seconds)) return;
     visitClockOffset = Math.min(86400, Math.max(-86400, seconds - Math.floor(Date.now() / 1000)));
+  };
+
+  const queryEvents = async (collection, limit) => {
+    const res = await fetch(RELAY + '/api/v1/events/query', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ collection, limit }),
+      cache: 'no-store'
+    });
+    syncRelayClock(res);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error((body && (body.code || body.error)) || ('HTTP ' + res.status));
+    }
+    return res.json();
   };
 
   const readText = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
@@ -881,33 +895,33 @@
   };
 
   const loadVisits = async () => {
-    const res = await fetch(RELAY + '/api/v1/events?collection=' + encodeURIComponent(VISITS_COLLECTION) + '&limit=50', { cache: 'no-store' });
-    syncRelayClock(res);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const body = await res.json();
+    const body = await queryEvents(VISITS_COLLECTION, 50);
     hydrateVisits(Array.isArray(body.events) ? body.events : []);
   };
 
-  const connectVisits = () => {
-    if (visitStream) { visitStream.close(); visitStream = null; }
-    clearTimeout(visitReconnect);
-    try {
-      visitStream = new EventSource(RELAY + '/api/v1/events/stream?collection=' + encodeURIComponent(VISITS_COLLECTION));
-    } catch {
-      visitReconnect = setTimeout(() => { if (!document.hidden) connectVisits(); }, 5000);
+  const pollVisits = async () => {
+    clearTimeout(visitTimer);
+    if (document.hidden) {
+      visitTimer = setTimeout(pollVisits, 5000);
       return;
     }
-    visitStream.onmessage = (event) => {
-      try { pushVisit(parseVisit(JSON.parse(event.data)), true); } catch {}
-    };
-    visitStream.onerror = () => {
-      if (!visitStream) return;
-      if (visitStream.readyState === EventSource.CLOSED) {
-        visitStream = null;
-        clearTimeout(visitReconnect);
-        visitReconnect = setTimeout(() => { if (!document.hidden) connectVisits(); }, 5000);
-      }
-    };
+    if (visitBusy) {
+      visitTimer = setTimeout(pollVisits, 1000);
+      return;
+    }
+    visitBusy = true;
+    try {
+      const body = await queryEvents(VISITS_COLLECTION, 50);
+      const visits = (Array.isArray(body.events) ? body.events : [])
+        .map(parseVisit)
+        .filter(Boolean)
+        .sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1));
+      visits.forEach((visit) => pushVisit(visit, true));
+    } catch {
+    } finally {
+      visitBusy = false;
+      visitTimer = setTimeout(pollVisits, 5000);
+    }
   };
 
   const fetchGeo = async (url) => {
@@ -963,6 +977,7 @@
       expires_at: at + VISIT_TTL,
       owner: identity.owner,
       labels: ['visit'],
+      blobs: [],
       data: { v: 1, city: place.city, country: place.country, cc: place.cc }
     };
     const bytes = new TextEncoder().encode(canonical(fields));
@@ -984,7 +999,7 @@
   const initVisitors = async () => {
     if (!visitList) return;
     try { await loadVisits(); } catch {}
-    connectVisits();
+    pollVisits();
     try {
       const place = await locate();
       const own = place ? await postVisit(place) : null;
@@ -1001,8 +1016,8 @@
   const shoutEmpty = $('shout-empty');
   const shoutStatus = $('shout-status');
   const shoutSeen = new Set();
-  let shoutStream = null;
-  let shoutReconnect = null;
+  let shoutTimer = null;
+  let shoutBusy = false;
   let shoutPosting = false;
   let shoutStatusTimer = null;
 
@@ -1092,33 +1107,33 @@
   };
 
   const loadShouts = async () => {
-    const res = await fetch(RELAY + '/api/v1/events?collection=' + encodeURIComponent(SHOUTS_COLLECTION) + '&limit=50', { cache: 'no-store' });
-    syncRelayClock(res);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const body = await res.json();
+    const body = await queryEvents(SHOUTS_COLLECTION, 50);
     hydrateShouts(Array.isArray(body.events) ? body.events : []);
   };
 
-  const connectShouts = () => {
-    if (shoutStream) { shoutStream.close(); shoutStream = null; }
-    clearTimeout(shoutReconnect);
-    try {
-      shoutStream = new EventSource(RELAY + '/api/v1/events/stream?collection=' + encodeURIComponent(SHOUTS_COLLECTION));
-    } catch {
-      shoutReconnect = setTimeout(() => { if (!document.hidden) connectShouts(); }, 5000);
+  const pollShouts = async () => {
+    clearTimeout(shoutTimer);
+    if (document.hidden) {
+      shoutTimer = setTimeout(pollShouts, 5000);
       return;
     }
-    shoutStream.onmessage = (event) => {
-      try { pushShout(parseShout(JSON.parse(event.data)), true); } catch {}
-    };
-    shoutStream.onerror = () => {
-      if (!shoutStream) return;
-      if (shoutStream.readyState === EventSource.CLOSED) {
-        shoutStream = null;
-        clearTimeout(shoutReconnect);
-        shoutReconnect = setTimeout(() => { if (!document.hidden) connectShouts(); }, 5000);
-      }
-    };
+    if (shoutBusy) {
+      shoutTimer = setTimeout(pollShouts, 1000);
+      return;
+    }
+    shoutBusy = true;
+    try {
+      const body = await queryEvents(SHOUTS_COLLECTION, 50);
+      const shouts = (Array.isArray(body.events) ? body.events : [])
+        .map(parseShout)
+        .filter(Boolean)
+        .sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1));
+      shouts.forEach((shout) => pushShout(shout, true));
+    } catch {
+    } finally {
+      shoutBusy = false;
+      shoutTimer = setTimeout(pollShouts, 5000);
+    }
   };
 
   const postShout = async (text) => {
@@ -1132,6 +1147,7 @@
       expires_at: at + SHOUT_TTL,
       owner: identity.owner,
       labels: ['shout'],
+      blobs: [],
       data: { v: 1, text }
     };
     const bytes = new TextEncoder().encode(canonical(fields));
@@ -1177,7 +1193,7 @@
       }
     });
     try { await loadShouts(); } catch {}
-    connectShouts();
+    pollShouts();
     setInterval(decorateShouts, 15000);
   };
 
@@ -1186,6 +1202,8 @@
       clearTimeout(timer);
     } else {
       load();
+      pollVisits();
+      pollShouts();
     }
   });
 
