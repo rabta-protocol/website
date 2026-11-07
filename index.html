@@ -52,6 +52,25 @@
   }
   h1 { margin: 0; font-size: 1.25rem; font-weight: 600; letter-spacing: -.02em; }
   header p { margin: 0; color: var(--muted); font-size: .8125rem; }
+  .llms-btn {
+    margin-left: auto;
+    flex: none;
+    padding: .5rem .9rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--fg);
+    font-size: .8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    transition: background .15s, border-color .15s;
+  }
+  .llms-btn:hover, .llms-btn:focus-visible {
+    background: var(--card-hover);
+    border-color: var(--fg);
+    outline: none;
+  }
   .grid { display: grid; gap: .75rem; }
   @media (min-width: 34rem) { .grid { grid-template-columns: 1fr 1fr; } }
   a.card.wide { grid-column: 1 / -1; }
@@ -191,6 +210,7 @@
       <h1>Rabta examples</h1>
       <p>Signed, live, streamed — built on the Rabta relay.</p>
     </div>
+    <a class="llms-btn" href="llms.txt">teach your ai agent</a>
   </header>
 
   <div class="grid">
