@@ -392,7 +392,7 @@
       busy: 'The relay is busy with other uploads. Try again in a moment.',
       disk_full: 'The relay disk is full.',
       empty_body: 'Empty files cannot be uploaded.',
-      bad_bin: 'Too many or duplicate blobs in one event.',
+      bad_blobs: 'Too many, duplicate, or invalid blobs in one event.',
       bad_sig: 'The relay rejected the event signature.',
       bad_collection: 'This collection name is not accepted by the relay.',
       timeout: 'An upload stalled and timed out.'
@@ -583,7 +583,7 @@
           const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
           const rawKey = new Uint8Array(await crypto.subtle.exportKey('raw', key));
           const entries = [];
-          const bin = [];
+          const blobs = [];
 
           for (let i = 0; i < chosen.length; i++) {
             const item = chosen[i];
@@ -593,7 +593,7 @@
             const cipher = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plain));
             progress.label = 'Uploading ' + (i + 1) + '/' + chosen.length;
             const hash = await uploadBlob(cipher);
-            bin.push(hash);
+            blobs.push(hash);
             entries.push({
               name: item.path,
               type: item.file.type || '',
@@ -621,9 +621,9 @@
             expires_at: now + TTL_SECONDS,
             owner: identity.value.owner,
             labels: ['share'],
+            blobs,
             data: { v: 1, iv: b64u(payloadIv), ct: b64u(payloadCipher) }
           };
-          if (bin.length) fields.bin = bin;
 
           const id = await publishEvent(fields);
           progress.done = progress.total;
@@ -634,7 +634,7 @@
           result.value = { url: url.toString(), id };
         } catch (err) {
           const code = err && err.message ? err.message : 'error';
-          const known = ['too_large', 'at_watermark', 'busy', 'disk_full', 'empty_body', 'bad_bin', 'bad_sig', 'bad_collection', 'timeout'];
+          const known = ['too_large', 'at_watermark', 'busy', 'disk_full', 'empty_body', 'bad_blobs', 'bad_sig', 'bad_collection', 'bad_label', 'bad_owner', 'bad_json', 'bad_body', 'ttl_range', 'timeout'];
           error.value = known.includes(code) ? errorText(code) : 'Upload failed: ' + code;
         } finally {
           busy.value = false;
