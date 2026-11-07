@@ -6,8 +6,8 @@
 <meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#ffffff" />
 <title>Rabta World — signed comments on a world map</title>
-<meta name="description" content="Leave a comment anywhere on Earth. Every note is Ed25519-signed in your browser, pinned to exact coordinates and streamed live from a Rabta relay." />
-<meta name="keywords" content="Rabta, rabta.space, world map, comments on a map, signed events, Ed25519, SSE streaming, realtime map, anonymous comments, self-hosted" />
+<meta name="description" content="Leave a comment anywhere on Earth. Every note is Ed25519-signed in your browser, pinned to exact coordinates and synced live from a Rabta relay." />
+<meta name="keywords" content="Rabta, rabta.space, world map, comments on a map, signed events, Ed25519, live polling, realtime map, anonymous comments, self-hosted" />
 <link rel="canonical" href="https://rabta.space/world.html" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Rabta" />
@@ -400,11 +400,11 @@
     <span class="brand-mark" aria-hidden="true">R</span>
     <span class="brand-text">
       <span class="brand-line"><span class="brand-name">RABTA</span><span class="brand-sub">WORLD</span></span>
-      <span class="brand-meta"><span>ed25519</span><span>/</span><span>sse</span><span>/</span><span>7d ttl</span></span>
+      <span class="brand-meta"><span>ed25519</span><span>/</span><span>polling</span><span>/</span><span>7d ttl</span></span>
     </span>
   </a>
   <div class="bar-right">
-    <span class="chip" id="relay-chip" title="Live event stream" aria-label="Relay connection">
+    <span class="chip" id="relay-chip" title="Live relay polling" aria-label="Relay connection">
       <span class="chip-dot" id="chip-dot" data-state="connecting" aria-hidden="true"></span>
       <span class="chip-host">1.rabta.space</span>
     </span>
@@ -517,7 +517,7 @@
 </main>
 
 <footer>
-  <span>world/comments · ed25519 / sse / 7d ttl</span>
+  <span>world/comments · ed25519 / polling / 7d ttl</span>
   <div class="footer-links">
     <a href="index.html">rabta.space</a>
     <a href="llms.txt">llms.txt</a>
@@ -584,8 +584,8 @@
   let selectedKey = null;
   let composePoint = null;
   let mode = 'default';
-  let stream = null;
-  let reconnectTimer = null;
+  let pollTimer = null;
+  let pollBusy = false;
   let clockOffset = 0;
   let posting = false;
   let toastTimer = null;
@@ -633,6 +633,21 @@
     const seconds = Math.floor(Date.parse(date) / 1000);
     if (!Number.isFinite(seconds)) return;
     clockOffset = Math.min(86400, Math.max(-86400, seconds - Math.floor(Date.now() / 1000)));
+  };
+
+  const queryEvents = async (query) => {
+    const res = await fetch(RELAY + '/api/v1/events/query', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(query),
+      cache: 'no-store'
+    });
+    syncClock(res);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error((body && (body.code || body.error)) || ('HTTP ' + res.status));
+    }
+    return res.json();
   };
 
   const loadIdentity = () => {
@@ -691,7 +706,7 @@
   const setConnection = (state) => {
     const label = state === 'live' ? 'live' : state === 'connecting' ? 'connecting' : 'offline';
     chipDot.dataset.state = state;
-    chip.title = 'Event stream: ' + label;
+    chip.title = 'Relay polling: ' + label;
     chip.setAttribute('aria-label', 'Relay connection: ' + label);
   };
 
@@ -952,16 +967,24 @@
   };
 
   /* ---------- relay ---------- */
-  const loadHistory = async () => {
+  const loadHistory = async (maxEvents = HISTORY_LIMIT) => {
     setConnection('connecting');
     try {
-      const res = await fetch(RELAY + '/api/v1/events?collection=' + encodeURIComponent(COLLECTION) + '&limit=' + HISTORY_LIMIT, { cache: 'no-store' });
-      syncClock(res);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const body = await res.json();
-      const events = Array.isArray(body.events) ? body.events : [];
+      const collected = [];
+      const maxPages = Math.ceil(maxEvents / 100);
+      let cursor = null;
+      let pages = 0;
+      do {
+        const query = { collection: COLLECTION, limit: 100 };
+        if (cursor) query.cursor = cursor;
+        const body = await queryEvents(query);
+        if (Array.isArray(body.events)) collected.push(...body.events);
+        cursor = body.next_cursor || null;
+        pages += 1;
+      } while (cursor && pages < maxPages);
+
       if (!loadedOnce) comments.clear();
-      events.forEach((event) => {
+      collected.forEach((event) => {
         const comment = parseComment(event);
         if (comment) comments.set(comment.id, comment);
       });
@@ -975,35 +998,48 @@
     }
   };
 
-  const connect = () => {
-    if (stream) { stream.close(); stream = null; }
-    clearTimeout(reconnectTimer);
-    try {
-      stream = new EventSource(RELAY + '/api/v1/events/stream?collection=' + encodeURIComponent(COLLECTION));
-    } catch {
-      setConnection('offline');
-      reconnectTimer = setTimeout(connect, 5000);
+  const poll = async () => {
+    clearTimeout(pollTimer);
+    if (document.hidden) {
+      pollTimer = setTimeout(poll, 5000);
       return;
     }
-    stream.onopen = () => setConnection('live');
-    stream.onmessage = (event) => {
-      try {
-        const comment = parseComment(JSON.parse(event.data));
-        if (!comment) return;
-        if (comments.has(comment.id)) return;
+    if (pollBusy) {
+      pollTimer = setTimeout(poll, 1000);
+      return;
+    }
+    pollBusy = true;
+    let added = false;
+    try {
+      const collected = [];
+      let cursor = null;
+      let pages = 0;
+      let unseen = true;
+      do {
+        const query = { collection: COLLECTION, limit: 100 };
+        if (cursor) query.cursor = cursor;
+        const body = await queryEvents(query);
+        const events = Array.isArray(body.events) ? body.events : [];
+        collected.push(...events);
+        unseen = events.some((event) => !comments.has(String(event && event.id)));
+        cursor = unseen ? (body.next_cursor || null) : null;
+        pages += 1;
+      } while (cursor && pages < 5);
+
+      for (const event of collected) {
+        const comment = parseComment(event);
+        if (!comment || comments.has(comment.id)) continue;
         comments.set(comment.id, comment);
-        rebuild();
-      } catch {}
-    };
-    stream.onerror = () => {
-      if (!stream) return;
-      setConnection('offline');
-      if (stream.readyState === EventSource.CLOSED) {
-        stream = null;
-        clearTimeout(reconnectTimer);
-        reconnectTimer = setTimeout(connect, 5000);
+        added = true;
       }
-    };
+      if (added) rebuild();
+      setConnection('live');
+    } catch {
+      setConnection('offline');
+    } finally {
+      pollBusy = false;
+      pollTimer = setTimeout(poll, 5000);
+    }
   };
 
   const postComment = async (text, lat, lon) => {
@@ -1016,6 +1052,7 @@
       expires_at: at + TTL_SECONDS,
       owner: identity.owner,
       labels: ['comment'],
+      blobs: [],
       data: { v: 1, lat: Number(lat.toFixed(4)), lon: Number(lon.toFixed(4)), text }
     };
     const bytes = new TextEncoder().encode(canonical(fields));
@@ -1172,8 +1209,8 @@
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
-    loadHistory();
-    if (!stream || stream.readyState === EventSource.CLOSED) connect();
+    loadHistory(100);
+    poll();
   });
 
   setInterval(() => {
@@ -1186,7 +1223,7 @@
   updateCount();
   applyTransform();
   setConnection('connecting');
-  loadHistory().then(connect);
+  loadHistory().then(poll);
 })();
 </script>
 </body>
