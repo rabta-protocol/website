@@ -1,6 +1,6 @@
 # Rabta
 
-> Self-hosted backend for signed events, realtime streaming, and content-addressed file uploads. One Rust binary, one SQLite file, one Docker container. No accounts, no database server, no cloud.
+> Self-hosted backend for signed events, live query polling, and content-addressed file uploads. One Rust binary, one SQLite file, one Docker container. No accounts, no database server, no cloud.
 
 ## Docs
 
@@ -22,10 +22,10 @@ curl -s http://localhost:3232/api/v1/health
 - Auth: none. Ed25519 signed events. Put behind TLS + authenticated reverse proxy for public use.
 - Events: canonical JSON sorted keys, SHA-256 id, Ed25519 sig over digest
 - Event limits: 100KB, TTL 60s to 10 years, 10 labels, collection ^[a-z0-9/_-]{1,32}$
-- Blobs: PUT /api/v1/blobs returns SHA-256. Unclaimed expire 48h. Claimed via `bin` array (1-8 hashes) expire with latest live event. Single blob max 1% of STORAGE_LIMIT.
+- Blobs: PUT /api/v1/blobs returns SHA-256. Unclaimed expire after 6h. An event claims 0-8 hashes through its `blobs` array and extends their life to its own expiry.
 - Storage: STORAGE_LIMIT default 20GB covers envelopes + claimed blobs. Admission 90%, eviction target 85%. Events evicted first, largest footprint first. WHITELIST_PUBKEYS pins up to 64 keys from eviction.
-- Streaming: GET /api/v1/events/stream SSE, Last-Event-ID resume, 15s keepalive, cap 256.
-- API: POST /api/v1/events, GET /api/v1/events, GET /api/v1/events/{id}, GET /api/v1/events/stream, PUT /api/v1/blobs, GET /api/v1/blobs/{hash}
+- Delivery: poll POST /api/v1/events/query. Filters for collection, labels and owner, newest first, opaque `next_cursor`, 1-100 rows per page.
+- API: POST /api/v1/events, POST /api/v1/events/query, GET /api/v1/events/{id}, GET /api/v1/events/{id}/size, PUT /api/v1/blobs, GET /api/v1/blobs/{hash}, GET /api/v1/health, GET /api/v1/stats, GET /api/v1/node
 - OpenAPI: GET /api/v1/openapi.json. Route index: GET /
 - Not Nostr: no NIPs, no WebSocket, no kinds/tags/replaceable events.
 
