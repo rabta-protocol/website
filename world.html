@@ -123,8 +123,17 @@
     align-items: start; margin-top: 2.25rem;
   }
   @media (min-width: 62rem) {
-    .workspace { grid-template-columns: minmax(0, 1fr) 21rem; }
-    .panel { position: sticky; top: 1rem; }
+    .panel { position: relative; padding: 1.35rem 1.5rem; }
+    .panel-view:not([hidden]) {
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+      gap: 2.25rem; align-items: start;
+    }
+    .panel-view .icon-btn { position: absolute; top: 1.2rem; right: 1.4rem; }
+    #view-compose:not([hidden]), #view-place:not([hidden]) { padding-top: 2.1rem; }
+    .panel-intro { min-width: 0; }
+    .panel-view .latest { margin-top: 0; padding-top: 0; border-top: 0; }
+    .panel-view .compose-form { margin-top: 0; }
+    .panel-view .place-list { margin-top: 0; max-height: 22rem; }
   }
 
   .map-card {
@@ -217,6 +226,7 @@
     text-transform: uppercase; color: var(--subtle);
   }
   .map-foot span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #map-count { flex: none; }
   .hint-narrow { display: none; }
   @media (max-width: 40rem) {
     .hint-wide { display: none; }
@@ -371,6 +381,7 @@
     .map-coords { font-size: .55rem; }
     .zoom-btn { min-width: 1.9rem; height: 1.9rem; font-size: .75rem; }
     .zoom-level { min-width: 2rem; font-size: .55rem; }
+    .map-foot { gap: .5rem; padding: .6rem .7rem; }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -446,9 +457,11 @@
 
     <aside class="panel" aria-label="Comment panel">
       <div class="panel-view" id="view-default">
-        <p class="panel-eyebrow">new comment</p>
-        <h2>Pick a point.</h2>
-        <p class="panel-copy">Click anywhere on the map to drop a pin, then write your comment. It is signed in your browser and published straight to the relay.</p>
+        <div class="panel-intro">
+          <p class="panel-eyebrow">new comment</p>
+          <h2>Pick a point.</h2>
+          <p class="panel-copy">Click anywhere on the map to drop a pin, then write your comment. It is signed in your browser and published straight to the relay.</p>
+        </div>
         <div class="latest">
           <div class="latest-head"><h3>Latest comments</h3><span>live</span></div>
           <ol class="note-list" id="latest-list" aria-live="polite"></ol>
@@ -457,16 +470,18 @@
       </div>
 
       <div class="panel-view" id="view-compose" hidden>
-        <div class="panel-head">
-          <div>
-            <p class="panel-eyebrow">new comment</p>
-            <h2 class="coords" id="compose-coords">—</h2>
+        <div class="panel-intro">
+          <div class="panel-head">
+            <div>
+              <p class="panel-eyebrow">new comment</p>
+              <h2 class="coords" id="compose-coords">—</h2>
+            </div>
+            <button class="icon-btn" id="compose-close" type="button" title="Cancel" aria-label="Cancel comment">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
           </div>
-          <button class="icon-btn" id="compose-close" type="button" title="Cancel" aria-label="Cancel comment">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
-          </button>
+          <p class="panel-copy">What happened here?</p>
         </div>
-        <p class="panel-copy">What happened here?</p>
         <form class="compose-form" id="note-form">
           <label class="sr-only" for="note-text">Your comment</label>
           <textarea class="note-input" id="note-text" name="comment" maxlength="280" placeholder="Write a comment…" required></textarea>
@@ -480,18 +495,22 @@
       </div>
 
       <div class="panel-view" id="view-place" hidden>
-        <div class="panel-head">
-          <div>
-            <p class="panel-eyebrow">comments here</p>
-            <h2 class="coords" id="place-coords">—</h2>
+        <div class="panel-intro">
+          <div class="panel-head">
+            <div>
+              <p class="panel-eyebrow">comments here</p>
+              <h2 class="coords" id="place-coords">—</h2>
+            </div>
+            <button class="icon-btn" id="place-close" type="button" title="Close" aria-label="Close place">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
           </div>
-          <button class="icon-btn" id="place-close" type="button" title="Close" aria-label="Close place">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
-          </button>
+          <p class="place-meta" id="place-meta">—</p>
         </div>
-        <p class="place-meta" id="place-meta">—</p>
-        <ol class="place-list" id="place-list" aria-live="polite"></ol>
-        <button class="send write-again" id="write-here" type="button">Write here</button>
+        <div class="place-body">
+          <ol class="place-list" id="place-list" aria-live="polite"></ol>
+          <button class="send write-again" id="write-here" type="button">Write here</button>
+        </div>
       </div>
     </aside>
   </section>
@@ -557,6 +576,7 @@
   const noteStatus = $('note-status');
   const latestList = $('latest-list');
   const latestEmpty = $('latest-empty');
+  const panelEl = document.querySelector('.panel');
   const toastEl = $('toast');
 
   const comments = new Map();
@@ -886,12 +906,23 @@
     setPanel('default');
   };
 
+  const revealPanel = () => {
+    if (!panelEl) return;
+    const rect = panelEl.getBoundingClientRect();
+    const viewHeight = window.innerHeight || document.documentElement.clientHeight;
+    const visible = Math.max(0, Math.min(rect.bottom, viewHeight) - Math.max(rect.top, 0));
+    if (visible < Math.min(rect.height, viewHeight) * 0.5) {
+      panelEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const selectCluster = (key) => {
     const group = clusters.get(key);
     if (!group) return;
     selectedKey = key;
     setPanel('place');
     renderPlace();
+    revealPanel();
   };
 
   const startCompose = (lat, lon, text) => {
@@ -908,6 +939,7 @@
     if (window.matchMedia('(pointer: fine)').matches) {
       noteText.focus({ preventScroll: true });
     }
+    revealPanel();
   };
 
   const rebuild = () => {
