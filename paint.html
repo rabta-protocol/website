@@ -255,7 +255,7 @@
               <p class="mx-auto mt-2 max-w-xs text-[11px] leading-relaxed text-white/35 sm:text-xs">
                 <template v-if="loadingHistory">Loading signed strokes from {{ relayHost }}…</template>
                 <template v-else-if="historyError">Could not read the history. Live strokes may still arrive.</template>
-                <template v-else>Drag to paint. Every stroke is signed with your local Ed25519 key and streamed to everyone here in real time.</template>
+                <template v-else>Drag to paint. Every stroke is signed with your local Ed25519 key and synced to everyone here in real time.</template>
               </p>
               <div v-if="loadingHistory" class="mx-auto mt-5 h-0.5 w-24 overflow-hidden rounded-full bg-white/10">
                 <span class="loader-bar block h-full w-1/2 rounded-full bg-violet-300/80"></span>
@@ -465,7 +465,7 @@
               </div>
               <div class="flex gap-2.5">
                 <span class="mt-1 font-mono text-[9px] text-violet-300/60">03</span>
-                <p class="text-[10px] leading-relaxed text-white/40"><span class="text-white/65">Stream it.</span> Every visitor receives new strokes over Server-Sent Events, with automatic resume after a reconnect.</p>
+                <p class="text-[10px] leading-relaxed text-white/40"><span class="text-white/65">Sync it.</span> Every visitor polls for new strokes and catches up automatically after a reconnect.</p>
               </div>
             </div>
 
