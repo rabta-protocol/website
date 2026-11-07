@@ -132,29 +132,53 @@
     background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
   }
   .map-toolbar {
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-    padding: .7rem 1rem; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    padding: .45rem .55rem .45rem 1rem; border-bottom: 1px solid var(--line);
     font-family: var(--mono); font-size: .5938rem; letter-spacing: .1em;
     text-transform: uppercase; color: var(--subtle);
   }
-  .map-toolbar span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .map-coords { color: var(--ink); font-variant-numeric: tabular-nums; }
-  .map-scroll { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: rgba(0, 0, 0, .16) transparent; }
-  .map-scroll::-webkit-scrollbar { height: 6px; }
-  .map-scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .16); border-radius: 999px; }
-  .map-wrap {
-    position: relative; aspect-ratio: 2 / 1; min-width: 100%;
-    cursor: crosshair; touch-action: manipulation; background: #fff;
+  .map-toolbar-hint { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .map-toolbar-right { display: flex; align-items: center; gap: .65rem; min-width: 0; margin-left: auto; }
+  .map-coords { color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .map-viewport {
+    position: relative; aspect-ratio: 2 / 1; overflow: hidden;
+    cursor: crosshair; touch-action: pan-y; background: #fff;
   }
-  @media (max-width: 48rem) { .map-wrap { min-width: 36rem; } }
-  .map-wrap img {
+  .map-viewport.is-zoomed { cursor: grab; touch-action: none; }
+  .map-viewport.is-dragging { cursor: grabbing; }
+  .map-plane {
+    position: absolute; inset: 0; transform-origin: 0 0;
+    will-change: transform;
+  }
+  .map-plane img {
     display: block; width: 100%; height: 100%;
     pointer-events: none; user-select: none; -webkit-user-drag: none;
   }
   .markers { position: absolute; inset: 0; pointer-events: none; }
 
+  .map-controls {
+    display: flex; align-items: center; gap: .1rem; padding: .15rem; flex: none;
+    border: 1px solid var(--line); border-radius: .5rem; background: #fff;
+  }
+  .zoom-btn {
+    display: grid; place-items: center; min-width: 1.5rem; height: 1.5rem;
+    padding: 0 .3rem; border: 0; border-radius: .32rem;
+    background: transparent; color: var(--muted); cursor: pointer;
+    font-family: var(--mono); font-size: .75rem; line-height: 1;
+    transition: background .15s, color .15s;
+  }
+  .zoom-btn:hover:not(:disabled) { background: #f4f4f5; color: var(--ink); }
+  .zoom-btn:disabled { opacity: .28; cursor: default; }
+  .zoom-level {
+    min-width: 2rem; text-align: center;
+    font-family: var(--mono); font-size: .5938rem; color: var(--subtle);
+    font-variant-numeric: tabular-nums;
+  }
+  .zoom-fit { font-size: .5625rem; letter-spacing: .08em; text-transform: uppercase; }
+  .zoom-divider { width: 1px; height: .9rem; margin: 0 .1rem; background: var(--line); }
+
   .pin {
-    position: absolute; transform: translate(-50%, -50%);
+    position: absolute; transform: translate(-50%, -50%) scale(var(--inv, 1));
     display: grid; place-items: center; width: 1.05rem; height: 1.05rem; padding: 0;
     border: 2px solid #fff; border-radius: 999px;
     background: var(--ink); color: #fff; cursor: pointer; pointer-events: auto;
@@ -163,7 +187,7 @@
     transition: transform .16s cubic-bezier(.2, .8, .2, 1), background .16s, box-shadow .16s;
   }
   .pin.has-count { width: auto; min-width: 1.3rem; height: 1.3rem; padding: 0 .3rem; }
-  .pin:hover { transform: translate(-50%, -50%) scale(1.16); z-index: 3; }
+  .pin:hover { transform: translate(-50%, -50%) scale(var(--inv, 1)) scale(1.16); z-index: 3; }
   .pin.is-active {
     background: var(--live);
     box-shadow: 0 0 0 2px rgba(16, 185, 129, .28), 0 3px 10px rgba(16, 185, 129, .38);
@@ -172,7 +196,7 @@
   .pin-label:empty { display: none; }
 
   .pending {
-    position: absolute; transform: translate(-50%, -50%);
+    position: absolute; transform: translate(-50%, -50%) scale(var(--inv, 1));
     width: 1.6rem; height: 1.6rem; border: 2px solid rgba(14, 14, 16, .6);
     border-radius: 50%; pointer-events: none; z-index: 4;
   }
@@ -193,6 +217,11 @@
     text-transform: uppercase; color: var(--subtle);
   }
   .map-foot span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hint-narrow { display: none; }
+  @media (max-width: 40rem) {
+    .hint-wide { display: none; }
+    .hint-narrow { display: inline; }
+  }
 
   /* panel */
   .panel {
@@ -336,6 +365,12 @@
     .intro { gap: 1.5rem; }
     .counters { gap: 1.5rem; }
     .counter strong { font-size: 1.5rem; }
+    .map-toolbar { gap: .4rem; padding: .4rem .45rem .4rem .7rem; }
+    .map-toolbar-hint { display: none; }
+    .map-toolbar-right { gap: .4rem; }
+    .map-coords { font-size: .55rem; }
+    .zoom-btn { min-width: 1.9rem; height: 1.9rem; font-size: .75rem; }
+    .zoom-level { min-width: 2rem; font-size: .55rem; }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -384,18 +419,27 @@
   <section class="workspace" aria-label="World map and comment composer">
     <div class="map-card">
       <div class="map-toolbar">
-        <span>equirectangular · click to place</span>
-        <span class="map-coords" id="map-coords">—</span>
+        <span class="map-toolbar-hint">equirectangular · click to place</span>
+        <div class="map-toolbar-right">
+          <span class="map-coords" id="map-coords">—</span>
+          <div class="map-controls" role="group" aria-label="Map zoom">
+            <button class="zoom-btn" id="zoom-out" type="button" title="Zoom out" aria-label="Zoom out">−</button>
+            <span class="zoom-level" id="zoom-level">1.0×</span>
+            <button class="zoom-btn" id="zoom-in" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+            <span class="zoom-divider" aria-hidden="true"></span>
+            <button class="zoom-btn zoom-fit" id="zoom-reset" type="button" title="Reset zoom" aria-label="Reset zoom">Fit</button>
+          </div>
+        </div>
       </div>
-      <div class="map-scroll">
-        <div class="map-wrap" id="map-wrap" role="group" aria-label="World map. Click anywhere to leave a comment.">
+      <div class="map-viewport" id="map-viewport" role="group" aria-label="World map. Click anywhere to leave a comment.">
+        <div class="map-plane" id="map-plane">
           <img src="world-map.svg" alt="World map, equirectangular projection" width="1000" height="500" />
           <div class="markers" id="markers"></div>
           <div class="pending" id="pending" hidden aria-hidden="true"></div>
         </div>
       </div>
       <div class="map-foot">
-        <span>click a pin to read · click the map to write</span>
+        <span class="map-foot-hint"><span class="hint-wide">click a pin to read · scroll to zoom · drag to pan</span><span class="hint-narrow">tap a pin · + / − to zoom</span></span>
         <span id="map-count">0 comments · 0 places</span>
       </div>
     </div>
@@ -477,13 +521,20 @@
   const HISTORY_LIMIT = 500;
   const CLUSTER_DEGREES = 2;
   const STORE_IDENTITY = 'rabta.canvas.identity.v1';
+  const MIN_ZOOM = 1;
+  const MAX_ZOOM = 8;
 
   const $ = (id) => document.getElementById(id);
-  const mapWrap = $('map-wrap');
+  const mapViewport = $('map-viewport');
+  const mapPlane = $('map-plane');
   const markersEl = $('markers');
   const pendingEl = $('pending');
   const mapCoords = $('map-coords');
   const mapCount = $('map-count');
+  const zoomInBtn = $('zoom-in');
+  const zoomOutBtn = $('zoom-out');
+  const zoomResetBtn = $('zoom-reset');
+  const zoomLevel = $('zoom-level');
   const chipDot = $('chip-dot');
   const chip = $('relay-chip');
   const statComments = $('stat-comments');
@@ -519,6 +570,12 @@
   let posting = false;
   let toastTimer = null;
   let loadedOnce = false;
+  let zoom = 1;
+  let panX = 0;
+  let panY = 0;
+  let drag = null;
+  let suppressClick = false;
+  let suppressTimer = null;
 
   /* ---------- helpers ---------- */
   const readText = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
@@ -633,6 +690,55 @@
 
   const updateCount = () => {
     noteCount.textContent = Array.from(noteText.value).length + '/' + MAX_TEXT;
+  };
+
+  /* ---------- zoom & pan ---------- */
+  const clampPan = () => {
+    const width = mapViewport.clientWidth;
+    const height = mapViewport.clientHeight;
+    if (zoom <= MIN_ZOOM) {
+      panX = 0;
+      panY = 0;
+      return;
+    }
+    panX = Math.min(0, Math.max(-width * (zoom - 1), panX));
+    panY = Math.min(0, Math.max(-height * (zoom - 1), panY));
+  };
+
+  const applyTransform = () => {
+    mapPlane.style.transform = 'translate(' + panX + 'px, ' + panY + 'px) scale(' + zoom + ')';
+    mapPlane.style.setProperty('--inv', String(1 / zoom));
+    mapViewport.classList.toggle('is-zoomed', zoom > MIN_ZOOM + 0.001);
+    zoomLevel.textContent = zoom.toFixed(1) + '×';
+    zoomInBtn.disabled = zoom >= MAX_ZOOM - 0.001;
+    zoomOutBtn.disabled = zoom <= MIN_ZOOM + 0.001;
+    zoomResetBtn.disabled = zoom <= MIN_ZOOM + 0.001;
+  };
+
+  const setZoom = (next, focusX, focusY) => {
+    const clamped = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
+    if (Math.abs(clamped - zoom) < 0.0001) return;
+    const width = mapViewport.clientWidth;
+    const height = mapViewport.clientHeight;
+    const fx = Number.isFinite(focusX) ? focusX : width / 2;
+    const fy = Number.isFinite(focusY) ? focusY : height / 2;
+    panX = fx - (fx - panX) * (clamped / zoom);
+    panY = fy - (fy - panY) * (clamped / zoom);
+    zoom = clamped;
+    clampPan();
+    applyTransform();
+  };
+
+  const mapPoint = (event) => {
+    const rect = mapViewport.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    const px = event.clientX - rect.left;
+    const py = event.clientY - rect.top;
+    if (px < 0 || px > rect.width || py < 0 || py > rect.height) return null;
+    const x = (px - panX) / zoom / rect.width;
+    const y = (py - panY) / zoom / rect.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return null;
+    return { px, py, x, y, lat: 90 - y * 180, lon: x * 360 - 180 };
   };
 
   /* ---------- data ---------- */
@@ -899,25 +1005,82 @@
   };
 
   /* ---------- events ---------- */
-  mapWrap.addEventListener('click', (event) => {
+  mapViewport.addEventListener('click', (event) => {
     if (event.target.closest('.pin')) return;
-    const rect = mapWrap.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
-    if (x < 0 || x > 1 || y < 0 || y > 1) return;
-    startCompose(90 - y * 180, x * 360 - 180);
+    if (suppressClick) {
+      suppressClick = false;
+      clearTimeout(suppressTimer);
+      return;
+    }
+    const point = mapPoint(event);
+    if (!point) return;
+    startCompose(point.lat, point.lon);
   });
 
-  mapWrap.addEventListener('mousemove', (event) => {
-    const rect = mapWrap.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
-    if (x < 0 || x > 1 || y < 0 || y > 1) return;
-    mapCoords.textContent = formatCoords(90 - y * 180, x * 360 - 180);
+  mapViewport.addEventListener('mousemove', (event) => {
+    const point = mapPoint(event);
+    if (!point) return;
+    mapCoords.textContent = formatCoords(point.lat, point.lon);
   });
-  mapWrap.addEventListener('mouseleave', () => { mapCoords.textContent = '—'; });
+  mapViewport.addEventListener('mouseleave', () => { mapCoords.textContent = '—'; });
+
+  mapViewport.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    const rect = mapViewport.getBoundingClientRect();
+    const factor = Math.exp(-event.deltaY * 0.002);
+    setZoom(zoom * factor, event.clientX - rect.left, event.clientY - rect.top);
+  }, { passive: false });
+
+  const endDrag = (event) => {
+    if (!drag || event.pointerId !== drag.id) return;
+    const moved = drag.moved;
+    try { mapViewport.releasePointerCapture(event.pointerId); } catch {}
+    mapViewport.classList.remove('is-dragging');
+    drag = null;
+    if (moved) {
+      suppressClick = true;
+      clearTimeout(suppressTimer);
+      suppressTimer = setTimeout(() => { suppressClick = false; }, 300);
+    }
+  };
+
+  mapViewport.addEventListener('pointerdown', (event) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (zoom <= MIN_ZOOM + 0.001) return;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, panX, panY, moved: false };
+    mapViewport.classList.add('is-dragging');
+    try { mapViewport.setPointerCapture(event.pointerId); } catch {}
+  });
+
+  mapViewport.addEventListener('pointermove', (event) => {
+    if (!drag || event.pointerId !== drag.id) return;
+    const dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) > 4) drag.moved = true;
+    if (!drag.moved) return;
+    panX = drag.panX + dx;
+    panY = drag.panY + dy;
+    clampPan();
+    applyTransform();
+  });
+
+  mapViewport.addEventListener('pointerup', endDrag);
+  mapViewport.addEventListener('pointercancel', endDrag);
+
+  zoomInBtn.addEventListener('click', () => setZoom(zoom * 1.5));
+  zoomOutBtn.addEventListener('click', () => setZoom(zoom / 1.5));
+  zoomResetBtn.addEventListener('click', () => {
+    zoom = 1;
+    panX = 0;
+    panY = 0;
+    applyTransform();
+  });
+
+  if (window.ResizeObserver) {
+    new ResizeObserver(() => { clampPan(); applyTransform(); }).observe(mapViewport);
+  } else {
+    window.addEventListener('resize', () => { clampPan(); applyTransform(); });
+  }
 
   noteText.addEventListener('input', updateCount);
   composeClose.addEventListener('click', showDefault);
@@ -989,6 +1152,7 @@
   }, 15000);
 
   updateCount();
+  applyTransform();
   setConnection('connecting');
   loadHistory().then(connect);
 })();
