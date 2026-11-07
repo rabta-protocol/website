@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#ffffff" />
+<title>Rabta Share — encrypted file drop</title>
+<meta name="description" content="Share up to 8 files and a note as one encrypted Rabta event. The decryption key lives only in the link fragment." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://rabta.space" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono: ['"Geist Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
+<style>
+  [v-cloak] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    background: #ffffff;
+    color: #171717;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: rgba(0, 0, 0, .1); color: #171717; }
+  .page-bg {
+    background: radial-gradient(900px 360px at 50% -180px, #fafafa, transparent 70%), #ffffff;
+  }
+  .dropzone {
+    border: 1px dashed #d4d4d4;
+    background: #fafafa;
+    transition: border-color .15s, background .15s;
+  }
+  .dropzone:hover, .dropzone.is-over {
+    border-color: #171717;
+    background: #ffffff;
+  }
+  .scroll { scrollbar-width: thin; scrollbar-color: rgba(0, 0, 0, .16) transparent; }
+  .scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .16); border-radius: 999px; }
+  .fade-enter-active, .fade-leave-active { transition: opacity .18s ease; }
+  .fade-enter-from, .fade-leave-to { opacity: 0; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body class="h-full font-sans antialiased">
+<div id="app" v-cloak class="page-bg flex min-h-[100dvh] flex-col">
+
+  <header class="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-[#eaeaea] bg-white px-4 sm:px-6">
+    <a href="index.html" class="flex min-w-0 items-center gap-3">
+      <div class="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[#171717] text-white">
+        <span class="font-mono text-[14px] font-semibold tracking-tighter">R</span>
+      </div>
+      <div class="min-w-0">
+        <div class="flex items-baseline gap-2 leading-none">
+          <span class="text-[13px] font-semibold tracking-[.18em]">RABTA</span>
+          <span class="text-[13px] font-medium tracking-[.18em] text-[#a1a1a1]">SHARE</span>
+        </div>
+        <div class="mt-1.5 hidden items-center gap-1.5 text-[9px] uppercase tracking-[.18em] text-[#a1a1a1] sm:flex">
+          <span>aes-256-gcm</span><span class="text-[#d4d4d4]">/</span><span>ed25519</span><span class="text-[#d4d4d4]">/</span><span>7d ttl</span>
+        </div>
+      </div>
+    </a>
+    <div class="flex items-center gap-2">
+      <span class="hidden items-center gap-2 rounded-full border border-[#eaeaea] bg-white px-3 py-1.5 text-[9px] uppercase tracking-[.16em] text-[#737373] sm:flex">
+        <span class="h-1 w-1 rounded-full" :style="{ backgroundColor: mode === 'view' ? '#171717' : '#10b981' }"></span>
+        <span class="max-w-[12rem] truncate">{{ relayHost }}</span>
+      </span>
+      <a href="chat.html" class="flex items-center gap-1.5 rounded-full border border-[#eaeaea] bg-white px-3 py-2 text-[9px] uppercase tracking-[.16em] text-[#737373] transition hover:bg-[#fafafa] hover:text-[#171717]">Chat</a>
+      <a href="paint.html" class="flex items-center gap-1.5 rounded-full border border-[#eaeaea] bg-white px-3 py-2 text-[9px] uppercase tracking-[.16em] text-[#737373] transition hover:bg-[#fafafa] hover:text-[#171717]">Canvas</a>
+    </div>
+  </header>
+
+  <main class="flex flex-1 justify-center px-3 py-8 sm:px-6 sm:py-12">
+    <div class="w-full max-w-2xl">
+
+      <transition name="fade" mode="out-in">
+        <section v-if="mode === 'compose'" key="compose">
+          <h1 class="text-2xl font-semibold tracking-[-.02em]">Share files</h1>
+          <p class="mt-1 text-sm text-[#737373]">Up to 8 files and a note, encrypted in your browser and published as one signed Rabta event. The key stays in the link.</p>
+
+          <div class="mt-6 rounded-xl border border-[#eaeaea] bg-white shadow-[0_1px_2px_rgba(0,0,0,.04)]">
+            <div class="p-4 sm:p-5">
+              <label for="note" class="text-[10px] font-medium uppercase tracking-[.16em] text-[#a1a1a1]">Note</label>
+              <textarea
+                id="note"
+                v-model="note"
+                rows="3"
+                maxlength="4000"
+                placeholder="Add a message for whoever opens this link…"
+                class="mt-2 block w-full resize-none rounded-lg border border-[#eaeaea] bg-white px-3 py-2.5 text-[13px] leading-relaxed text-[#171717] outline-none transition placeholder:text-[#a1a1a1] focus:border-[#171717]"
+                @input="error = ''"
+              ></textarea>
+              <div class="mt-1.5 flex justify-end">
+                <span class="font-mono text-[9px] text-[#a1a1a1]">{{ note.length }} / 4000</span>
+              </div>
+            </div>
+
+            <div class="border-t border-[#eaeaea] p-4 sm:p-5">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-[10px] font-medium uppercase tracking-[.16em] text-[#a1a1a1]">Files</span>
+                <span class="font-mono text-[9px] text-[#a1a1a1]">{{ files.length }} / 8</span>
+              </div>
+
+              <div
+                class="dropzone mt-2 flex flex-col items-center justify-center rounded-lg px-4 py-8 text-center"
+                :class="{ 'is-over': dragOver }"
+                @dragover.prevent="dragOver = true"
+                @dragleave.prevent="dragOver = false"
+                @drop.prevent="onDrop"
+              >
+                <svg class="h-5 w-5 text-[#a1a1a1]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                <p class="mt-3 text-[13px] text-[#171717]">Drop files or a folder here</p>
+                <p class="mt-0.5 text-[11px] text-[#a1a1a1]">Encrypted before upload. Nothing is readable by the relay.</p>
+                <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  <button type="button" @click="$refs.fileInput.click()" class="rounded-md border border-[#eaeaea] bg-white px-3 py-1.5 text-[11px] font-medium text-[#171717] transition hover:bg-[#fafafa]">Choose files</button>
+                  <button type="button" @click="$refs.folderInput.click()" class="rounded-md border border-[#eaeaea] bg-white px-3 py-1.5 text-[11px] font-medium text-[#171717] transition hover:bg-[#fafafa]">Choose folder</button>
+                </div>
+                <input ref="fileInput" type="file" multiple class="hidden" @change="onPick($event, false)" />
+                <input ref="folderInput" type="file" webkitdirectory directory multiple class="hidden" @change="onPick($event, true)" />
+              </div>
+
+              <div v-if="files.length" class="mt-3 overflow-hidden rounded-lg border border-[#eaeaea]">
+                <div class="flex items-center justify-between border-b border-[#eaeaea] bg-[#fafafa] px-3 py-2">
+                  <span class="text-[10px] uppercase tracking-[.14em] text-[#a1a1a1]">{{ fmtBytes(totalSize) }} total</span>
+                  <button type="button" @click="clearFiles" class="text-[10px] uppercase tracking-[.14em] text-[#737373] transition hover:text-[#171717]">Clear all</button>
+                </div>
+                <ul class="scroll max-h-56 divide-y divide-[#f5f5f5] overflow-y-auto">
+                  <li v-for="(f, i) in files" :key="f.path + f.size + i" class="flex items-center gap-3 px-3 py-2.5">
+                    <span class="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-[#eaeaea] bg-[#fafafa] font-mono text-[8px] uppercase text-[#737373]">{{ ext(f.path) }}</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="truncate text-[12px] text-[#171717]" :title="f.path">{{ f.path }}</div>
+                      <div class="font-mono text-[9px] text-[#a1a1a1]">{{ fmtBytes(f.size) }}</div>
+                    </div>
+                    <button type="button" @click="files.splice(i, 1)" class="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#a1a1a1] transition hover:bg-[#f5f5f5] hover:text-[#171717]" aria-label="Remove file">
+                      <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="border-t border-[#eaeaea] bg-[#fafafa] px-4 py-4 sm:px-5">
+              <p v-if="error" class="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] leading-relaxed text-rose-700">{{ error }}</p>
+
+              <div v-if="busy" class="mb-3">
+                <div class="flex items-center justify-between text-[10px] uppercase tracking-[.14em] text-[#737373]">
+                  <span class="flex items-center gap-2">
+                    <svg class="spin h-3 w-3" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".2" stroke-width="3" /><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></svg>
+                    {{ progress.label }}
+                  </span>
+                  <span class="font-mono">{{ progress.done }} / {{ progress.total }}</span>
+                </div>
+                <div class="mt-2 h-0.5 w-full overflow-hidden rounded-full bg-[#eaeaea]">
+                  <span class="block h-full rounded-full bg-[#171717] transition-[width] duration-300" :style="{ width: progressWidth }"></span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <p class="text-[10px] leading-relaxed text-[#a1a1a1]">One event, max 8 blobs. Expires after 7 days.</p>
+                <button
+                  type="button"
+                  :disabled="busy || (!files.length && !note.trim())"
+                  @click="createShare"
+                  class="rounded-md px-4 py-2 text-[11px] font-medium uppercase tracking-[.14em] transition"
+                  :class="(busy || (!files.length && !note.trim())) ? 'cursor-not-allowed border border-[#eaeaea] bg-white text-[#d4d4d4]' : 'bg-[#171717] text-white hover:bg-[#383838]'"
+                >{{ busy ? 'Working…' : 'Create share link' }}</button>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="result" class="mt-4 rounded-xl border border-[#eaeaea] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,.04)] sm:p-5">
+            <div class="flex items-center gap-2">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              <h2 class="text-[13px] font-semibold">Share link ready</h2>
+            </div>
+            <p class="mt-1 text-[11px] text-[#737373]">Anyone with this link can decrypt and download. The key is in the fragment, so it never reaches the relay.</p>
+            <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+              <input :value="result.url" readonly class="min-w-0 flex-1 rounded-md border border-[#eaeaea] bg-[#fafafa] px-3 py-2 font-mono text-[10px] text-[#404040] outline-none" aria-label="Share link" @focus="$event.target.select()" />
+              <button type="button" @click="copyResult" class="shrink-0 rounded-md bg-[#171717] px-3 py-2 text-[10px] font-medium uppercase tracking-[.14em] text-white transition hover:bg-[#383838]">{{ copied ? 'Copied' : 'Copy link' }}</button>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-3 text-[10px]">
+              <a :href="result.url" class="text-[#171717] underline decoration-[#d4d4d4] underline-offset-2 hover:decoration-[#171717]">Open share</a>
+              <span class="text-[#d4d4d4]">·</span>
+              <button type="button" @click="resetAll" class="text-[#737373] transition hover:text-[#171717]">Start another</button>
+            </div>
+          </div>
+        </section>
+
+        <section v-else key="view">
+          <div v-if="viewLoading" class="flex min-h-[40vh] flex-col items-center justify-center text-center">
+            <div class="grid h-11 w-11 place-items-center rounded-lg border border-[#eaeaea] bg-[#fafafa] text-[#737373]">
+              <svg class="spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".2" stroke-width="3" /><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></svg>
+            </div>
+            <h1 class="mt-4 text-lg font-medium tracking-tight">Opening the share</h1>
+            <p class="mt-1.5 max-w-xs text-[11px] leading-relaxed text-[#737373]">Fetching the encrypted event and unlocking it with the key in your link.</p>
+          </div>
+
+          <div v-else-if="viewError" class="flex min-h-[40vh] flex-col items-center justify-center text-center">
+            <div class="grid h-11 w-11 place-items-center rounded-lg border border-rose-200 bg-rose-50 text-rose-600">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v5m0 3h.01M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </div>
+            <h1 class="mt-4 text-lg font-medium tracking-tight">Can't open this share</h1>
+            <p class="mt-1.5 max-w-sm text-[11px] leading-relaxed text-[#737373]">{{ viewError }}</p>
+            <a href="share.html" class="mt-5 rounded-md bg-[#171717] px-3.5 py-1.5 text-[10px] uppercase tracking-[.16em] text-white transition hover:bg-[#383838]">Create a share</a>
+          </div>
+
+          <div v-else>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h1 class="text-2xl font-semibold tracking-[-.02em]">Shared with you</h1>
+                <p class="mt-1 text-sm text-[#737373]">{{ manifest.files.length }} file{{ manifest.files.length === 1 ? '' : 's' }}{{ manifest.note ? ' and a note' : '' }} · expires {{ expiryLabel }}</p>
+              </div>
+              <button
+                v-if="manifest.files.length"
+                type="button"
+                @click="downloadAll"
+                :disabled="downloadingAll"
+                class="shrink-0 rounded-md px-3.5 py-2 text-[10px] font-medium uppercase tracking-[.14em] transition"
+                :class="downloadingAll ? 'border border-[#eaeaea] bg-white text-[#a1a1a1]' : 'bg-[#171717] text-white hover:bg-[#383838]'"
+              >{{ downloadingAll ? 'Downloading…' : 'Download all' }}</button>
+            </div>
+
+            <div v-if="manifest.note" class="mt-5 rounded-xl border border-[#eaeaea] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,.04)] sm:p-5">
+              <div class="text-[10px] uppercase tracking-[.16em] text-[#a1a1a1]">Note</div>
+              <p class="mt-2 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-[#171717]">{{ manifest.note }}</p>
+            </div>
+
+            <div v-if="manifest.files.length" class="mt-4 overflow-hidden rounded-xl border border-[#eaeaea] bg-white shadow-[0_1px_2px_rgba(0,0,0,.04)]">
+              <div class="flex items-center justify-between border-b border-[#eaeaea] bg-[#fafafa] px-4 py-2.5">
+                <span class="text-[10px] uppercase tracking-[.14em] text-[#a1a1a1]">Files</span>
+                <span class="font-mono text-[9px] text-[#a1a1a1]">{{ fmtBytes(totalManifestSize) }} encrypted</span>
+              </div>
+              <ul class="divide-y divide-[#f5f5f5]">
+                <li v-for="(f, i) in manifest.files" :key="f.hash + i" class="flex items-center gap-3 px-4 py-3">
+                  <span class="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-[#eaeaea] bg-[#fafafa] font-mono text-[8px] uppercase text-[#737373]">{{ ext(f.name) }}</span>
+                  <div class="min-w-0 flex-1">
+                    <div class="truncate text-[12px] text-[#171717]" :title="f.name">{{ f.name }}</div>
+                    <div class="font-mono text-[9px] text-[#a1a1a1]">{{ fmtBytes(f.size) }}</div>
+                  </div>
+                  <button type="button" @click="downloadFile(f)" :disabled="downloading[f.hash]" class="shrink-0 rounded-md border border-[#eaeaea] bg-white px-2.5 py-1.5 text-[10px] font-medium text-[#171717] transition hover:bg-[#fafafa] disabled:text-[#a1a1a1]">
+                    {{ downloading[f.hash] ? '…' : 'Download' }}
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <p v-if="downloadError" class="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] leading-relaxed text-rose-700">{{ downloadError }}</p>
+
+            <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#eaeaea] pt-4 text-[10px] text-[#a1a1a1]">
+              <span class="flex items-center gap-1.5">
+                <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke-linecap="round" /></svg>
+                Decrypted locally · key never left your link
+              </span>
+              <a href="share.html" class="text-[#171717] underline decoration-[#d4d4d4] underline-offset-2 hover:decoration-[#171717]">Share your own</a>
+            </div>
+          </div>
+        </section>
+      </transition>
+
+    </div>
+  </main>
+
+  <footer class="flex shrink-0 items-center justify-between gap-3 border-t border-[#eaeaea] px-4 py-4 text-[9px] uppercase tracking-[.14em] text-[#a1a1a1] sm:px-6">
+    <span>rabta share · one event · max 8 blobs</span>
+    <a href="https://rabta.space" target="_blank" rel="noreferrer" class="transition hover:text-[#171717]">rabta.space</a>
+  </footer>
+
+  <transition name="fade">
+    <div v-if="toast" class="fixed bottom-6 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-lg border border-[#eaeaea] bg-white px-3.5 py-2.5 text-[11px] leading-relaxed text-[#171717] shadow-[0_8px_30px_-12px_rgba(0,0,0,.18)]" role="status">{{ toast }}</div>
+  </transition>
+</div>
+
+<script>
+(() => {
+  const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+  const DEFAULT_RELAY = 'https://rabta.space';
+  const COLLECTION = 'share/rabta';
+  const TTL_SECONDS = 7 * 24 * 60 * 60;
+  const MAX_FILES = 8;
+  const MAX_NOTE = 4000;
+  const STORE_IDENTITY = 'rabta.canvas.identity.v1';
+
+  const readStore = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
+  const writeStore = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
+  const readJSON = (key) => { try { return JSON.parse(readStore(key) || 'null'); } catch { return null; } };
+
+  const bytesToHex = (bytes) => {
+    let out = '';
+    for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, '0');
+    return out;
+  };
+  const bytesToBase64 = (bytes) => {
+    let raw = '';
+    for (let i = 0; i < bytes.length; i++) raw += String.fromCharCode(bytes[i]);
+    return btoa(raw);
+  };
+  const base64ToBytes = (value) => {
+    const raw = atob(value);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  };
+  const b64u = (bytes) => bytesToBase64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const fromB64u = (value) => {
+    const padded = value.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((value.length + 3) % 4);
+    return base64ToBytes(padded);
+  };
+
+  const canonical = (value) => {
+    if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
+    if (value && typeof value === 'object') {
+      return '{' + Object.keys(value).sort().map((key) => JSON.stringify(key) + ':' + canonical(value[key])).join(',') + '}';
+    }
+    return JSON.stringify(value);
+  };
+
+  const normalizeRelay = (value) => {
+    if (typeof value !== 'string' || !value.trim()) return null;
+    let next = value.trim();
+    if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(next)) next = 'https://' + next;
+    try {
+      const url = new URL(next);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+      return url.origin;
+    } catch { return null; }
+  };
+
+  const fmtBytes = (n) => {
+    if (!Number.isFinite(n)) return '—';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let value = n;
+    let i = 0;
+    while (value >= 1024 && i < units.length - 1) { value /= 1024; i++; }
+    return (value < 10 ? value.toFixed(1) : Math.round(value)) + ' ' + units[i];
+  };
+
+  const ext = (name) => {
+    const base = String(name || '').split('/').pop();
+    const parts = base.split('.');
+    if (parts.length < 2) return 'file';
+    return parts.pop().slice(0, 4) || 'file';
+  };
+
+  const sanitizeName = (name) => String(name || 'file').split('/').pop().replace(/[\\:*?"<>|]/g, '_') || 'file';
+
+  const errorText = (code) => {
+    const map = {
+      too_large: 'A file is larger than this relay accepts in one blob.',
+      at_watermark: 'The relay is out of storage budget right now.',
+      busy: 'The relay is busy with other uploads. Try again in a moment.',
+      disk_full: 'The relay disk is full.',
+      empty_body: 'Empty files cannot be uploaded.',
+      bad_bin: 'Too many or duplicate blobs in one event.',
+      bad_sig: 'The relay rejected the event signature.',
+      bad_collection: 'This collection name is not accepted by the relay.',
+      timeout: 'An upload stalled and timed out.'
+    };
+    return map[code] || ('The relay refused the upload (' + code + ').');
+  };
+
+  function loadIdentity() {
+    try {
+      const saved = readJSON(STORE_IDENTITY);
+      if (saved && typeof saved.secret === 'string' && typeof saved.public === 'string') {
+        const secretKey = base64ToBytes(saved.secret);
+        const publicKey = base64ToBytes(saved.public);
+        if (secretKey.length === 64 && publicKey.length === 32) {
+          const publicHex = bytesToHex(publicKey);
+          return { secretKey, publicKey, publicHex, owner: 'ed25519:' + publicHex };
+        }
+      }
+    } catch {}
+    const pair = nacl.sign.keyPair();
+    writeStore(STORE_IDENTITY, JSON.stringify({ secret: bytesToBase64(pair.secretKey), public: bytesToBase64(pair.publicKey) }));
+    const publicHex = bytesToHex(pair.publicKey);
+    return { secretKey: pair.secretKey, publicKey: pair.publicKey, publicHex, owner: 'ed25519:' + publicHex };
+  }
+
+  function parseShare() {
+    const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const id = params.get('e') || '';
+    const key = params.get('k') || '';
+    const relay = normalizeRelay(params.get('r') || '') || DEFAULT_RELAY;
+    if (!/^[0-9a-f]{64}$/.test(id) || !key) return null;
+    let keyBytes;
+    try { keyBytes = fromB64u(key); } catch { return null; }
+    if (keyBytes.length !== 32) return null;
+    return { id, key: keyBytes, relay };
+  }
+
+  createApp({
+    setup() {
+      const share = parseShare();
+      const mode = ref(share ? 'view' : 'compose');
+      const relay = ref(share ? share.relay : (normalizeRelay(new URLSearchParams(location.search).get('relay') || '') || DEFAULT_RELAY));
+      const relayHost = computed(() => { try { return new URL(relay.value).host; } catch { return relay.value; } });
+
+      const note = ref('');
+      const files = ref([]);
+      const dragOver = ref(false);
+      const error = ref('');
+      const busy = ref(false);
+      const progress = reactive({ label: '', done: 0, total: 0 });
+      const result = ref(null);
+      const copied = ref(false);
+      const toast = ref('');
+      const identity = ref(null);
+
+      const totalSize = computed(() => files.value.reduce((sum, f) => sum + f.size, 0));
+      const progressWidth = computed(() => progress.total ? Math.round((progress.done / progress.total) * 100) + '%' : '0%');
+
+      const viewLoading = ref(mode.value === 'view');
+      const viewError = ref('');
+      const manifest = ref(null);
+      const downloading = reactive({});
+      const downloadingAll = ref(false);
+      const downloadError = ref('');
+      const expiry = ref(0);
+      const totalManifestSize = computed(() => (manifest.value ? manifest.value.files.reduce((sum, f) => sum + (f.size || 0), 0) : 0));
+      const expiryLabel = computed(() => {
+        if (!expiry.value) return 'in 7 days';
+        return new Date(expiry.value * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      });
+
+      const showToast = (message) => {
+        toast.value = message;
+        setTimeout(() => { if (toast.value === message) toast.value = ''; }, 3200);
+      };
+
+      const addFiles = (incoming) => {
+        error.value = '';
+        const room = MAX_FILES - files.value.length;
+        if (room <= 0) { error.value = 'A share holds at most 8 files.'; return; }
+        const seen = new Set(files.value.map((f) => f.path + ':' + f.size));
+        for (const item of incoming) {
+          if (files.value.length >= MAX_FILES) { error.value = 'Only the first 8 files were added.'; break; }
+          const key = item.path + ':' + item.size;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          files.value.push(item);
+        }
+      };
+
+      const onPick = (event, folder) => {
+        const picked = Array.from(event.target.files || []).map((file) => ({
+          file,
+          path: (folder ? file.webkitRelativePath : '') || file.name,
+          size: file.size
+        }));
+        addFiles(picked);
+        event.target.value = '';
+      };
+
+      const readEntry = (entry, prefix, out) => new Promise((resolve) => {
+        if (!entry) return resolve();
+        if (entry.isFile) {
+          entry.file((file) => {
+            out.push({ file, path: prefix + entry.name, size: file.size });
+            resolve();
+          }, () => resolve());
+          return;
+        }
+        if (!entry.isDirectory) return resolve();
+        const reader = entry.createReader();
+        const next = () => reader.readEntries(async (batch) => {
+          if (!batch.length) return resolve();
+          for (const child of batch) await readEntry(child, prefix + entry.name + '/', out);
+          next();
+        }, () => resolve());
+        next();
+      });
+
+      const onDrop = async (event) => {
+        dragOver.value = false;
+        const dt = event.dataTransfer;
+        if (!dt) return;
+        const entries = Array.from(dt.items || []).map((item) => (item.webkitGetAsEntry ? item.webkitGetAsEntry() : null)).filter(Boolean);
+        if (entries.length) {
+          const out = [];
+          for (const entry of entries) await readEntry(entry, '', out);
+          addFiles(out);
+          return;
+        }
+        addFiles(Array.from(dt.files || []).map((file) => ({ file, path: file.name, size: file.size })));
+      };
+
+      const clearFiles = () => { files.value = []; };
+
+      const uploadBlob = async (bytes) => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 180000);
+        try {
+          const res = await fetch(relay.value + '/api/v1/blobs', {
+            method: 'PUT',
+            headers: { 'content-type': 'application/octet-stream' },
+            body: bytes,
+            signal: controller.signal
+          });
+          const text = await res.text();
+          let body = null;
+          try { body = JSON.parse(text); } catch {}
+          if (!res.ok) throw new Error((body && body.code) || ('HTTP ' + res.status));
+          return body.hash;
+        } finally {
+          clearTimeout(timer);
+        }
+      };
+
+      const publishEvent = async (fields) => {
+        const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical(fields))));
+        const signature = nacl.sign.detached(digest, identity.value.secretKey);
+        const envelope = { ...fields, id: bytesToHex(digest), sig: bytesToHex(signature) };
+        const res = await fetch(relay.value + '/api/v1/events', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(envelope)
+        });
+        const text = await res.text();
+        let body = null;
+        try { body = JSON.parse(text); } catch {}
+        if (!res.ok) throw new Error((body && body.code) || ('HTTP ' + res.status));
+        return (body && body.id) || envelope.id;
+      };
+
+      const createShare = async () => {
+        if (busy.value) return;
+        error.value = '';
+        result.value = null;
+        copied.value = false;
+
+        const chosen = files.value.slice(0, MAX_FILES);
+        if (chosen.some((f) => f.size === 0)) { error.value = 'Empty files cannot be uploaded. Remove them and try again.'; return; }
+        if (!chosen.length && !note.value.trim()) { error.value = 'Add a note or at least one file.'; return; }
+
+        busy.value = true;
+        progress.label = 'Encrypting';
+        progress.done = 0;
+        progress.total = chosen.length + 1;
+
+        try {
+          const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+          const rawKey = new Uint8Array(await crypto.subtle.exportKey('raw', key));
+          const entries = [];
+          const bin = [];
+
+          for (let i = 0; i < chosen.length; i++) {
+            const item = chosen[i];
+            progress.label = 'Encrypting ' + (i + 1) + '/' + chosen.length;
+            const plain = await item.file.arrayBuffer();
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const cipher = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plain));
+            progress.label = 'Uploading ' + (i + 1) + '/' + chosen.length;
+            const hash = await uploadBlob(cipher);
+            bin.push(hash);
+            entries.push({
+              name: item.path,
+              type: item.file.type || '',
+              size: item.size,
+              hash,
+              iv: b64u(iv)
+            });
+            progress.done = i + 1;
+          }
+
+          progress.label = 'Publishing event';
+          const payload = JSON.stringify({
+            v: 1,
+            note: note.value.trim().slice(0, MAX_NOTE),
+            created: Math.floor(Date.now() / 1000),
+            files: entries
+          });
+          const payloadIv = crypto.getRandomValues(new Uint8Array(12));
+          const payloadCipher = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: payloadIv }, key, new TextEncoder().encode(payload)));
+
+          const now = Math.floor(Date.now() / 1000) - 1;
+          const fields = {
+            collection: COLLECTION,
+            created_at: now,
+            expires_at: now + TTL_SECONDS,
+            owner: identity.value.owner,
+            labels: ['share'],
+            data: { v: 1, iv: b64u(payloadIv), ct: b64u(payloadCipher) }
+          };
+          if (bin.length) fields.bin = bin;
+
+          const id = await publishEvent(fields);
+          progress.done = progress.total;
+
+          const url = new URL(location.href);
+          url.search = '';
+          url.hash = new URLSearchParams({ v: '1', r: relay.value, e: id, k: b64u(rawKey) }).toString();
+          result.value = { url: url.toString(), id };
+        } catch (err) {
+          const code = err && err.message ? err.message : 'error';
+          const known = ['too_large', 'at_watermark', 'busy', 'disk_full', 'empty_body', 'bad_bin', 'bad_sig', 'bad_collection', 'timeout'];
+          error.value = known.includes(code) ? errorText(code) : 'Upload failed: ' + code;
+        } finally {
+          busy.value = false;
+        }
+      };
+
+      const copyResult = async () => {
+        if (!result.value) return;
+        try {
+          await navigator.clipboard.writeText(result.value.url);
+          copied.value = true;
+          showToast('Link copied');
+        } catch {
+          showToast('Copy failed — select the link and copy it manually');
+        }
+      };
+
+      const resetAll = () => {
+        result.value = null;
+        files.value = [];
+        note.value = '';
+        error.value = '';
+        copied.value = false;
+      };
+
+      const decryptKey = async (keyBytes) => crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['decrypt']);
+
+      const openShare = async () => {
+        if (!share) return;
+        try {
+          if (!window.nacl) throw new Error('lib');
+          identity.value = loadIdentity();
+          const res = await fetch(share.relay + '/api/v1/events/' + share.id, { cache: 'no-store' });
+          if (!res.ok) throw new Error(res.status === 404 ? 'not_found' : 'http');
+          const event = await res.json();
+          if (!event || !event.data || event.data.v !== 1) throw new Error('format');
+          const key = await decryptKey(share.key);
+          const plain = await crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: fromB64u(event.data.iv) },
+            key,
+            fromB64u(event.data.ct)
+          );
+          const payload = JSON.parse(new TextDecoder().decode(plain));
+          if (!payload || payload.v !== 1 || !Array.isArray(payload.files)) throw new Error('format');
+          manifest.value = { note: String(payload.note || ''), files: payload.files };
+          expiry.value = Number(event.expires_at) || 0;
+        } catch (err) {
+          const code = err && err.message;
+          viewError.value = code === 'not_found'
+            ? 'This share expired, was evicted, or never existed.'
+            : 'The link is incomplete or the event cannot be decrypted. Check that you copied the full link, including everything after #.';
+        } finally {
+          viewLoading.value = false;
+        }
+      };
+
+      const downloadFile = async (file) => {
+        if (!manifest.value || downloading[file.hash]) return;
+        downloadError.value = '';
+        downloading[file.hash] = true;
+        try {
+          const res = await fetch(share.relay + '/api/v1/blobs/' + file.hash, { cache: 'no-store' });
+          if (!res.ok) throw new Error('blob');
+          const cipher = await res.arrayBuffer();
+          const key = await decryptKey(share.key);
+          const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64u(file.iv) }, key, cipher);
+          const blob = new Blob([plain], { type: file.type || 'application/octet-stream' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = sanitizeName(file.name);
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } catch {
+          downloadError.value = 'Could not download ' + file.name + '. The blob may have expired or been evicted.';
+        } finally {
+          downloading[file.hash] = false;
+        }
+      };
+
+      const downloadAll = async () => {
+        if (!manifest.value || downloadingAll.value) return;
+        downloadingAll.value = true;
+        for (const file of manifest.value.files) {
+          await downloadFile(file);
+          await new Promise((resolve) => setTimeout(resolve, 350));
+        }
+        downloadingAll.value = false;
+      };
+
+      onMounted(() => {
+        if (!window.nacl || !window.crypto || !window.crypto.subtle) {
+          error.value = 'This browser cannot sign or encrypt. Open the page over HTTPS or from localhost.';
+          viewError.value = error.value;
+          viewLoading.value = false;
+          return;
+        }
+        if (mode.value === 'view') openShare();
+        else identity.value = loadIdentity();
+      });
+
+      return {
+        mode, relay, relayHost,
+        note, files, dragOver, error, busy, progress, progressWidth, result, copied, toast,
+        totalSize, fmtBytes, ext,
+        onPick, onDrop, clearFiles, createShare, copyResult, resetAll,
+        viewLoading, viewError, manifest, downloading, downloadingAll, downloadError, expiryLabel, totalManifestSize,
+        downloadFile, downloadAll
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#ffffff" />
+<title>Rabta examples</title>
+<meta name="description" content="Minimal browser demos for Rabta — chat, collaborative canvas and encrypted file sharing, signed with Ed25519 and streamed over SSE." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://rabta.space" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #171717;
+    --muted: #737373;
+    --subtle: #a1a1a1;
+    --card: #ffffff;
+    --card-hover: #fafafa;
+    --border: #eaeaea;
+    --border-strong: #d4d4d4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 2rem 1.25rem;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { width: 100%; max-width: 44rem; }
+  header { display: flex; align-items: center; gap: .75rem; margin-bottom: 2rem; }
+  .logo {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: .375rem;
+    background: #171717;
+    color: #fff;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: .875rem;
+    font-weight: 600;
+    letter-spacing: -.04em;
+  }
+  h1 { margin: 0; font-size: 1.25rem; font-weight: 600; letter-spacing: -.02em; }
+  header p { margin: 0; color: var(--muted); font-size: .8125rem; }
+  .grid { display: grid; gap: .75rem; }
+  @media (min-width: 34rem) { .grid { grid-template-columns: 1fr 1fr; } }
+  a.card.wide { grid-column: 1 / -1; }
+  a.card {
+    display: block;
+    padding: 1.15rem 1.25rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    transition: background .15s, border-color .15s;
+  }
+  a.card:hover, a.card:focus-visible {
+    background: var(--card-hover);
+    border-color: var(--border-strong);
+    outline: none;
+  }
+  a.card strong { display: block; font-weight: 600; margin-bottom: .2rem; font-size: .9375rem; }
+  a.card span { color: var(--muted); font-size: .8125rem; }
+  a.card code {
+    display: inline-block;
+    margin-top: .75rem;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: .6875rem;
+    color: var(--subtle);
+  }
+
+  .stats { margin-top: 2rem; }
+  .stats-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem .75rem;
+    margin-bottom: .75rem;
+  }
+  .stats-title { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+  .stats-title h2 { margin: 0; font-size: .875rem; font-weight: 600; letter-spacing: -.01em; }
+  .stats-title code {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: .6875rem;
+    color: var(--subtle);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dot {
+    width: .4375rem;
+    height: .4375rem;
+    flex: none;
+    border-radius: 50%;
+    background: var(--subtle);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, .04);
+    transition: background .2s;
+  }
+  .dot[data-state="live"] { background: #10b981; }
+  .dot[data-state="stale"] { background: #d97706; }
+  .dot[data-state="error"] { background: #e11d48; }
+  .stats-meta {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .6875rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--subtle);
+  }
+  .stats-meta span + span::before { content: "·"; margin-right: .5rem; color: var(--border-strong); }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+  }
+  @media (min-width: 34rem) { .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .tile {
+    padding: .85rem .95rem;
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+    background: var(--card);
+    min-width: 0;
+  }
+  .tile .label {
+    display: block;
+    font-size: .625rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--subtle);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tile .value {
+    display: block;
+    margin-top: .3rem;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tile .sub {
+    display: block;
+    margin-top: .15rem;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: .625rem;
+    color: var(--subtle);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tile[data-wide] .value { font-size: .9375rem; }
+
+  footer {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: .6875rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--subtle);
+  }
+  footer a { color: inherit; text-decoration: none; }
+  footer a:hover { color: var(--fg); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo">R</div>
+    <div>
+      <h1>Rabta examples</h1>
+      <p>Signed, live, streamed — built on the Rabta relay.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="chat.html">
+      <strong>Chat</strong>
+      <span>Live public lobby, last 20 signed messages.</span>
+      <code>chat/rabta</code>
+    </a>
+    <a class="card" href="paint.html">
+      <strong>Canvas</strong>
+      <span>Realtime collaborative 1000×1000 board.</span>
+      <code>canvas/rabta</code>
+    </a>
+    <a class="card wide" href="share.html">
+      <strong>Share</strong>
+      <span>Encrypted file drop — up to 8 files and a note, key in the link.</span>
+      <code>share/rabta</code>
+    </a>
+  </div>
+
+  <section class="stats" aria-labelledby="stats-heading">
+    <div class="stats-head">
+      <div class="stats-title">
+        <span class="dot" id="stats-dot" data-state="loading"></span>
+        <h2 id="stats-heading">Node status</h2>
+        <code>rabta.space/api/v1/stats</code>
+      </div>
+      <div class="stats-meta">
+        <span id="stats-state" aria-live="polite">connecting</span>
+        <span id="stats-updated">—</span>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="tile">
+        <span class="label">Live events</span>
+        <span class="value" id="s-events">—</span>
+        <span class="sub" id="s-events-bytes">—</span>
+      </div>
+      <div class="tile">
+        <span class="label">SSE subscribers</span>
+        <span class="value" id="s-subs">—</span>
+        <span class="sub" id="s-subs-cap">—</span>
+      </div>
+      <div class="tile">
+        <span class="label">Live blobs</span>
+        <span class="value" id="s-blobs">—</span>
+        <span class="sub" id="s-blobs-bytes">—</span>
+      </div>
+      <div class="tile">
+        <span class="label">Store</span>
+        <span class="value" id="s-store">—</span>
+        <span class="sub" id="s-store-sub">—</span>
+      </div>
+      <div class="tile">
+        <span class="label">Uptime</span>
+        <span class="value" id="s-uptime">—</span>
+        <span class="sub" id="s-sweep">—</span>
+      </div>
+      <div class="tile" data-wide>
+        <span class="label">Version</span>
+        <span class="value" id="s-version">—</span>
+        <span class="sub" id="s-inflight">—</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>ed25519 / sse / 7d ttl</span>
+    <a href="https://rabta.space" target="_blank" rel="noreferrer">rabta.space</a>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const STATS_URL = 'https://rabta.space/api/v1/stats';
+  const MIN_DELAY = 1000;
+  const MAX_DELAY = 10000;
+
+  const $ = (id) => document.getElementById(id);
+  const dot = $('stats-dot');
+  const stateEl = $('stats-state');
+  const updatedEl = $('stats-updated');
+
+  let timer = null;
+  let inflight = false;
+  let lastOk = 0;
+
+  const fmtBytes = (n) => {
+    if (!Number.isFinite(n)) return '—';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let value = n;
+    let i = 0;
+    while (value >= 1024 && i < units.length - 1) { value /= 1024; i++; }
+    return (value < 10 ? value.toFixed(1) : Math.round(value)) + ' ' + units[i];
+  };
+
+  const fmtCount = (n) => Number.isFinite(n) ? n.toLocaleString('en-US') : '—';
+
+  const fmtUptime = (s) => {
+    if (!Number.isFinite(s)) return '—';
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    if (d) return d + 'd ' + h + 'h';
+    if (h) return h + 'h ' + m + 'm';
+    return m + 'm';
+  };
+
+  const ago = (ms) => {
+    const s = Math.max(0, Math.round(ms / 1000));
+    if (s < 2) return 'just now';
+    if (s < 60) return s + 's ago';
+    return Math.round(s / 60) + 'm ago';
+  };
+
+  const setState = (state, label) => {
+    dot.dataset.state = state;
+    stateEl.textContent = label;
+  };
+
+  const paint = (data) => {
+    const events = data.events || {};
+    const blobs = data.blobs || {};
+    const sse = data.sse || {};
+    const storage = data.storage || {};
+    const upload = data.upload || {};
+    const reaper = data.reaper || {};
+
+    $('s-events').textContent = fmtCount(events.live);
+    $('s-events-bytes').textContent = fmtBytes(events.bytes) + ' stored';
+    $('s-subs').textContent = fmtCount(sse.subscribers);
+    $('s-subs-cap').textContent = 'cap ' + fmtCount(sse.cap);
+    $('s-blobs').textContent = fmtCount(blobs.live);
+    $('s-blobs-bytes').textContent = fmtBytes(blobs.bytes) + ' stored';
+    $('s-store').textContent = fmtBytes(storage.store_bytes);
+    $('s-store-sub').textContent = 'free ' + fmtBytes(storage.free_bytes);
+    $('s-uptime').textContent = fmtUptime(data.uptime_s);
+    $('s-sweep').textContent = 'sweep ' + fmtUptime(reaper.last_sweep_age_s) + ' ago';
+    $('s-version').textContent = data.version || '—';
+    $('s-inflight').textContent = fmtBytes(upload.inflight_bytes) + ' inflight · max ' + fmtBytes(upload.max_single_bytes);
+  };
+
+  const schedule = () => {
+    clearTimeout(timer);
+    const delay = MIN_DELAY + Math.random() * (MAX_DELAY - MIN_DELAY);
+    timer = setTimeout(load, delay);
+  };
+
+  const load = async () => {
+    if (inflight) return;
+    inflight = true;
+    const controller = new AbortController();
+    const abort = setTimeout(() => controller.abort(), 8000);
+    try {
+      const res = await fetch(STATS_URL, {
+        cache: 'no-store',
+        headers: { accept: 'application/json' },
+        signal: controller.signal
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      paint(await res.json());
+      lastOk = Date.now();
+      setState('live', 'live');
+    } catch (err) {
+      setState(lastOk ? 'stale' : 'error', lastOk ? 'stale' : 'unreachable');
+    } finally {
+      clearTimeout(abort);
+      inflight = false;
+      if (!document.hidden) schedule();
+    }
+  };
+
+  const tick = () => {
+    if (!lastOk) { updatedEl.textContent = '—'; return; }
+    updatedEl.textContent = ago(Date.now() - lastOk);
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearTimeout(timer);
+    } else {
+      load();
+    }
+  });
+
+  setInterval(tick, 1000);
+  load();
+  tick();
+})();
+</script>
+</body>
+</html>

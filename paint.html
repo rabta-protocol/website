@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<title>Rabta Canvas — live, signed, 1000×1000</title>
+<meta name="description" content="A realtime collaborative canvas built on Rabta. Every stroke is signed with an Ed25519 key stored in your browser and streamed over SSE." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
+<style>
+  [v-cloak] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    background: #06060a;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: rgba(167, 139, 250, .35); color: #fff; }
+
+  .app-bg {
+    background:
+      radial-gradient(900px 600px at 18% -10%, rgba(124, 58, 237, .16), transparent 62%),
+      radial-gradient(800px 540px at 92% 108%, rgba(34, 211, 238, .10), transparent 60%),
+      radial-gradient(600px 400px at 78% 8%, rgba(232, 121, 249, .07), transparent 70%),
+      #06060a;
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, .022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .022) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 85% 70% at 50% 42%, #000 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 42%, #000 30%, transparent 100%);
+  }
+  .canvas-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, .042) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, .042) 1px, transparent 1px);
+    background-size: 10% 10%;
+    background-position: -1px -1px;
+  }
+  .canvas-grid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to right, transparent calc(50% - .5px), rgba(255, 255, 255, .07) 50%, transparent calc(50% + .5px)),
+      linear-gradient(to bottom, transparent calc(50% - .5px), rgba(255, 255, 255, .07) 50%, transparent calc(50% + .5px));
+  }
+  .canvas-vignette {
+    background: radial-gradient(circle at 50% 48%, transparent 55%, rgba(0, 0, 0, .38) 100%);
+  }
+
+  .glass {
+    background: rgba(11, 11, 17, .78);
+    backdrop-filter: blur(24px) saturate(130%);
+    -webkit-backdrop-filter: blur(24px) saturate(130%);
+  }
+  .hairline { border: 1px solid rgba(255, 255, 255, .075); }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(167, 139, 250, .9) 0%, rgba(34, 211, 238, .65) var(--fill, 10%), rgba(255, 255, 255, .10) var(--fill, 10%));
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #f4f4f5;
+    border: 2px solid #0b0b11;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .25), 0 2px 8px rgba(0, 0, 0, .5);
+    transition: transform .15s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    background: #f4f4f5;
+    border: 2px solid #0b0b11;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .25);
+  }
+  input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 999px; }
+  input[type="color"]::-moz-color-swatch { border: 0; border-radius: 999px; }
+
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .thin-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .15) transparent; }
+  .thin-scrollbar::-webkit-scrollbar { width: 6px; }
+  .thin-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .15); border-radius: 999px; }
+
+  .loader-bar { animation: loader-slide 1.2s ease-in-out infinite; }
+  @keyframes loader-slide {
+    0% { transform: translateX(-120%); }
+    100% { transform: translateX(320%); }
+  }
+  .pulse-dot::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: inherit;
+    animation: pulse-ring 2s cubic-bezier(.4, 0, .6, 1) infinite;
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: .55; }
+    70%, 100% { transform: scale(2.4); opacity: 0; }
+  }
+
+  .toast { border: 1px solid rgba(255, 255, 255, .1); }
+  .toast-info { background: rgba(13, 13, 20, .94); color: rgba(226, 232, 240, .88); border-color: rgba(167, 139, 250, .22); }
+  .toast-success { background: rgba(7, 22, 17, .94); color: rgba(167, 243, 208, .92); border-color: rgba(52, 211, 153, .25); }
+  .toast-error { background: rgba(26, 9, 13, .94); color: rgba(253, 164, 175, .92); border-color: rgba(251, 113, 133, .28); }
+  .toast-enter-active, .toast-leave-active { transition: opacity .22s ease, transform .22s ease; }
+  .toast-enter-from, .toast-leave-to { opacity: 0; transform: translate(-50%, 10px) scale(.98); }
+  .fade-enter-active, .fade-leave-active { transition: opacity .18s ease; }
+  .fade-enter-from, .fade-leave-to { opacity: 0; }
+  .modal-enter-active, .modal-leave-active { transition: opacity .2s ease, transform .2s ease; }
+  .modal-enter-from, .modal-leave-to { opacity: 0; transform: translateY(12px) scale(.985); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body class="h-full overflow-hidden font-sans text-zinc-100 antialiased">
+<div id="app" v-cloak class="relative flex h-[100dvh] flex-col overflow-hidden app-bg">
+  <div class="pointer-events-none absolute inset-0 bg-grid"></div>
+  <div class="pointer-events-none absolute -top-48 left-[8%] h-[34rem] w-[34rem] rounded-full bg-violet-600/[.09] blur-[130px]"></div>
+  <div class="pointer-events-none absolute -bottom-56 right-[4%] h-[32rem] w-[32rem] rounded-full bg-cyan-500/[.06] blur-[130px]"></div>
+
+  <header class="relative z-30 flex h-16 shrink-0 items-center justify-between gap-3 px-4 sm:h-[72px] sm:px-6">
+    <div class="flex min-w-0 items-center gap-3">
+      <div class="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-violet-400 via-fuchsia-400 to-cyan-300 shadow-[0_0_30px_-6px_rgba(167,139,250,.8)]">
+        <span class="font-mono text-[15px] font-bold tracking-tighter text-[#100b1c]">R</span>
+        <span class="absolute inset-x-0 top-0 h-px bg-white/60"></span>
+      </div>
+      <div class="min-w-0">
+        <div class="flex items-baseline gap-2 leading-none">
+          <span class="text-[13px] font-semibold tracking-[.24em]">RABTA</span>
+          <span class="text-[13px] font-medium tracking-[.24em] text-white/30">CANVAS</span>
+        </div>
+        <div class="mt-1.5 hidden items-center gap-1.5 text-[9px] uppercase tracking-[.2em] text-white/25 sm:flex">
+          <span>ed25519</span><span class="text-white/10">/</span><span>sse</span><span class="text-white/10">/</span><span>30d ttl</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-full border border-white/[.07] bg-white/[.025] px-3.5 py-1.5 text-[9px] uppercase tracking-[.18em] text-white/35 lg:flex">
+      <span class="h-1 w-1 rounded-full bg-violet-400/80"></span>
+      <span class="font-mono tracking-[.08em] text-white/50">{{ collection }}</span>
+      <span class="text-white/10">·</span>
+      <span class="max-w-[12rem] truncate">{{ relayHost }}</span>
+    </div>
+
+    <div class="flex shrink-0 items-center gap-2">
+      <div class="flex items-center gap-2 rounded-full border border-white/[.07] bg-white/[.025] px-2.5 py-1.5 sm:px-3" :title="'Live event stream: ' + connLabel">
+        <span class="relative flex h-1.5 w-1.5">
+          <span class="pulse-dot absolute inset-0 rounded-full opacity-60" :style="{ backgroundColor: connColor }"></span>
+          <span class="relative h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: connColor }"></span>
+        </span>
+        <span class="hidden text-[9px] uppercase tracking-[.18em] text-white/40 sm:inline">{{ connLabel }}</span>
+      </div>
+
+      <button @click="openModal" class="group flex items-center gap-2 rounded-full border border-white/[.07] bg-white/[.025] py-1 pl-1 pr-2.5 transition hover:border-white/15 hover:bg-white/[.06]" title="Your local identity and relay settings">
+        <span class="grid h-6 w-6 place-items-center rounded-full text-[8px] font-bold text-black/70" :style="{ background: ownerGradient(identity.owner) }">{{ identity.short.slice(0, 2).toUpperCase() }}</span>
+        <span class="hidden font-mono text-[10px] text-white/45 transition group-hover:text-white/80 sm:inline">{{ identity.short }}</span>
+        <span class="hidden text-[8px] uppercase tracking-[.16em] text-emerald-300/60 md:inline">local</span>
+      </button>
+
+      <a :href="chatHref" class="flex items-center gap-1.5 rounded-full border border-white/[.07] bg-white/[.025] px-2.5 py-2 text-white/35 transition hover:border-white/15 hover:bg-white/[.06] hover:text-white/80" title="Open the public chat">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a8.5 8.5 0 0 1-8.5 8.5H6l-3 2 1.1-4.2A8.5 8.5 0 1 1 21 12Z" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span class="hidden text-[9px] uppercase tracking-[.16em] md:inline">Chat</span>
+      </a>
+
+      <button @click="toggleFullscreen" class="grid h-8 w-8 place-items-center rounded-full border border-white/[.07] bg-white/[.025] text-white/35 transition hover:border-white/15 hover:bg-white/[.06] hover:text-white/80" :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
+        <svg v-if="!isFullscreen" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3" stroke-linecap="round" /></svg>
+        <svg v-else class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3m8 0v-3a2 2 0 0 1 2-2h3" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <main ref="canvasArea" class="relative z-10 flex min-h-0 flex-1 items-center justify-center px-3 py-2 sm:px-6 sm:py-3">
+    <div class="relative shrink-0" :style="{ width: canvasSize + 'px', height: canvasSize + 'px' }">
+      <div class="pointer-events-none absolute -inset-10 rounded-[3rem] bg-violet-500/[.07] blur-3xl"></div>
+
+      <div class="relative h-full w-full rounded-[24px] bg-gradient-to-br from-white/[.16] via-white/[.035] to-white/[.015] p-px shadow-[0_40px_120px_-30px_rgba(0,0,0,.95)]">
+        <div class="relative h-full w-full overflow-hidden rounded-[23px] bg-[#08080d]">
+          <div class="pointer-events-none absolute inset-0 canvas-grid"></div>
+          <div class="pointer-events-none absolute inset-0 canvas-vignette"></div>
+
+          <canvas
+            ref="canvasEl"
+            class="absolute inset-0 h-full w-full cursor-none touch-none"
+            @pointerdown="onPointerDown"
+            @pointermove="onPointerMove"
+            @pointerup="onPointerUp"
+            @pointercancel="onPointerUp"
+            @pointerleave="onPointerLeave"
+            @pointerenter="onPointerEnter"
+            @contextmenu.prevent
+          ></canvas>
+
+          <div v-if="!strokes.length && !drawing" class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-8">
+            <div class="max-w-sm text-center">
+              <div class="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/[.025] text-violet-200/70">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9.5 14.5 5-5m-7.2 8.8-1.7 1.7a2.1 2.1 0 0 1-3-3l1.7-1.7m8.9-8.9 1.7-1.7a2.1 2.1 0 0 1 3 3l-1.7 1.7M14 4l6 6M4 14l6 6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </div>
+              <h1 class="text-xl font-medium tracking-tight text-white/85 sm:text-2xl">{{ loadingHistory ? 'Opening the canvas' : historyError ? 'The relay is quiet' : 'Make your first mark' }}</h1>
+              <p class="mx-auto mt-2 max-w-xs text-[11px] leading-relaxed text-white/35 sm:text-xs">
+                <template v-if="loadingHistory">Loading signed strokes from {{ relayHost }}…</template>
+                <template v-else-if="historyError">Could not read the history. Live strokes may still arrive.</template>
+                <template v-else>Drag to paint. Every stroke is signed with your local Ed25519 key and streamed to everyone here in real time.</template>
+              </p>
+              <div v-if="loadingHistory" class="mx-auto mt-5 h-0.5 w-24 overflow-hidden rounded-full bg-white/10">
+                <span class="loader-bar block h-full w-1/2 rounded-full bg-violet-300/80"></span>
+              </div>
+              <button v-if="historyError" @click="retryHistory" class="pointer-events-auto mt-5 rounded-full border border-white/15 bg-white/[.05] px-3.5 py-1.5 text-[10px] uppercase tracking-[.18em] text-white/60 transition hover:bg-white/10 hover:text-white">Retry history</button>
+            </div>
+          </div>
+
+          <div v-if="strokes.length" class="pointer-events-none absolute bottom-2.5 right-3 font-mono text-[9px] tracking-[.16em] text-white/20">
+            {{ hover ? ('x ' + pad(hover.x) + '  y ' + pad(hover.y)) : '0,0 → 1000,1000' }}
+          </div>
+          <div class="pointer-events-none absolute left-3 top-2.5 font-mono text-[9px] tracking-[.16em] text-white/15">1000 × 1000</div>
+
+          <div v-if="publishing" class="pointer-events-none absolute right-3 top-2.5 flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-0.5 text-[8px] uppercase tracking-[.18em] text-violet-200/60 backdrop-blur">
+            <span class="h-1 w-1 animate-pulse rounded-full bg-violet-300"></span> signing
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <aside class="pointer-events-none absolute bottom-28 left-6 z-20 hidden w-60 2xl:block">
+    <div class="overflow-hidden rounded-2xl glass hairline shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/[.06] px-3.5 py-2.5">
+        <div class="flex items-center gap-2 text-[8px] uppercase tracking-[.22em] text-white/35">
+          <span class="relative flex h-1.5 w-1.5">
+            <span class="pulse-dot absolute inset-0 rounded-full bg-emerald-400 opacity-60"></span>
+            <span class="relative h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+          </span>
+          Live traffic
+        </div>
+        <div class="font-mono text-[9px] text-white/25">{{ stats.strokes }} · {{ stats.painters }}</div>
+      </div>
+      <div class="max-h-56 overflow-y-auto thin-scrollbar">
+        <div v-for="s in recentStrokes" :key="s.renderKey" class="flex items-center gap-2 border-b border-white/[.035] px-3.5 py-2 last:border-0">
+          <span class="h-1.5 w-1.5 shrink-0 rounded-full" :style="{ backgroundColor: s.color, boxShadow: '0 0 8px ' + s.color }"></span>
+          <span class="font-mono text-[9px] text-white/40">{{ shortOwner(s.owner) }}</span>
+          <span v-if="s.owner === identity.owner" class="rounded bg-emerald-400/10 px-1 py-px text-[7px] uppercase tracking-wider text-emerald-300/80">you</span>
+          <span class="ml-auto font-mono text-[8px] text-white/20">{{ timeAgo(s.created_at) }}</span>
+        </div>
+        <div v-if="!recentStrokes.length" class="px-3.5 py-5 text-center text-[9px] uppercase tracking-[.18em] text-white/20">Waiting for a stroke</div>
+      </div>
+      <div class="border-t border-white/[.06] px-3.5 py-2 font-mono text-[8px] uppercase tracking-[.16em] text-white/20">
+        ed25519 → rabta → sse
+      </div>
+    </div>
+  </aside>
+
+  <footer class="relative z-20 shrink-0 px-3 pb-3 sm:px-6 sm:pb-5">
+    <div class="mx-auto flex w-fit max-w-full flex-col items-center gap-2.5 rounded-2xl glass hairline px-3 py-2.5 shadow-[0_20px_60px_-20px_rgba(0,0,0,.9)] sm:flex-row sm:gap-4 sm:px-4">
+      <div class="flex min-w-0 max-w-full items-center gap-2 sm:gap-2.5">
+        <div class="flex items-center gap-1 overflow-x-auto no-scrollbar sm:gap-1.5" role="group" aria-label="Color palette">
+          <button
+            v-for="(c, index) in palette"
+            :key="c"
+            @click="setColor(c)"
+            class="relative h-5 w-5 shrink-0 rounded-full ring-1 ring-inset ring-white/20 transition hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            :class="index >= 7 ? 'hidden sm:block' : ''"
+            :style="{ backgroundColor: c }"
+            :aria-label="'Use color ' + c"
+            :aria-pressed="color === c"
+          >
+            <span v-if="color === c" class="absolute -inset-[3px] rounded-full border border-white/70"></span>
+          </button>
+        </div>
+
+        <div class="mx-0.5 h-6 w-px bg-white/[.08]"></div>
+
+        <label class="relative h-7 w-7 shrink-0 cursor-pointer rounded-full p-px" :style="{ background: ownerGradient(color) }" title="Pick any color">
+          <input type="color" :value="color" @input="setColor($event.target.value)" class="absolute inset-0 h-full w-full cursor-pointer rounded-full opacity-0" aria-label="Custom color" />
+          <span class="pointer-events-none block h-full w-full rounded-full border-2 border-[#0b0b11]" :style="{ backgroundColor: color }"></span>
+        </label>
+
+        <div class="relative">
+          <input
+            v-model="hexDraft"
+            @blur="commitHex"
+            @keydown.enter.prevent="onHexEnter"
+            spellcheck="false"
+            maxlength="7"
+            aria-label="Hex color"
+            class="w-[4.75rem] rounded-lg border bg-black/30 px-2 py-1.5 font-mono text-[10px] tracking-wide text-white/65 outline-none transition focus:border-violet-400/50 focus:text-white sm:w-[5.6rem]"
+            :class="hexError ? 'border-rose-400/70 text-rose-300' : 'border-white/[.07]'"
+          />
+        </div>
+      </div>
+
+      <div class="hidden h-6 w-px bg-white/[.08] sm:block"></div>
+
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2.5">
+          <span class="text-[8px] uppercase tracking-[.2em] text-white/30">Brush</span>
+          <input
+            v-model.number="brushSize"
+            type="range"
+            min="1"
+            max="48"
+            step="1"
+            class="w-24 sm:w-28"
+            :style="{ '--fill': ((brushSize - 1) / 47 * 100) + '%' }"
+            aria-label="Brush size"
+          />
+          <span class="w-5 text-right font-mono text-[10px] text-white/50">{{ brushSize }}</span>
+        </div>
+
+        <div class="hidden h-6 w-px bg-white/[.08] lg:block"></div>
+
+        <div class="hidden items-center gap-2 lg:flex">
+          <span class="h-1 w-1 rounded-full" :style="{ backgroundColor: syncColor }"></span>
+          <span class="font-mono text-[9px] uppercase tracking-[.14em] text-white/30">{{ syncLabel }}</span>
+        </div>
+
+        <button @click="copyLink" class="flex items-center gap-1.5 rounded-lg border border-white/[.07] bg-white/[.03] px-2.5 py-1.5 text-[9px] uppercase tracking-[.16em] text-white/40 transition hover:border-white/15 hover:bg-white/[.07] hover:text-white/80" title="Copy a link to this canvas">
+          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7m-1.3 5.3a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          <span class="hidden sm:inline">Share</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <transition name="fade">
+    <div v-if="modal" class="fixed inset-0 z-40 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="closeModal"></div>
+      <transition name="modal" appear>
+        <div class="relative flex max-h-[88dvh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0b0b11] shadow-[0_40px_120px_-20px_rgba(0,0,0,.95)]">
+          <div class="h-px w-full bg-gradient-to-r from-transparent via-violet-400/60 to-transparent"></div>
+          <div class="flex items-start justify-between gap-4 px-5 pb-4 pt-5 sm:px-6">
+            <div class="flex items-center gap-3">
+              <div class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet-400 via-fuchsia-400 to-cyan-300 text-[13px] font-bold text-[#100b1c]">R</div>
+              <div>
+                <h2 class="text-sm font-semibold tracking-tight text-white/90">Your local identity</h2>
+                <p class="mt-0.5 text-[10px] text-white/35">Generated in this browser. Rabta never sees the private key.</p>
+              </div>
+            </div>
+            <button @click="closeModal" class="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/[.08] text-white/35 transition hover:bg-white/[.06] hover:text-white" aria-label="Close">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
+            </button>
+          </div>
+
+          <div class="min-h-0 flex-1 overflow-y-auto thin-scrollbar px-5 pb-6 sm:px-6">
+            <div class="rounded-2xl border border-white/[.07] bg-black/25 p-3">
+              <div class="mb-1.5 flex items-center justify-between">
+                <span class="text-[8px] uppercase tracking-[.2em] text-white/30">Public key · ed25519</span>
+                <button @click="copyKey" class="flex items-center gap-1 rounded text-[9px] uppercase tracking-wider text-violet-300/70 transition hover:text-violet-200">
+                  <svg class="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>
+                  {{ copied === 'key' ? 'copied' : 'copy' }}
+                </button>
+              </div>
+              <p class="break-all font-mono text-[10px] leading-relaxed text-white/55">{{ identity.owner }}</p>
+              <div class="mt-2 flex items-center gap-2 text-[9px] text-white/25">
+                <span class="h-1 w-1 rounded-full bg-emerald-400"></span>
+                Stored in localStorage · reused on your next visit
+              </div>
+            </div>
+
+            <div v-if="!confirmRegenerate" class="mt-2 flex justify-end">
+              <button @click="confirmRegenerate = true" class="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[9px] uppercase tracking-[.16em] text-white/25 transition hover:bg-white/[.04] hover:text-white/60">
+                <svg class="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                New key
+              </button>
+            </div>
+            <div v-else class="mt-2 rounded-xl border border-amber-400/20 bg-amber-400/[.05] p-3">
+              <p class="text-[10px] leading-relaxed text-amber-100/60">A new key means your future strokes have a new owner. Strokes already on the canvas stay under the old key.</p>
+              <div class="mt-2 flex gap-2">
+                <button @click="regenerateIdentity" class="rounded-lg bg-amber-300/90 px-2.5 py-1 text-[9px] font-medium uppercase tracking-[.14em] text-black/80 transition hover:bg-amber-200">Generate new key</button>
+                <button @click="confirmRegenerate = false" class="rounded-lg px-2.5 py-1 text-[9px] uppercase tracking-[.14em] text-white/35 transition hover:bg-white/[.05]">Cancel</button>
+              </div>
+            </div>
+
+            <div class="my-4 h-px bg-white/[.06]"></div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-[8px] uppercase tracking-[.2em] text-white/30">Relay</span>
+              <a :href="relay" target="_blank" rel="noreferrer" class="flex items-center gap-1 text-[9px] text-white/30 transition hover:text-white/70">
+                {{ health.state === 'ok' ? 'healthy' : health.state === 'error' ? 'unreachable' : 'checking…' }}
+                <span class="h-1 w-1 rounded-full" :style="{ backgroundColor: health.state === 'ok' ? '#34d399' : health.state === 'error' ? '#fb7185' : '#fbbf24' }"></span>
+              </a>
+            </div>
+            <div class="mt-2 flex gap-2">
+              <input v-model="relayDraft" spellcheck="false" class="min-w-0 flex-1 rounded-lg border bg-black/30 px-2.5 py-2 font-mono text-[10px] text-white/65 outline-none transition focus:border-violet-400/50" :class="relayError ? 'border-rose-400/60' : 'border-white/[.07]'" aria-label="Relay URL" />
+              <button @click="applyRelay" class="shrink-0 rounded-lg bg-white/[.07] px-3 py-2 text-[9px] uppercase tracking-[.16em] text-white/60 transition hover:bg-white/[.12] hover:text-white">Apply</button>
+            </div>
+            <p v-if="relayError" class="mt-1.5 text-[9px] text-rose-300/80">{{ relayError }}</p>
+            <div class="mt-3 grid grid-cols-3 gap-2">
+              <div class="rounded-xl border border-white/[.05] bg-white/[.015] p-2.5">
+                <div class="text-[8px] uppercase tracking-[.16em] text-white/25">Collection</div>
+                <div class="mt-1 truncate font-mono text-[10px] text-white/55">{{ collection }}</div>
+              </div>
+              <div class="rounded-xl border border-white/[.05] bg-white/[.015] p-2.5">
+                <div class="text-[8px] uppercase tracking-[.16em] text-white/25">Retention</div>
+                <div class="mt-1 font-mono text-[10px] text-white/55">30 days</div>
+              </div>
+              <div class="rounded-xl border border-white/[.05] bg-white/[.015] p-2.5">
+                <div class="text-[8px] uppercase tracking-[.16em] text-white/25">Owners</div>
+                <div class="mt-1 font-mono text-[10px] text-white/55">{{ stats.painters }}</div>
+              </div>
+            </div>
+
+            <div class="mt-4 space-y-2 rounded-2xl border border-white/[.05] bg-white/[.015] p-3.5">
+              <div class="flex gap-2.5">
+                <span class="mt-1 font-mono text-[9px] text-violet-300/60">01</span>
+                <p class="text-[10px] leading-relaxed text-white/40"><span class="text-white/65">Sign locally.</span> Each stroke becomes a canonical JSON event, hashed with SHA-256 and signed with your Ed25519 key.</p>
+              </div>
+              <div class="flex gap-2.5">
+                <span class="mt-1 font-mono text-[9px] text-violet-300/60">02</span>
+                <p class="text-[10px] leading-relaxed text-white/40"><span class="text-white/65">Relay, don't interpret.</span> Rabta verifies the signature, stores opaque data in SQLite and expires it automatically.</p>
+              </div>
+              <div class="flex gap-2.5">
+                <span class="mt-1 font-mono text-[9px] text-violet-300/60">03</span>
+                <p class="text-[10px] leading-relaxed text-white/40"><span class="text-white/65">Stream it.</span> Every visitor receives new strokes over Server-Sent Events, with automatic resume after a reconnect.</p>
+              </div>
+            </div>
+
+            <div class="mt-3 flex items-center justify-between text-[8px] uppercase tracking-[.16em] text-white/20">
+              <span>Rabta protocol v1</span>
+              <span>{{ stats.strokes }} strokes · {{ stats.painters }} painters</span>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </div>
+  </transition>
+
+  <transition name="fade">
+    <div v-if="fatal" class="fixed inset-0 z-50 flex items-center justify-center bg-[#06060a] p-6">
+      <div class="max-w-sm text-center">
+        <div class="mx-auto mb-4 grid h-10 w-10 place-items-center rounded-xl border border-rose-400/20 bg-rose-400/[.06] text-rose-300/80">!</div>
+        <h2 class="text-base font-medium">This browser can't sign strokes</h2>
+        <p class="mt-2 text-xs leading-relaxed text-white/40">{{ fatal }}</p>
+      </div>
+    </div>
+  </transition>
+
+  <transition name="toast">
+    <div v-if="toast" class="fixed bottom-28 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-xl border px-3.5 py-2.5 text-[11px] leading-relaxed shadow-2xl backdrop-blur-xl sm:bottom-32" :class="toastClass" role="status">
+      {{ toast.message }}
+    </div>
+  </transition>
+
+  <div
+    v-if="cursor.visible"
+    class="pointer-events-none fixed z-30 -translate-x-1/2 -translate-y-1/2 rounded-full border transition-[width,height] duration-100"
+    :style="{ left: cursor.x + 'px', top: cursor.y + 'px', width: cursor.size + 'px', height: cursor.size + 'px', borderColor: color, boxShadow: '0 0 0 1px rgba(0,0,0,.6), 0 0 14px ' + color + '55' }"
+  >
+    <span class="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full" :style="{ backgroundColor: color }"></span>
+  </div>
+</div>
+
+<script>
+(() => {
+  const { createApp, ref, reactive, computed, shallowReactive, watch, nextTick, onMounted, onBeforeUnmount } = Vue;
+
+  const DEFAULT_RELAY = 'https://rabta.space';
+  const COLLECTION = 'canvas/rabta';
+  const TTL_SECONDS = 30 * 24 * 60 * 60;
+  const MAX_POINTS = 1200;
+  const MAX_PAGES = 10;
+  const STORE = {
+    identity: 'rabta.canvas.identity.v1',
+    prefs: 'rabta.canvas.prefs.v1',
+    relay: 'rabta.canvas.relay.v1'
+  };
+  const PALETTE = ['#ffffff', '#ff5c7a', '#ff8a3d', '#ffd166', '#7cffb2', '#3ddc97', '#38bdf8', '#6366f1', '#a855f7', '#f472b6'];
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+  function readStore(key) {
+    try { return localStorage.getItem(key); } catch { return null; }
+  }
+  function writeStore(key, value) {
+    try {
+      if (value === null) localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    } catch {}
+  }
+  function readJSON(key) {
+    const raw = readStore(key);
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+  function writeJSON(key, value) {
+    writeStore(key, JSON.stringify(value));
+  }
+
+  function bytesToHex(bytes) {
+    let out = '';
+    for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, '0');
+    return out;
+  }
+  function bytesToBase64(bytes) {
+    let raw = '';
+    for (let i = 0; i < bytes.length; i++) raw += String.fromCharCode(bytes[i]);
+    return btoa(raw);
+  }
+  function base64ToBytes(value) {
+    const raw = atob(value);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  }
+  function randomHex(length = 8) {
+    const bytes = new Uint8Array(length);
+    crypto.getRandomValues(bytes);
+    return bytesToHex(bytes);
+  }
+
+  function normalizeHex(value) {
+    if (typeof value !== 'string') return null;
+    let next = value.trim().toLowerCase();
+    if (!next.startsWith('#')) next = '#' + next;
+    if (/^#[0-9a-f]{3}$/.test(next)) {
+      next = '#' + next[1] + next[1] + next[2] + next[2] + next[3] + next[3];
+    }
+    return /^#[0-9a-f]{6}$/.test(next) ? next : null;
+  }
+
+  function shortOwner(owner) {
+    const value = String(owner || '').replace(/^ed25519:/, '');
+    return value.length > 12 ? value.slice(0, 6) + '…' + value.slice(-4) : value;
+  }
+
+  function ownerGradient(owner) {
+    let hash = 0;
+    const value = String(owner || '');
+    for (let i = 0; i < value.length; i++) hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+    const a = hash % 360;
+    const b = (a + 78) % 360;
+    return 'linear-gradient(135deg, hsl(' + a + ' 88% 65%), hsl(' + b + ' 88% 55%))';
+  }
+
+  function canonical(value) {
+    if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
+    if (value && typeof value === 'object') {
+      return '{' + Object.keys(value).sort().map((key) => JSON.stringify(key) + ':' + canonical(value[key])).join(',') + '}';
+    }
+    return JSON.stringify(value);
+  }
+
+  function normalizeCollection(value) {
+    const next = String(value || '').trim().toLowerCase();
+    return /^[a-z0-9/_-]{1,32}$/.test(next) ? next : null;
+  }
+
+  function normalizeRelay(value) {
+    if (typeof value !== 'string' || !value.trim()) return null;
+    let next = value.trim();
+    if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(next)) next = 'https://' + next;
+    try {
+      const url = new URL(next);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+      if (!url.hostname) return null;
+      const path = url.pathname === '/' ? '' : url.pathname.replace(/\/+$/, '');
+      return (url.origin + path).replace(/\/+$/, '');
+    } catch {
+      return null;
+    }
+  }
+
+  function flattenPoints(points) {
+    const out = new Array(points.length * 2);
+    for (let i = 0; i < points.length; i++) {
+      out[i * 2] = points[i][0];
+      out[i * 2 + 1] = points[i][1];
+    }
+    return out;
+  }
+
+  function readableError(error) {
+    if (error instanceof Error) return error.message;
+    return String(error);
+  }
+
+  function makeIdentity(secretKey, publicKey) {
+    const publicHex = bytesToHex(publicKey);
+    return {
+      secretKey,
+      publicKey,
+      publicHex,
+      owner: 'ed25519:' + publicHex,
+      short: publicHex.slice(0, 6) + '…' + publicHex.slice(-4)
+    };
+  }
+
+  function generateIdentity() {
+    const pair = nacl.sign.keyPair();
+    writeJSON(STORE.identity, {
+      secret: bytesToBase64(pair.secretKey),
+      public: bytesToBase64(pair.publicKey)
+    });
+    return makeIdentity(pair.secretKey, pair.publicKey);
+  }
+
+  function loadIdentity() {
+    try {
+      const saved = readJSON(STORE.identity);
+      if (saved && typeof saved.secret === 'string' && typeof saved.public === 'string') {
+        const secretKey = base64ToBytes(saved.secret);
+        const publicKey = base64ToBytes(saved.public);
+        if (secretKey.length === 64 && publicKey.length === 32) return makeIdentity(secretKey, publicKey);
+      }
+    } catch {}
+    return generateIdentity();
+  }
+
+  createApp({
+    setup() {
+      const fatal = ref('');
+      let initialIdentity = null;
+      try {
+        if (!window.nacl) throw new Error('The Ed25519 signing library could not be loaded. Check your connection and reload.');
+        if (!window.crypto || !window.crypto.subtle) throw new Error('Web Crypto is unavailable. Open this page over HTTPS or from localhost.');
+        initialIdentity = loadIdentity();
+      } catch (error) {
+        fatal.value = readableError(error);
+      }
+
+      const identity = ref(initialIdentity || { secretKey: null, publicKey: null, publicHex: '', owner: '', short: '' });
+      const savedPrefs = readJSON(STORE.prefs) || {};
+      const startingColor = normalizeHex(savedPrefs.color) || PALETTE[Math.floor(Math.random() * PALETTE.length)];
+      const color = ref(startingColor);
+      const hexDraft = ref(startingColor);
+      const hexError = ref(false);
+      const brushSize = ref(clamp(Number(savedPrefs.brush) || 6, 1, 48));
+
+      const queryRelay = normalizeRelay(new URLSearchParams(location.search).get('relay') || '');
+      const storedRelay = readStore(STORE.relay);
+      const relay = ref(queryRelay || normalizeRelay(storedRelay === 'https://rabta.t3nk.com' ? '' : storedRelay || '') || DEFAULT_RELAY);
+      const collection = ref(normalizeCollection(new URLSearchParams(location.search).get('collection')) || COLLECTION);
+      const relayHost = computed(() => {
+        try { return new URL(relay.value).host; } catch { return relay.value; }
+      });
+      const chatHref = computed(() => {
+        const params = new URLSearchParams();
+        if (relay.value !== DEFAULT_RELAY) params.set('relay', relay.value);
+        const query = params.toString();
+        return 'chat.html' + (query ? '?' + query : '');
+      });
+
+      const canvasEl = ref(null);
+      const canvasArea = ref(null);
+      const canvasSize = ref(520);
+      const strokes = shallowReactive([]);
+      const stats = reactive({ strokes: 0, painters: 0 });
+      const owners = new Set();
+      const seen = new Set();
+      const strokeKeys = new Set();
+
+      const loadingHistory = ref(true);
+      const historyError = ref('');
+      const publishing = ref(false);
+      const signing = ref(0);
+      const conn = ref('connecting');
+      const modal = ref(false);
+      const confirmRegenerate = ref(false);
+      const copied = ref('');
+      const relayDraft = ref(relay.value);
+      const relayError = ref('');
+      const health = reactive({ state: 'idle' });
+      const hover = ref(null);
+      const drawing = ref(false);
+      const cursor = reactive({ visible: false, x: 0, y: 0, size: 8 });
+      const isFullscreen = ref(false);
+      const nowTick = ref(Math.floor(Date.now() / 1000));
+      const toast = ref(null);
+      const outbox = shallowReactive([]);
+      const syncState = ref('idle');
+      const lastError = ref('');
+      const lastSyncAt = ref(0);
+
+      const connColor = computed(() => {
+        if (conn.value === 'live') return '#34d399';
+        if (conn.value === 'connecting' || conn.value === 'retrying') return '#fbbf24';
+        return '#fb7185';
+      });
+      const connLabel = computed(() => {
+        if (conn.value === 'live') return 'live';
+        if (conn.value === 'retrying') return 'resync';
+        if (conn.value === 'connecting') return 'connecting';
+        return 'offline';
+      });
+      const syncLabel = computed(() => {
+        if (syncState.value === 'error') return 'retrying';
+        if (outbox.length || signing.value) return 'signing…';
+        if (lastSyncAt.value) return 'synced';
+        return 'ready';
+      });
+      const syncColor = computed(() => {
+        if (syncState.value === 'error') return '#fb7185';
+        if (outbox.length || signing.value) return '#fbbf24';
+        return '#34d399';
+      });
+      const recentStrokes = computed(() => strokes.slice(-6).reverse());
+      const toastClass = computed(() => 'toast toast-' + ((toast.value && toast.value.tone) || 'info'));
+
+      let toastTimer = null;
+      function showToast(message, tone) {
+        toast.value = { message, tone: tone || 'info' };
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { toast.value = null; }, 4200);
+      }
+
+      function savePrefs() {
+        writeJSON(STORE.prefs, { color: color.value, brush: brushSize.value });
+      }
+      watch(color, (value) => {
+        hexDraft.value = value;
+        savePrefs();
+      });
+      watch(brushSize, (value) => {
+        savePrefs();
+        const rect = canvasEl.value && canvasEl.value.getBoundingClientRect();
+        if (rect) cursor.size = Math.max(6, (value / 1000) * rect.width + 2);
+      });
+      savePrefs();
+
+      function setColor(value) {
+        const normalized = normalizeHex(value);
+        if (normalized) color.value = normalized;
+      }
+      function commitHex() {
+        const normalized = normalizeHex(hexDraft.value);
+        if (!normalized) {
+          hexError.value = true;
+          setTimeout(() => { hexError.value = false; }, 900);
+          hexDraft.value = color.value;
+          return;
+        }
+        hexError.value = false;
+        color.value = normalized;
+      }
+      function onHexEnter(event) {
+        commitHex();
+        if (event && event.target) event.target.blur();
+      }
+
+      function timeAgo(timestamp) {
+        const delta = Math.max(0, nowTick.value - Number(timestamp || nowTick.value));
+        if (delta < 5) return 'now';
+        if (delta < 60) return delta + 's';
+        if (delta < 3600) return Math.floor(delta / 60) + 'm';
+        return Math.floor(delta / 3600) + 'h';
+      }
+      function pad(value) {
+        return String(Math.max(0, Math.min(1000, Math.round(value)))).padStart(4, '0');
+      }
+
+      let clockOffset = 0;
+      function serverNow() {
+        return Math.floor(Date.now() / 1000) + clockOffset;
+      }
+      function syncClock(response) {
+        const date = response && response.headers ? response.headers.get('date') : null;
+        if (!date) return;
+        const seconds = Math.floor(Date.parse(date) / 1000);
+        if (!Number.isFinite(seconds)) return;
+        clockOffset = clamp(seconds - Math.floor(Date.now() / 1000), -86400, 86400);
+      }
+
+      let ctx = null;
+      let active = null;
+      let activePointer = null;
+      let drawRaf = 0;
+      let redrawQueued = false;
+
+      function scheduleRedraw() {
+        if (redrawQueued) return;
+        redrawQueued = true;
+        drawRaf = requestAnimationFrame(() => {
+          redrawQueued = false;
+          redraw();
+        });
+      }
+
+      function drawStroke(stroke, preview) {
+        if (!ctx || !stroke || !stroke.points.length) return;
+        const points = stroke.points;
+        ctx.save();
+        ctx.strokeStyle = stroke.color;
+        ctx.fillStyle = stroke.color;
+        ctx.lineWidth = stroke.width;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.globalAlpha = 0.96;
+        if (preview) {
+          ctx.shadowColor = stroke.color;
+          ctx.shadowBlur = Math.min(22, 4 + stroke.width * 1.4);
+        }
+        if (points.length === 1) {
+          ctx.beginPath();
+          ctx.arc(points[0][0], points[0][1], Math.max(stroke.width / 2, 0.7), 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(points[0][0], points[0][1]);
+          for (let i = 1; i < points.length - 1; i++) {
+            const midX = (points[i][0] + points[i + 1][0]) / 2;
+            const midY = (points[i][1] + points[i + 1][1]) / 2;
+            ctx.quadraticCurveTo(points[i][0], points[i][1], midX, midY);
+          }
+          const last = points[points.length - 1];
+          ctx.lineTo(last[0], last[1]);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      function redraw() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, 1000, 1000);
+        for (let i = 0; i < strokes.length; i++) drawStroke(strokes[i], false);
+        if (active) drawStroke(active, true);
+      }
+
+      function resizeBacking() {
+        const element = canvasEl.value;
+        if (!element) return;
+        const rect = element.getBoundingClientRect();
+        if (!rect.width) return;
+        const ratio = Math.min(window.devicePixelRatio || 1, 2.5);
+        const pixels = Math.max(1, Math.round(rect.width * ratio));
+        if (element.width !== pixels || element.height !== pixels) {
+          element.width = pixels;
+          element.height = pixels;
+        }
+        ctx = element.getContext('2d');
+        if (!ctx) return;
+        ctx.setTransform(pixels / 1000, 0, 0, pixels / 1000, 0, 0);
+        redraw();
+      }
+
+      function measureCanvas() {
+        const area = canvasArea.value;
+        if (!area) return;
+        const rect = area.getBoundingClientRect();
+        const style = getComputedStyle(area);
+        const availableWidth = rect.width - parseFloat(style.paddingLeft || '0') - parseFloat(style.paddingRight || '0');
+        const availableHeight = rect.height - parseFloat(style.paddingTop || '0') - parseFloat(style.paddingBottom || '0');
+        const size = Math.max(120, Math.floor(Math.min(availableWidth, availableHeight, 1200)));
+        if (size !== canvasSize.value) {
+          canvasSize.value = size;
+          nextTick(resizeBacking);
+        }
+      }
+
+      function canvasPoint(event) {
+        const element = canvasEl.value;
+        if (!element) return [0, 0];
+        const rect = element.getBoundingClientRect();
+        return [
+          clamp(((event.clientX - rect.left) / rect.width) * 1000, 0, 1000),
+          clamp(((event.clientY - rect.top) / rect.height) * 1000, 0, 1000)
+        ];
+      }
+
+      function updateCursor(event, force) {
+        const element = canvasEl.value;
+        if (!element) return;
+        const rect = element.getBoundingClientRect();
+        const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+        if (event.pointerType === 'touch') {
+          cursor.visible = false;
+          return;
+        }
+        cursor.x = event.clientX;
+        cursor.y = event.clientY;
+        cursor.size = Math.max(6, (brushSize.value / 1000) * rect.width + 2);
+        cursor.visible = inside || force === true;
+        if (inside) {
+          const point = canvasPoint(event);
+          hover.value = { x: Math.round(point[0]), y: Math.round(point[1]) };
+        } else if (!active) {
+          hover.value = null;
+        }
+      }
+
+      function drawSegment(from, to) {
+        if (!ctx || !active) return;
+        ctx.save();
+        ctx.strokeStyle = active.color;
+        ctx.lineWidth = active.width;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.globalAlpha = 0.96;
+        ctx.shadowColor = active.color;
+        ctx.shadowBlur = Math.min(22, 4 + active.width * 1.4);
+        ctx.beginPath();
+        ctx.moveTo(from[0], from[1]);
+        ctx.lineTo(to[0], to[1]);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function onPointerDown(event) {
+        if (fatal.value || active) return;
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        const point = canvasPoint(event);
+        drawing.value = true;
+        active = { color: color.value, width: brushSize.value, points: [point] };
+        activePointer = event.pointerId;
+        try { canvasEl.value && canvasEl.value.setPointerCapture(event.pointerId); } catch {}
+        updateCursor(event, true);
+        drawStroke(active, true);
+        event.preventDefault();
+      }
+
+      function onPointerMove(event) {
+        updateCursor(event);
+        if (!active || event.pointerId !== activePointer) return;
+        const point = canvasPoint(event);
+        const last = active.points[active.points.length - 1];
+        const distance = Math.hypot(point[0] - last[0], point[1] - last[1]);
+        if (distance < Math.max(0.9, active.width * 0.06)) return;
+        active.points.push(point);
+        drawSegment(last, point);
+        if (active.points.length > 12000) {
+          const captured = active;
+          active = null;
+          drawing.value = false;
+          commitStroke(captured);
+          scheduleRedraw();
+        }
+        event.preventDefault();
+      }
+
+      function onPointerUp(event) {
+        if (!active) return;
+        if (event && event.pointerId !== activePointer) return;
+        const pointer = activePointer;
+        const captured = active;
+        active = null;
+        activePointer = null;
+        drawing.value = false;
+        try { canvasEl.value && canvasEl.value.releasePointerCapture(pointer); } catch {}
+        commitStroke(captured);
+        scheduleRedraw();
+      }
+
+      function onPointerLeave() {
+        cursor.visible = false;
+        if (!active) hover.value = null;
+      }
+
+      function onPointerEnter(event) {
+        updateCursor(event);
+      }
+
+      function onWindowPointerUp(event) {
+        if (active) onPointerUp(event);
+      }
+
+      function compareRawEvents(a, b) {
+        const timeA = Number(a.created_at) || 0;
+        const timeB = Number(b.created_at) || 0;
+        if (timeA !== timeB) return timeA - timeB;
+        const da = a.data || {};
+        const db = b.data || {};
+        if (da.sid && da.sid === db.sid) return (Number(da.seq) || 0) - (Number(db.seq) || 0);
+        const idA = String(a.id || '');
+        const idB = String(b.id || '');
+        return idA < idB ? -1 : idA > idB ? 1 : 0;
+      }
+
+      function addStroke(stroke) {
+        if (!stroke) return false;
+        const key = stroke.sid ? stroke.owner + '|' + stroke.sid + '|' + stroke.seq : 'id:' + stroke.id;
+        if (strokeKeys.has(key)) return false;
+        strokeKeys.add(key);
+        if (stroke.id) seen.add(stroke.id);
+        if (!stroke.renderKey) stroke.renderKey = stroke.id ? 'ev:' + stroke.id : 'local:' + key;
+        strokes.push(stroke);
+        owners.add(stroke.owner);
+        stats.strokes = strokes.length;
+        stats.painters = owners.size;
+        scheduleRedraw();
+        return true;
+      }
+
+      function parseEvent(event) {
+        if (!event || typeof event !== 'object') return null;
+        const data = event.data;
+        if (!data || data.v !== 1 || typeof data.color !== 'string' || !Array.isArray(data.p)) return null;
+        if (data.p.length < 2 || data.p.length > MAX_POINTS * 2 || data.p.length % 2 !== 0) return null;
+        const eventColor = normalizeHex(data.color);
+        if (!eventColor) return null;
+        const width = Number(data.w);
+        if (!Number.isFinite(width)) return null;
+        const owner = typeof event.owner === 'string' ? event.owner.toLowerCase() : '';
+        if (!/^ed25519:[0-9a-f]{64}$/.test(owner)) return null;
+        const points = [];
+        for (let i = 0; i < data.p.length; i += 2) {
+          const x = Number(data.p[i]);
+          const y = Number(data.p[i + 1]);
+          if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+          points.push([clamp(Math.round(x), 0, 1000), clamp(Math.round(y), 0, 1000)]);
+        }
+        const sid = typeof data.sid === 'string' && /^[0-9a-f]{1,64}$/i.test(data.sid) ? data.sid.toLowerCase() : '';
+        const seq = Number.isInteger(data.seq) && data.seq >= 0 && data.seq < 100000 ? data.seq : 0;
+        const createdAt = Number.isFinite(event.created_at) ? event.created_at : Math.floor(Date.now() / 1000);
+        return {
+          renderKey: event.id ? 'ev:' + event.id : 'ev:' + randomHex(8),
+          id: typeof event.id === 'string' ? event.id : null,
+          owner,
+          color: eventColor,
+          width: clamp(width, 1, 48),
+          points,
+          sid,
+          seq,
+          created_at: createdAt,
+          synced: true
+        };
+      }
+
+      function addEvent(event) {
+        if (!event || typeof event.id !== 'string' || seen.has(event.id)) return false;
+        const stroke = parseEvent(event);
+        if (!stroke) {
+          seen.add(event.id);
+          return false;
+        }
+        const key = stroke.sid ? stroke.owner + '|' + stroke.sid + '|' + stroke.seq : 'id:' + stroke.id;
+        if (strokeKeys.has(key)) {
+          seen.add(event.id);
+          return false;
+        }
+        return addStroke(stroke);
+      }
+
+      function commitStroke(finished) {
+        if (!finished || !finished.points.length || fatal.value) return;
+        const stamp = serverNow() - 1;
+        const sid = randomHex(8);
+        const chunks = [];
+        for (let start = 0; start < finished.points.length;) {
+          const end = Math.min(start + MAX_POINTS, finished.points.length);
+          chunks.push(finished.points.slice(start, end));
+          if (end >= finished.points.length) break;
+          start = end - 1;
+        }
+
+        const payloads = [];
+        chunks.forEach((rawPoints, seq) => {
+          const points = rawPoints.map((point) => [Math.round(point[0]), Math.round(point[1])]);
+          const local = {
+            renderKey: 'local:' + sid + ':' + seq,
+            id: null,
+            owner: identity.value.owner,
+            color: finished.color,
+            width: Math.round(finished.width),
+            points,
+            sid,
+            seq,
+            created_at: stamp,
+            synced: false
+          };
+          addStroke(local);
+          payloads.push({
+            stroke: local,
+            data: { v: 1, sid, seq, color: finished.color, w: local.width, p: flattenPoints(points) }
+          });
+        });
+
+        (async () => {
+          for (const payload of payloads) {
+            signing.value += 1;
+            publishing.value = true;
+            try {
+              const envelope = await buildEnvelope(payload.data, stamp);
+              enqueue(envelope, payload.stroke);
+            } catch (error) {
+              showToast('Could not sign this stroke: ' + readableError(error), 'error');
+            } finally {
+              signing.value = Math.max(0, signing.value - 1);
+              publishing.value = signing.value > 0;
+            }
+          }
+        })();
+      }
+
+      async function buildEnvelope(data, createdAt) {
+        const timestamp = Number.isFinite(createdAt) ? createdAt : serverNow() - 1;
+        const fields = {
+          collection: collection.value,
+          created_at: timestamp,
+          expires_at: timestamp + TTL_SECONDS,
+          owner: identity.value.owner,
+          labels: ['stroke'],
+          data
+        };
+        const canonicalBytes = new TextEncoder().encode(canonical(fields));
+        const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', canonicalBytes));
+        const signature = nacl.sign.detached(digest, identity.value.secretKey);
+        return {
+          ...fields,
+          id: bytesToHex(digest),
+          sig: bytesToHex(signature)
+        };
+      }
+
+      let flushing = false;
+      let flushTimer = null;
+      function scheduleFlush(delay) {
+        clearTimeout(flushTimer);
+        flushTimer = setTimeout(flushOutbox, delay);
+      }
+      function enqueue(envelope, stroke) {
+        outbox.push({ envelope, stroke, relay: relay.value });
+        syncState.value = 'syncing';
+        flushOutbox();
+      }
+
+      async function flushOutbox() {
+        if (flushing) return;
+        if (!outbox.length) {
+          if (syncState.value !== 'error') syncState.value = 'idle';
+          return;
+        }
+        flushing = true;
+        while (outbox.length) {
+          const item = outbox[0];
+          const wasError = syncState.value === 'error';
+          try {
+            const response = await fetch(item.relay + '/api/v1/events', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify(item.envelope)
+            });
+            syncClock(response);
+            let body = null;
+            const text = await response.text();
+            try { body = JSON.parse(text); } catch {}
+            if (!response.ok) {
+              const failure = new Error((body && body.code) || ('HTTP ' + response.status));
+              failure.permanent = response.status >= 400 && response.status < 500 && response.status !== 429;
+              throw failure;
+            }
+            if (item.stroke) {
+              item.stroke.id = (body && body.id) || item.envelope.id;
+              item.stroke.synced = true;
+            }
+            seen.add(item.envelope.id);
+            outbox.shift();
+            lastError.value = '';
+            lastSyncAt.value = Date.now();
+            syncState.value = 'syncing';
+          } catch (error) {
+            if (error && error.permanent) {
+              outbox.shift();
+              lastError.value = readableError(error);
+              showToast('The relay rejected a stroke: ' + readableError(error) + '. It stays visible on this device only.', 'error');
+              syncState.value = 'idle';
+              continue;
+            }
+            lastError.value = readableError(error);
+            syncState.value = 'error';
+            if (!wasError) showToast('The relay is unreachable. Strokes are queued and will retry.', 'error');
+            scheduleFlush(Math.min(30000, 2000 * Math.max(1, outbox.length)));
+            break;
+          }
+        }
+        flushing = false;
+        if (!outbox.length && syncState.value !== 'error') syncState.value = 'idle';
+      }
+
+      let historyToken = 0;
+      async function loadHistory() {
+        const token = ++historyToken;
+        loadingHistory.value = true;
+        historyError.value = '';
+        const collected = [];
+        let cursor = null;
+        let pages = 0;
+        try {
+          do {
+            const params = new URLSearchParams({ collection: collection.value, limit: '100' });
+            if (cursor) params.set('cursor', cursor);
+            const response = await fetch(relay.value + '/api/v1/events?' + params.toString(), { cache: 'no-store' });
+            syncClock(response);
+            if (!response.ok) {
+              let body = null;
+              try { body = await response.json(); } catch {}
+              throw new Error((body && body.code) || ('HTTP ' + response.status));
+            }
+            const body = await response.json();
+            if (token !== historyToken) return;
+            if (Array.isArray(body.events)) collected.push(...body.events);
+            cursor = body.next_cursor || null;
+            pages += 1;
+          } while (cursor && pages < MAX_PAGES);
+
+          collected.sort(compareRawEvents);
+          for (const event of collected) addEvent(event);
+          if (token === historyToken) {
+            loadingHistory.value = false;
+            if (conn.value === 'connecting') conn.value = 'live';
+          }
+        } catch (error) {
+          if (token !== historyToken) return;
+          loadingHistory.value = false;
+          historyError.value = readableError(error);
+          showToast('Could not load the canvas history from ' + relayHost.value + '.', 'error');
+        }
+      }
+
+      let stream = null;
+      let reconnectTimer = null;
+      function scheduleReconnect() {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(() => {
+          if (!document.hidden) connectStream();
+        }, 5000);
+      }
+
+      function connectStream() {
+        if (stream) {
+          stream.close();
+          stream = null;
+        }
+        clearTimeout(reconnectTimer);
+        conn.value = 'connecting';
+        try {
+          stream = new EventSource(relay.value + '/api/v1/events/stream?collection=' + encodeURIComponent(collection.value));
+        } catch (error) {
+          conn.value = 'offline';
+          scheduleReconnect();
+          return;
+        }
+        stream.onopen = () => { conn.value = 'live'; };
+        stream.onmessage = (event) => {
+          try {
+            const payload = JSON.parse(event.data);
+            addEvent(payload);
+            conn.value = 'live';
+          } catch {}
+        };
+        stream.onerror = () => {
+          if (!stream) return;
+          if (stream.readyState === EventSource.CLOSED) {
+            conn.value = 'offline';
+            scheduleReconnect();
+          } else {
+            conn.value = 'retrying';
+          }
+        };
+      }
+
+      async function fetchHealth() {
+        health.state = 'loading';
+        try {
+          const response = await fetch(relay.value + '/api/v1/health', { cache: 'no-store' });
+          syncClock(response);
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          const body = await response.json();
+          Object.assign(health, { state: 'ok', status: body.status, live_events: body.live_events, live_blobs: body.live_blobs });
+        } catch (error) {
+          Object.assign(health, { state: 'error', error: readableError(error) });
+        }
+      }
+
+      function resetCanvas() {
+        active = null;
+        activePointer = null;
+        drawing.value = false;
+        strokes.splice(0, strokes.length);
+        owners.clear();
+        seen.clear();
+        strokeKeys.clear();
+        stats.strokes = 0;
+        stats.painters = 0;
+        historyError.value = '';
+        hover.value = null;
+        scheduleRedraw();
+      }
+
+      function openModal() {
+        modal.value = true;
+        relayDraft.value = relay.value;
+        relayError.value = '';
+        confirmRegenerate.value = false;
+        copied.value = '';
+        fetchHealth();
+      }
+      function closeModal() {
+        modal.value = false;
+        confirmRegenerate.value = false;
+        copied.value = '';
+      }
+
+      function applyRelay() {
+        const next = normalizeRelay(relayDraft.value);
+        if (!next) {
+          relayError.value = 'Enter a valid http(s) relay URL.';
+          return;
+        }
+        relayError.value = '';
+        if (next === relay.value) {
+          closeModal();
+          return;
+        }
+        relay.value = next;
+        writeStore(STORE.relay, next);
+        relayDraft.value = next;
+        try {
+          const url = new URL(location.href);
+          if (next === DEFAULT_RELAY) url.searchParams.delete('relay');
+          else url.searchParams.set('relay', next);
+          history.replaceState(null, '', url.toString());
+        } catch {}
+        resetCanvas();
+        closeModal();
+        connectStream();
+        loadHistory();
+        fetchHealth();
+        showToast('Relay switched to ' + relayHost.value + '.', 'info');
+      }
+
+      function regenerateIdentity() {
+        identity.value = generateIdentity();
+        confirmRegenerate.value = false;
+        showToast('New Ed25519 key generated and stored on this device.', 'success');
+      }
+
+      function fallbackCopy(text) {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        try { document.execCommand('copy'); } catch {}
+        document.body.removeChild(area);
+      }
+
+      async function copyText(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch {
+          fallbackCopy(text);
+          return true;
+        }
+      }
+
+      async function copyKey() {
+        await copyText(identity.value.owner);
+        copied.value = 'key';
+        setTimeout(() => { copied.value = ''; }, 1600);
+        showToast('Public key copied.', 'success');
+      }
+
+      async function copyLink() {
+        const url = new URL(location.href);
+        if (relay.value === DEFAULT_RELAY) url.searchParams.delete('relay');
+        else url.searchParams.set('relay', relay.value);
+        await copyText(url.toString());
+        showToast('Link copied. Anyone who opens it paints with you.', 'success');
+      }
+
+      function retryHistory() {
+        loadHistory();
+      }
+
+      function toggleFullscreen() {
+        if (document.fullscreenElement) {
+          if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        } else if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {
+            showToast('Fullscreen was blocked by the browser.', 'error');
+          });
+        }
+      }
+
+      function onFullscreenChange() {
+        isFullscreen.value = Boolean(document.fullscreenElement);
+      }
+
+      function onKeyDown(event) {
+        if (event.key === 'Escape' && modal.value) closeModal();
+      }
+
+      function onOnline() {
+        scheduleFlush(400);
+        if (!stream || stream.readyState === EventSource.CLOSED) connectStream();
+      }
+
+      let resizeObserver = null;
+      let clockTimer = null;
+
+      onMounted(() => {
+        measureCanvas();
+        nextTick(() => {
+          measureCanvas();
+          resizeBacking();
+        });
+        if (window.ResizeObserver && canvasArea.value) {
+          resizeObserver = new ResizeObserver(measureCanvas);
+          resizeObserver.observe(canvasArea.value);
+        }
+        window.addEventListener('resize', measureCanvas);
+        window.addEventListener('online', onOnline);
+        window.addEventListener('pointerup', onWindowPointerUp);
+        window.addEventListener('pointercancel', onWindowPointerUp);
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('keydown', onKeyDown);
+        clockTimer = setInterval(() => {
+          nowTick.value = Math.floor(Date.now() / 1000);
+        }, 15000);
+        connectStream();
+        loadHistory();
+      });
+
+      onBeforeUnmount(() => {
+        if (resizeObserver) resizeObserver.disconnect();
+        if (stream) stream.close();
+        if (clockTimer) clearInterval(clockTimer);
+        if (toastTimer) clearTimeout(toastTimer);
+        clearTimeout(reconnectTimer);
+        clearTimeout(flushTimer);
+        cancelAnimationFrame(drawRaf);
+        window.removeEventListener('resize', measureCanvas);
+        window.removeEventListener('online', onOnline);
+        window.removeEventListener('pointerup', onWindowPointerUp);
+        window.removeEventListener('pointercancel', onWindowPointerUp);
+        document.removeEventListener('fullscreenchange', onFullscreenChange);
+        document.removeEventListener('keydown', onKeyDown);
+      });
+
+      return {
+        palette: PALETTE,
+        identity,
+        fatal,
+        color,
+        hexDraft,
+        hexError,
+        brushSize,
+        relay,
+        relayHost,
+        chatHref,
+        collection,
+        relayDraft,
+        relayError,
+        health,
+        canvasEl,
+        canvasArea,
+        canvasSize,
+        strokes,
+        stats,
+        loadingHistory,
+        historyError,
+        publishing,
+        conn,
+        connColor,
+        connLabel,
+        syncColor,
+        syncLabel,
+        modal,
+        confirmRegenerate,
+        copied,
+        hover,
+        drawing,
+        cursor,
+        isFullscreen,
+        toast,
+        toastClass,
+        recentStrokes,
+        onPointerDown,
+        onPointerMove,
+        onPointerUp,
+        onPointerLeave,
+        onPointerEnter,
+        setColor,
+        commitHex,
+        onHexEnter,
+        timeAgo,
+        pad,
+        openModal,
+        closeModal,
+        applyRelay,
+        regenerateIdentity,
+        copyKey,
+        copyLink,
+        retryHistory,
+        toggleFullscreen,
+        ownerGradient,
+        shortOwner
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>
