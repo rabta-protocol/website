@@ -61,22 +61,28 @@
   }
   ::selection { background: #d1fae5; color: #064e3b; }
 
-  main { position: relative; z-index: 1; width: 100%; max-width: 72rem; margin: 0 auto; padding: 1.25rem 1.5rem 3rem; }
-  @media (min-width: 48rem) { main { padding: 1.75rem 2.5rem 4rem; } }
+  main { position: relative; z-index: 1; width: 100%; max-width: 74rem; margin: 0 auto; padding: 1.5rem 1.75rem 4.5rem; }
+  @media (min-width: 48rem) { main { padding: 2.25rem 3rem 6.5rem; } }
 
   /* hero */
-  .hero { padding: 3.5rem 0 0; }
-  @media (min-width: 48rem) { .hero { padding: 5.5rem 0 0; } }
+  .hero { padding: 4rem 0 0; }
+  @media (min-width: 48rem) { .hero { padding: 6.5rem 0 0; } }
   .eyebrow {
     display: inline-flex; align-items: center; gap: .5rem;
-    padding: .4rem .7rem .4rem .55rem;
+    padding: .45rem .8rem .45rem .65rem;
     border: 1px solid var(--line); border-radius: 999px;
     background: #fff;
     font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
     color: #52525b; cursor: pointer; user-select: none;
-    transition: border-color .2s, background .2s;
+    transition: transform .25s cubic-bezier(0.16, 1, 0.3, 1), border-color .2s ease, background .2s ease, box-shadow .25s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .eyebrow:hover { border-color: var(--line-strong); background: #fff; }
+  .eyebrow:hover {
+    border-color: var(--line-strong);
+    background: #fafafa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, .06);
+  }
+  .eyebrow:active { transform: translateY(0) scale(.97); }
   .eyebrow[data-copied] { border-color: #6ee7b7; background: #ecfdf5; color: #047857; }
   .live-dot { position: relative; width: .4rem; height: .4rem; flex: none; border-radius: 50%; background: var(--accent); }
   .live-dot::after {
@@ -87,52 +93,62 @@
 
   .hero-title {
     display: flex; flex-wrap: wrap; align-items: flex-end; gap: .5rem 1rem;
-    margin: 1.5rem 0 0;
-    font-size: clamp(4rem, 13vw, 8.5rem);
+    margin: 1.75rem 0 0;
+    font-size: clamp(4.25rem, 13vw, 8.75rem);
     line-height: .86;
     letter-spacing: -.065em;
     font-weight: 600;
   }
   .hero-title .word { display: inline-block; }
   .pron {
-    display: inline-block; margin: .9rem 0 0; padding: .28rem .5rem;
+    display: inline-block; margin: 1rem 0 0; padding: .32rem .55rem;
     border: 1px dashed var(--line-strong); border-radius: .35rem;
     font-family: var(--mono); font-size: .8125rem; font-weight: 400; line-height: 1.2; letter-spacing: .08em;
     color: var(--muted); white-space: nowrap;
   }
   .lede {
-    max-width: 44rem; margin: 1.75rem 0 0;
-    font-size: clamp(1.25rem, 2.1vw, 1.65rem); line-height: 1.5; letter-spacing: -.02em; color: var(--muted);
+    max-width: 44rem; margin: 2rem 0 0;
+    font-size: clamp(1.25rem, 2.1vw, 1.65rem); line-height: 1.55; letter-spacing: -.02em; color: var(--muted);
   }
   .lede b { color: var(--ink); font-weight: 600; }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 2rem; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2.25rem; }
   .btn {
     display: inline-flex; align-items: center; gap: .5rem;
-    padding: .8rem 1.2rem; border-radius: 999px; border: 1px solid transparent;
+    padding: .85rem 1.35rem; border-radius: 999px; border: 1px solid transparent;
     font-size: 1rem; font-weight: 500; text-decoration: none;
-    transition: transform .25s cubic-bezier(.2, .8, .2, 1), background .2s, border-color .2s, box-shadow .25s, color .2s;
+    transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1), background .2s ease, border-color .2s ease, box-shadow .28s cubic-bezier(0.16, 1, 0.3, 1), color .2s ease;
   }
   .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-  .btn-ghost { border-color: var(--line-strong); background: #fff; color: var(--ink); }
-  .btn-ghost:hover { transform: translateY(-2px); border-color: var(--ink); background: #fff; }
+  .btn-ghost { border-color: var(--line-strong); background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .04); }
+  .btn-ghost:hover {
+    transform: translateY(-2px);
+    border-color: var(--ink);
+    background: #fafafa;
+    box-shadow: 0 8px 18px -8px rgba(0, 0, 0, .12);
+  }
+  .btn-ghost:active { transform: translateY(0) scale(.98); }
   .btn-github svg { width: 1rem; height: 1rem; }
   .btn-agent { border-color: rgba(16, 185, 129, .38); }
   .btn-agent .agent-icon { width: 1rem; height: 1rem; color: #059669; }
-  .btn-agent:hover { border-color: var(--accent); background: #f0fdf4; }
+  .btn-agent:hover {
+    border-color: var(--accent);
+    background: #f0fdf4;
+    box-shadow: 0 8px 18px -8px rgba(16, 185, 129, .22);
+  }
+  .btn-agent:active { transform: translateY(0) scale(.98); }
   .hero-meta {
-    display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .75rem;
-    margin-top: 1.75rem;
+    display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .85rem;
+    margin-top: 2.25rem;
     font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle);
   }
-  .hero-meta span + span::before { content: "·"; margin-right: .75rem; color: #d4d4d8; }
+  .hero-meta span + span::before { content: "·"; margin-right: .85rem; color: #d4d4d8; }
 
   /* ticker */
   .ticker {
-    position: relative; margin-top: 3rem; padding: .7rem 0;
+    position: relative; margin-top: 5rem; padding: 1rem 0;
     border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    background: #fafafa;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
   }
   .ticker-track { display: flex; width: max-content; animation: ticker 34s linear infinite; }
   .ticker:hover .ticker-track { animation-play-state: paused; }
@@ -145,57 +161,205 @@
   @keyframes ticker { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
 
   /* sections */
-  .section { margin-top: 4.5rem; }
-  .section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .35rem 1rem; margin-bottom: 1rem; }
+  .section { margin-top: 5.5rem; }
+  @media (min-width: 48rem) { .section { margin-top: 7rem; } }
+  .section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem 1.25rem; margin-bottom: 1.5rem; }
   .section-head h2 {
-    margin: 0; font-size: clamp(1.5rem, 2.5vw, 1.875rem); font-weight: 600;
+    margin: 0; font-size: clamp(1.6rem, 2.7vw, 2rem); font-weight: 600;
     line-height: 1.2; letter-spacing: -.035em; color: var(--ink);
   }
-  .section-head span { font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle); }
+  .section-head span { font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle); }
 
   /* features */
-  .feature-grid { display: grid; gap: .75rem; }
-  @media (min-width: 46rem) { .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 70rem) { .feature-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .feature-grid { display: grid; gap: 1rem; }
+  @media (min-width: 44rem) { .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 66rem) { .feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .feature {
-    display: flex; flex-direction: column; gap: .55rem;
-    min-height: 12.5rem; padding: 1.15rem;
-    border: 1px solid var(--line); border-radius: .9rem;
+    position: relative;
+    display: flex; flex-direction: column; gap: .7rem;
+    min-height: 14.5rem; padding: 1.4rem 1.5rem;
+    border: 1px solid var(--line); border-radius: .95rem;
     background: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1), border-color .22s ease, background .22s ease, box-shadow .28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .feature:hover {
+    transform: translateY(-3px);
+    border-color: var(--line-strong);
+    box-shadow: 0 12px 28px -14px rgba(0, 0, 0, .1);
+  }
+  .feature:active {
+    transform: translateY(-1px) scale(.99);
+  }
+  .feature:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .feature.is-active {
+    border-color: var(--tone);
+    background: color-mix(in srgb, var(--tone) 4%, #fff);
+    box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--tone) 35%, transparent);
   }
   .feature-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
   .feature-icon {
-    display: grid; place-items: center; width: 2.1rem; height: 2.1rem;
-    border: 1px solid var(--line); border-radius: .6rem; background: #fff; color: var(--tone);
+    display: grid; place-items: center; width: 2.35rem; height: 2.35rem;
+    border: 1px solid var(--line); border-radius: .65rem; background: #fff; color: var(--tone);
+    transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .28s ease;
   }
-  .feature-icon svg { width: 1rem; height: 1rem; }
-  .feature code { font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle); }
+  .feature-icon svg { width: 1.15rem; height: 1.15rem; }
+  .feature:hover .feature-icon, .feature.is-active .feature-icon {
+    transform: scale(1.08);
+    box-shadow: 0 6px 14px -8px color-mix(in srgb, var(--tone) 60%, transparent);
+  }
+  .feature-tag {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle);
+  }
+  .feature.is-active .feature-tag { color: var(--tone); font-weight: 500; }
+  .feature-active-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--tone);
+    opacity: 0; transform: scale(.5); transition: opacity .2s, transform .2s;
+  }
+  .feature.is-active .feature-active-dot { opacity: 1; transform: scale(1); }
   .feature h3 { margin: .35rem 0 0; font-size: 1.125rem; font-weight: 600; line-height: 1.25; letter-spacing: -.02em; }
   .feature p { margin: 0; color: var(--muted); font-size: .9375rem; line-height: 1.55; }
+  .feature-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    margin-top: auto; padding-top: 1rem;
+  }
+  .feature-pills { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .feature-pill {
+    padding: .2rem .48rem; border-radius: .35rem;
+    background: rgba(14, 14, 16, .04); color: var(--subtle);
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .feature-action {
+    display: inline-flex; align-items: center; gap: .25rem;
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .02em;
+    color: var(--subtle); opacity: .6;
+    transition: opacity .2s, color .2s, transform .2s;
+    white-space: nowrap;
+  }
+  .feature:hover .feature-action, .feature.is-active .feature-action {
+    opacity: 1; color: var(--tone); transform: translateX(2px);
+  }
   .feature[data-tone="emerald"] { --tone: #10b981; }
   .feature[data-tone="sky"] { --tone: #0ea5e9; }
   .feature[data-tone="violet"] { --tone: #8b5cf6; }
   .feature[data-tone="amber"] { --tone: #d97706; }
+  .feature[data-tone="rose"] { --tone: #f43f5e; }
+  .feature[data-tone="teal"] { --tone: #0d9488; }
+
+  /* feature inspector */
+  .feature-inspector {
+    margin-top: 1.35rem;
+    border: 1px solid var(--line-strong); border-radius: .95rem;
+    background: #0d0e12;
+    color: #e4e4e7;
+    overflow: hidden;
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, .35);
+  }
+  .inspector-head {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.25rem;
+    padding: .9rem 1.35rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    background: #13141a;
+  }
+  .inspector-meta { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+  .inspector-dots { display: flex; align-items: center; gap: .38rem; }
+  .inspector-dots span { width: .6rem; height: .6rem; border-radius: 50%; }
+  .inspector-dots span:nth-child(1) { background: #ef4444; opacity: .85; }
+  .inspector-dots span:nth-child(2) { background: #f59e0b; opacity: .85; }
+  .inspector-dots span:nth-child(3) { background: #10b981; opacity: .85; }
+  .inspector-title {
+    font-size: .875rem; font-weight: 600; color: #fff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .inspector-badge {
+    font-family: var(--mono); font-size: .75rem; letter-spacing: .02em;
+    padding: .22rem .55rem; border-radius: .35rem;
+    background: rgba(255, 255, 255, .08); color: var(--ins-tone, #10b981);
+    white-space: nowrap;
+  }
+  .inspector-copy {
+    display: inline-flex; align-items: center; gap: .45rem;
+    padding: .4rem .85rem; border-radius: .45rem;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .05); color: #d4d4d8;
+    font-family: var(--mono); font-size: .75rem; font-weight: 500;
+    cursor: pointer; user-select: none;
+    transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .inspector-copy:hover {
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    border-color: rgba(255, 255, 255, .28);
+    transform: translateY(-1px);
+  }
+  .inspector-copy:active { transform: translateY(0) scale(.97); }
+  .inspector-copy svg { width: .875rem; height: .875rem; }
+  .inspector-copy[data-copied] {
+    color: #34d399; border-color: rgba(52, 211, 153, .45); background: rgba(52, 211, 153, .12);
+  }
+  .inspector-body {
+    position: relative;
+    max-height: 24rem; overflow: auto;
+    padding: 1.35rem 1.5rem;
+    font-family: var(--mono); font-size: .8125rem; line-height: 1.65;
+    color: #d4d4d8;
+    background: #0d0e12;
+    -webkit-overflow-scrolling: touch;
+  }
+  .inspector-body pre { margin: 0; font-family: inherit; font-size: inherit; tab-size: 2; }
+  .inspector-body code { font-family: inherit; font-size: inherit; white-space: pre; }
+  @keyframes code-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .inspector-body code.is-switching {
+    animation: code-in .22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .c-kw { color: #f472b6; font-weight: 500; }
+  .c-prop { color: #38bdf8; }
+  .c-str { color: #34d399; }
+  .c-num { color: #fbbf24; }
+  .c-cmt { color: #71717a; font-style: italic; }
+  .c-pun { color: #94a3b8; }
+  .c-cmd { color: #a78bfa; font-weight: 500; }
+  .inspector-foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1.25rem;
+    padding: .75rem 1.35rem;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    background: #101117;
+    font-family: var(--mono); font-size: .75rem; color: #a1a1aa;
+  }
+  .inspector-foot-tag { display: inline-flex; align-items: center; gap: .45rem; }
+  .inspector-foot-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ins-tone, #10b981); }
+  .inspector-guarantee { color: #e4e4e7; }
 
   /* cards */
-  .cards { display: grid; gap: .75rem; }
+  .cards { display: grid; gap: 1.15rem; }
   @media (min-width: 46rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .card {
     position: relative; isolation: isolate;
-    display: flex; flex-direction: column; gap: .25rem;
-    min-height: 15.5rem; padding: 1.25rem;
-    border: 1px solid var(--line); border-radius: .9rem;
+    display: flex; flex-direction: column; gap: .35rem;
+    min-height: 16.5rem; padding: 1.55rem 1.65rem;
+    border: 1px solid var(--line); border-radius: .95rem;
     background: #fff;
     color: inherit; text-decoration: none; overflow: hidden;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
-    transition: transform .4s cubic-bezier(.2, .8, .2, 1), border-color .3s, background .3s, box-shadow .4s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
+    transition: transform .32s cubic-bezier(0.16, 1, 0.3, 1), border-color .24s ease, background .24s ease, box-shadow .32s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .card:hover, .card:focus-visible {
-    transform: translateY(-5px); border-color: var(--line-strong);
-    background: color-mix(in srgb, var(--tone) 4%, #fff);
-    box-shadow: 0 24px 48px -32px rgba(0, 0, 0, .55);
+    transform: translateY(-4px); border-color: var(--line-strong);
+    background: #fafafa;
+    box-shadow: 0 16px 32px -16px rgba(0, 0, 0, .1);
   }
+  .card:active { transform: translateY(-1px) scale(.99); }
   .card:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   .card[data-tone="emerald"] { --tone: #10b981; }
   .card[data-tone="violet"] { --tone: #8b5cf6; }
@@ -203,101 +367,168 @@
   .card-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
   .card-index { font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; color: var(--subtle); }
   .card-icon {
-    display: grid; place-items: center; width: 2.1rem; height: 2.1rem;
-    border: 1px solid var(--line); border-radius: .6rem; background: #fff; color: var(--tone);
-    transition: transform .4s cubic-bezier(.2, .8, .2, 1), box-shadow .4s;
+    display: grid; place-items: center; width: 2.35rem; height: 2.35rem;
+    border: 1px solid var(--line); border-radius: .65rem; background: #fff; color: var(--tone);
+    transition: transform .32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .32s ease;
   }
-  .card-icon svg { width: 1rem; height: 1rem; }
-  .card:hover .card-icon { transform: rotate(-6deg) scale(1.06); box-shadow: 0 8px 18px -12px color-mix(in srgb, var(--tone) 70%, transparent); }
-  .card h3 { margin: 1.45rem 0 .3rem; font-size: 1.375rem; font-weight: 600; line-height: 1.2; letter-spacing: -.025em; }
+  .card-icon svg { width: 1.1rem; height: 1.1rem; }
+  .card:hover .card-icon { transform: rotate(-6deg) scale(1.08); box-shadow: 0 8px 18px -12px color-mix(in srgb, var(--tone) 70%, transparent); }
+  .card h3 { margin: 1.55rem 0 .35rem; font-size: 1.375rem; font-weight: 600; line-height: 1.2; letter-spacing: -.025em; }
   .card p { margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.55; }
-  .card-foot { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: auto; padding-top: 1.1rem; }
-  .card-foot code { font-family: var(--mono); font-size: .75rem; letter-spacing: .04em; color: var(--subtle); transition: color .3s; }
+  .card-foot { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: auto; padding-top: 1.25rem; }
+  .card-foot code { font-family: var(--mono); font-size: .75rem; letter-spacing: .04em; color: var(--subtle); transition: color .24s; }
   .card:hover .card-foot code { color: var(--tone); }
-  .card-arrow { color: var(--subtle); transform: translateX(-3px); opacity: .35; transition: transform .3s, opacity .3s, color .3s; }
+  .card-arrow { color: var(--subtle); transform: translateX(-3px); opacity: .35; transition: transform .32s cubic-bezier(0.16, 1, 0.3, 1), opacity .24s, color .24s; }
   .card:hover .card-arrow { transform: translateX(0); opacity: 1; color: var(--ink); }
   @media (max-width: 45.99rem) { .card { min-height: 0; } }
 
   /* stats */
-  .stats { margin-top: 4.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
-  .stats-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem .75rem; margin-bottom: .85rem; }
-  .stats-title { display: flex; align-items: center; gap: .5rem; min-width: 0; }
-  .stats-title h2 { margin: 0; font-size: clamp(1.5rem, 2.5vw, 1.875rem); font-weight: 600; line-height: 1.2; letter-spacing: -.035em; color: var(--ink); white-space: nowrap; }
+  .stats { margin-top: 5.5rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+  @media (min-width: 48rem) { .stats { margin-top: 7rem; padding-top: 2.5rem; } }
+  .stats-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .65rem 1rem; margin-bottom: 1.25rem; }
+  .stats-title { display: flex; align-items: center; gap: .65rem; min-width: 0; }
+  .stats-title h2 { margin: 0; font-size: clamp(1.6rem, 2.7vw, 2rem); font-weight: 600; line-height: 1.2; letter-spacing: -.035em; color: var(--ink); white-space: nowrap; }
   .stats-title code { font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dot {
-    width: .4rem; height: .4rem; flex: none; border-radius: 50%; background: var(--subtle);
+    width: .45rem; height: .45rem; flex: none; border-radius: 50%; background: var(--subtle);
     box-shadow: 0 0 0 3px rgba(14, 14, 16, .04); transition: background .2s;
   }
   .dot[data-state="live"] { background: var(--accent); animation: glow 2.4s ease-in-out infinite; }
   .dot[data-state="stale"] { background: #d97706; }
   .dot[data-state="error"] { background: #e11d48; }
-  @keyframes glow { 0%, 100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, .1); } 50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, .04); } }
-  .stats-meta { display: flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle); }
-  .stats-meta span + span::before { content: "·"; margin-right: .5rem; color: var(--line-strong); }
-  .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+  @keyframes glow { 0%, 100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, .15); } 50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, .04); } }
+  .stats-meta { display: flex; align-items: center; gap: .6rem; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle); }
+  .stats-meta span + span::before { content: "·"; margin-right: .6rem; color: var(--line-strong); }
+  .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
   @media (min-width: 48rem) { .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .tile {
-    min-width: 0; padding: .95rem 1rem;
-    border: 1px solid var(--line); border-radius: .7rem;
+    display: flex; flex-direction: column;
+    min-width: 0; min-height: 10.5rem; padding: 1.15rem 1.25rem;
+    border: 1px solid var(--line); border-radius: .75rem;
     background: #fff;
-    transition: border-color .25s, background .25s, transform .25s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+    transition: border-color .24s ease, background .24s ease, transform .28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .28s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .tile:hover { border-color: var(--line-strong); background: #fff; transform: translateY(-1px); }
+  .tile:hover {
+    border-color: var(--line-strong); background: #fafafa; transform: translateY(-3px);
+    box-shadow: 0 10px 22px -12px rgba(0, 0, 0, .09);
+  }
+  .tile:active { transform: translateY(-1px) scale(.99); }
+  .tile-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .tile-icon {
+    display: grid; place-items: center; width: 1.95rem; height: 1.95rem;
+    border-radius: .5rem; border: 1px solid var(--line);
+    background: #fff; color: var(--tone);
+    flex: none;
+    transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .28s ease;
+  }
+  .tile:hover .tile-icon {
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px -4px color-mix(in srgb, var(--tone) 50%, transparent);
+  }
+  .tile-icon svg { width: 1rem; height: 1rem; }
+  .tile-icon[data-tone="emerald"] { --tone: #10b981; }
+  .tile-icon[data-tone="amber"] { --tone: #d97706; }
+  .tile-icon[data-tone="violet"] { --tone: #8b5cf6; }
+  .tile-icon[data-tone="sky"] { --tone: #0ea5e9; }
+  .tile-icon[data-tone="teal"] { --tone: #0d9488; }
   .tile .label {
     display: block; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle);
     overflow-wrap: anywhere;
   }
   .tile .value {
-    display: block; margin-top: .35rem;
-    font-family: var(--mono); font-size: 1.5rem; font-weight: 500; letter-spacing: -.03em;
+    display: block; margin-top: .4rem;
+    font-family: var(--mono); font-size: 1.55rem; font-weight: 500; letter-spacing: -.03em;
     font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .tile .sub {
-    display: block; margin-top: .15rem;
+    display: block; margin-top: .18rem;
     font-family: var(--mono); font-size: .75rem; letter-spacing: 0; color: var(--subtle);
     overflow-wrap: anywhere;
   }
-  .tile[data-wide] .value { font-size: 1.125rem; letter-spacing: 0; }
+  .tile[data-wide] .value { font-size: 1.15rem; letter-spacing: 0; }
+  .tile-graphic { margin-top: auto; padding-top: .75rem; width: 100%; }
+  .tile-svg-spark, .tile-svg-meter, .tile-svg-blocks, .tile-svg-disk, .tile-svg-pulse, .tile-svg-pipeline {
+    display: block; width: 100%; height: auto;
+  }
+  @keyframes spark-pulse { 0%, 100% { r: 3; opacity: 1; } 50% { r: 4.5; opacity: .7; } }
+  .spark-point { animation: spark-pulse 2.2s ease-in-out infinite; }
+  @keyframes pulse-flow { from { stroke-dashoffset: 120; } to { stroke-dashoffset: 0; } }
+  .pulse-flow { stroke-dasharray: 24 96; animation: pulse-flow 2.2s linear infinite; }
+
+  /* stats topology */
+  .stats-topology {
+    margin-top: 1rem; padding: 1.15rem 1.35rem;
+    border: 1px solid var(--line); border-radius: .75rem;
+    background: #fafafa;
+    transition: border-color .24s ease, box-shadow .28s ease;
+  }
+  .stats-topology:hover {
+    border-color: var(--line-strong);
+  }
+  .topology-head {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem;
+    margin-bottom: .75rem;
+  }
+  .topology-title {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-family: var(--mono); font-size: .75rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--ink);
+  }
+  .topology-title svg { color: var(--subtle); }
+  .topology-meta {
+    font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle);
+  }
+  .topology-svg { display: block; width: 100%; height: 24px; overflow: visible; }
+  .topology-legend {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.5rem;
+    margin-top: .75rem;
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .02em; color: var(--subtle);
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: .4rem; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .legend-line { width: 14px; height: 0; flex: none; }
 
   /* visitors */
-  .visitors { margin-top: 4.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .visitors { margin-top: 5.5rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+  @media (min-width: 48rem) { .visitors { margin-top: 7rem; padding-top: 2.5rem; } }
   .visitor-board {
-    margin-top: .85rem; overflow: hidden;
-    border: 1px solid var(--line); border-radius: .9rem;
+    margin-top: 1.25rem; overflow: hidden;
+    border: 1px solid var(--line); border-radius: .95rem;
     background: #fff;
   }
   .visit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
   .visit {
-    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .75rem;
-    max-height: 4.5rem; padding: .72rem 1rem;
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .85rem;
+    max-height: 4.75rem; padding: .85rem 1.25rem;
     border-bottom: 1px solid var(--line);
     opacity: var(--o, 1);
-    transition: opacity 1.4s ease, max-height 1.4s ease, padding 1.4s ease, transform 1.4s ease, border-color 1.4s ease;
+    transition: background .2s ease, opacity 1.4s ease, max-height 1.4s ease, padding 1.4s ease, transform 1.4s ease, border-color 1.4s ease;
   }
   .visit:last-child { border-bottom: 0; }
-  .visit-flag { font-size: 1.125rem; line-height: 1; }
-  .visit-place { display: flex; align-items: baseline; gap: .45rem; min-width: 0; }
+  .visit:hover { background: #fafafa; }
+  .visit-flag { font-size: 1.15rem; line-height: 1; }
+  .visit-place { display: flex; align-items: baseline; gap: .5rem; min-width: 0; }
   .visit-city { font-size: 1rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .visit-country {
     font-family: var(--mono); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--subtle);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .visit-ago { font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .visit.entering { animation: visit-in .8s cubic-bezier(.2, .8, .2, 1) both; }
+  .visit.entering { animation: visit-in .8s cubic-bezier(.16, 1, 0.3, 1) both; }
   .visit.leaving { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; border-color: transparent; transform: translateY(-4px); }
   @keyframes visit-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: var(--o, 1); transform: none; } }
   .visit-empty {
-    margin: 0; padding: 1.1rem 1rem;
+    margin: 0; padding: 1.25rem 1.25rem;
     font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle);
   }
   .visit-empty[hidden] { display: none; }
 
   footer {
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.5rem;
-    margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem;
+    margin-top: 6rem; padding-top: 2rem; padding-bottom: 2.5rem; border-top: 1px solid var(--line);
     font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle);
   }
-  .footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+  .footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem; }
   footer a { color: inherit; text-decoration: none; transition: color .2s; }
   footer a:hover { color: var(--ink); }
 
@@ -356,41 +587,152 @@
   <section class="section features" aria-labelledby="features-heading">
     <div class="section-head">
       <h2 id="features-heading">Capabilities</h2>
-      <span>signed · live · durable · self-hosted</span>
+      <span>six core pillars · wire-level specs</span>
     </div>
-    <div class="feature-grid">
-      <article class="feature" data-tone="emerald">
+    <div class="feature-grid" role="tablist" aria-label="Rabta capabilities">
+      <article class="feature is-active" data-cap="events" data-tone="emerald" role="tab" tabindex="0" aria-selected="true" aria-controls="feature-inspector">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M14 9l3 3"/></svg></span>
-          <code>ed25519</code>
+          <span class="feature-tag"><code>ed25519</code><span class="feature-active-dot" aria-hidden="true"></span></span>
         </div>
         <h3>Signed events</h3>
         <p>Every event is canonical JSON, hashed with SHA-256 and signed with Ed25519. Identity is a keypair — no accounts, no sessions, no passwords.</p>
+        <div class="feature-foot">
+          <div class="feature-pills">
+            <span class="feature-pill">RFC 8785</span>
+            <span class="feature-pill">Keypair identity</span>
+            <span class="feature-pill">100 KB max</span>
+          </div>
+          <span class="feature-action" aria-hidden="true">
+            <span>spec</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </div>
       </article>
-      <article class="feature" data-tone="sky">
+
+      <article class="feature" data-cap="queries" data-tone="sky" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7"/><path d="M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/></svg></span>
-          <code>query</code>
+          <span class="feature-tag"><code>query</code><span class="feature-active-dot" aria-hidden="true"></span></span>
         </div>
         <h3>Live queries</h3>
         <p>Poll any collection through a typed JSON query. Filter by labels or owner, and page results with an opaque cursor.</p>
+        <div class="feature-foot">
+          <div class="feature-pills">
+            <span class="feature-pill">Cursor paging</span>
+            <span class="feature-pill">10 labels</span>
+            <span class="feature-pill">HTTP poll</span>
+          </div>
+          <span class="feature-action" aria-hidden="true">
+            <span>spec</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </div>
       </article>
-      <article class="feature" data-tone="violet">
+
+      <article class="feature" data-cap="blobs" data-tone="violet" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span>
-          <code>sha-256</code>
+          <span class="feature-tag"><code>sha-256</code><span class="feature-active-dot" aria-hidden="true"></span></span>
         </div>
         <h3>Content-addressed blobs</h3>
         <p>Uploads return their SHA-256, dedupe automatically and expire with the signed events that claim them. Encrypt client-side and the relay only sees ciphertext.</p>
+        <div class="feature-foot">
+          <div class="feature-pills">
+            <span class="feature-pill">Auto dedup</span>
+            <span class="feature-pill">Event-pinned</span>
+            <span class="feature-pill">Zero knowledge</span>
+          </div>
+          <span class="feature-action" aria-hidden="true">
+            <span>spec</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </div>
       </article>
-      <article class="feature" data-tone="amber">
+
+      <article class="feature" data-cap="sovereign" data-tone="amber" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></span>
-          <code>rust · sqlite</code>
+          <span class="feature-tag"><code>rust · sqlite</code><span class="feature-active-dot" aria-hidden="true"></span></span>
         </div>
         <h3>Yours to run</h3>
         <p>One Rust binary, one SQLite file, one container. No database server, no cloud dependency, no per-user pricing — deploy it anywhere.</p>
+        <div class="feature-foot">
+          <div class="feature-pills">
+            <span class="feature-pill">Rust 2024</span>
+            <span class="feature-pill">WAL mode</span>
+            <span class="feature-pill">Single binary</span>
+          </div>
+          <span class="feature-action" aria-hidden="true">
+            <span>spec</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </div>
       </article>
+
+      <article class="feature" data-cap="sync" data-tone="rose" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
+        <div class="feature-top">
+          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/><path d="M18 8v8"/></svg></span>
+          <span class="feature-tag"><code>merkle · xor</code><span class="feature-active-dot" aria-hidden="true"></span></span>
+        </div>
+        <h3>Autonomous peer sync</h3>
+        <p>Decentralized multi-node replication. Nodes reconcile diverged event sets in milliseconds using a 256-bucket XOR folding Merkle walk without central coordinators.</p>
+        <div class="feature-foot">
+          <div class="feature-pills">
+            <span class="feature-pill">256 buckets</span>
+            <span class="feature-pill">XOR folding</span>
+            <span class="feature-pill">Multi-node</span>
+          </div>
+          <span class="feature-action" aria-hidden="true">
+            <span>spec</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </div>
+      </article>
+
+      <article class="feature" data-cap="defense" data-tone="teal" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
+        <div class="feature-top">
+          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span class="feature-tag"><code>ring · sandbox</code><span class="feature-active-dot" aria-hidden="true"></span></span>
+        </div>
+        <h3>Machine anti-spam</h3>
+        <p>Engineered to protect the host machine: a 64k-entry in-memory ring buffer drops spam in microseconds, backed by battery token accounting and isolated staging.</p>
+        <div class="feature-foot">
+          <div class="feature-pills">
+            <span class="feature-pill">64k ring &lt;5µs</span>
+            <span class="feature-pill">Battery tokens</span>
+            <span class="feature-pill">10% staging</span>
+          </div>
+          <span class="feature-action" aria-hidden="true">
+            <span>spec</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </div>
+      </article>
+    </div>
+
+    <!-- Live Protocol & Wire Inspector -->
+    <div class="feature-inspector" id="feature-inspector" role="tabpanel" aria-label="Protocol and wire specification">
+      <div class="inspector-head">
+        <div class="inspector-meta">
+          <div class="inspector-dots" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="inspector-title" id="inspector-title">Signed events</span>
+          <span class="inspector-badge" id="inspector-badge">POST /api/v1/events</span>
+        </div>
+        <button class="inspector-copy" id="inspector-copy" type="button" aria-label="Copy wire format to clipboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span id="inspector-copy-label">Copy wire format</span>
+        </button>
+      </div>
+      <div class="inspector-body">
+        <pre><code id="inspector-code"></code></pre>
+      </div>
+      <div class="inspector-foot">
+        <span class="inspector-foot-tag">Guarantee</span>
+        <span class="inspector-guarantee" id="inspector-guarantee">Relay verifies Ed25519 signature over canonical SHA-256 digest. Server never holds private keys.</span>
+      </div>
     </div>
   </section>
 
@@ -465,34 +807,145 @@
     </div>
     <div class="stats-grid">
       <div class="tile">
-        <span class="label">Live events</span>
+        <div class="tile-top">
+          <span class="label">Live events</span>
+          <span class="tile-icon" data-tone="emerald" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </span>
+        </div>
         <span class="value" id="s-events">—</span>
         <span class="sub" id="s-events-bytes">—</span>
+        <div class="tile-graphic" aria-hidden="true">
+          <svg class="tile-svg-spark" viewBox="0 0 120 28" preserveAspectRatio="none">
+            <path class="spark-area" id="svg-events-area" fill="rgba(16, 185, 129, 0.08)" d="M0,24 Q30,16 60,20 T120,8 L120,28 L0,28 Z"/>
+            <path class="spark-line" id="svg-events-line" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" d="M0,24 Q30,16 60,20 T120,8"/>
+            <circle class="spark-point" id="svg-events-point" cx="120" cy="8" r="3" fill="#10b981"/>
+          </svg>
+        </div>
       </div>
+
       <div class="tile">
-        <span class="label">Unclaimed blobs</span>
+        <div class="tile-top">
+          <span class="label">Unclaimed blobs</span>
+          <span class="tile-icon" data-tone="amber" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </span>
+        </div>
         <span class="value" id="s-unclaimed">—</span>
         <span class="sub" id="s-unclaimed-cap">—</span>
+        <div class="tile-graphic" aria-hidden="true">
+          <svg class="tile-svg-meter" viewBox="0 0 120 18">
+            <rect x="0" y="5" width="120" height="8" rx="4" fill="rgba(14, 14, 16, 0.05)"/>
+            <rect id="svg-unclaimed-fill" x="0" y="5" width="6" height="8" rx="4" fill="#d97706" style="transition: width 0.6s ease;"/>
+            <line x1="84" y1="2" x2="84" y2="16" stroke="#d97706" stroke-width="1.2" stroke-dasharray="2 2" opacity="0.6"/>
+            <text x="87" y="12" font-family="var(--mono)" font-size="7" fill="var(--subtle)">10% cap</text>
+          </svg>
+        </div>
       </div>
+
       <div class="tile">
-        <span class="label">Live blobs</span>
+        <div class="tile-top">
+          <span class="label">Live blobs</span>
+          <span class="tile-icon" data-tone="violet" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </span>
+        </div>
         <span class="value" id="s-blobs">—</span>
         <span class="sub" id="s-blobs-bytes">—</span>
+        <div class="tile-graphic" aria-hidden="true">
+          <svg class="tile-svg-blocks" viewBox="0 0 120 18">
+            <g id="svg-blob-blocks">
+              <rect x="0" y="3" width="11" height="12" rx="2" fill="rgba(139, 92, 246, 0.12)" stroke="rgba(139, 92, 246, 0.25)" stroke-width="1"/>
+              <rect x="15" y="3" width="11" height="12" rx="2" fill="rgba(139, 92, 246, 0.12)" stroke="rgba(139, 92, 246, 0.25)" stroke-width="1"/>
+              <rect x="30" y="3" width="11" height="12" rx="2" fill="rgba(139, 92, 246, 0.12)" stroke="rgba(139, 92, 246, 0.25)" stroke-width="1"/>
+              <rect x="45" y="3" width="11" height="12" rx="2" fill="rgba(139, 92, 246, 0.12)" stroke="rgba(139, 92, 246, 0.25)" stroke-width="1"/>
+              <rect x="60" y="3" width="11" height="12" rx="2" fill="rgba(139, 92, 246, 0.12)" stroke="rgba(139, 92, 246, 0.25)" stroke-width="1"/>
+              <rect x="75" y="3" width="11" height="12" rx="2" fill="rgba(139, 92, 246, 0.12)" stroke="rgba(139, 92, 246, 0.25)" stroke-width="1"/>
+              <rect x="90" y="3" width="11" height="12" rx="2" fill="rgba(139, 92, 246, 0.12)" stroke="rgba(139, 92, 246, 0.25)" stroke-width="1"/>
+              <rect x="105" y="3" width="11" height="12" rx="2" fill="rgba(139, 92, 246, 0.12)" stroke="rgba(139, 92, 246, 0.25)" stroke-width="1"/>
+            </g>
+          </svg>
+        </div>
       </div>
+
       <div class="tile">
-        <span class="label">Store</span>
+        <div class="tile-top">
+          <span class="label">Store</span>
+          <span class="tile-icon" data-tone="sky" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </span>
+        </div>
         <span class="value" id="s-store">—</span>
         <span class="sub" id="s-store-sub">—</span>
+        <div class="tile-graphic" aria-hidden="true">
+          <svg class="tile-svg-disk" viewBox="0 0 120 18">
+            <rect x="0" y="5" width="120" height="8" rx="4" fill="rgba(14, 14, 16, 0.05)"/>
+            <rect id="svg-store-fill" x="0" y="5" width="14" height="8" rx="4" fill="#0ea5e9" style="transition: width 0.6s ease;"/>
+            <line x1="102" y1="2" x2="102" y2="16" stroke="rgba(14, 14, 16, 0.3)" stroke-width="1.2" stroke-dasharray="2 2"/>
+            <text x="104" y="12" font-family="var(--mono)" font-size="7" fill="var(--subtle)">85%</text>
+          </svg>
+        </div>
       </div>
+
       <div class="tile">
-        <span class="label">Uptime</span>
+        <div class="tile-top">
+          <span class="label">Uptime</span>
+          <span class="tile-icon" data-tone="emerald" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </span>
+        </div>
         <span class="value" id="s-uptime">—</span>
         <span class="sub" id="s-sweep">—</span>
+        <div class="tile-graphic" aria-hidden="true">
+          <svg class="tile-svg-pulse" viewBox="0 0 120 22" preserveAspectRatio="none">
+            <path class="pulse-track" d="M0,11 L32,11 L38,3 L45,19 L51,6 L57,14 L62,11 L120,11" fill="none" stroke="rgba(16, 185, 129, 0.18)" stroke-width="1.6"/>
+            <path class="pulse-flow" id="svg-pulse-flow" d="M0,11 L32,11 L38,3 L45,19 L51,6 L57,14 L62,11 L120,11" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
       </div>
+
       <div class="tile" data-wide>
-        <span class="label">Version</span>
+        <div class="tile-top">
+          <span class="label">Version</span>
+          <span class="tile-icon" data-tone="teal" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+          </span>
+        </div>
         <span class="value" id="s-version">—</span>
         <span class="sub" id="s-inflight">—</span>
+        <div class="tile-graphic" aria-hidden="true">
+          <svg class="tile-svg-pipeline" viewBox="0 0 120 18">
+            <line x1="0" y1="9" x2="120" y2="9" stroke="rgba(13, 148, 136, 0.2)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <circle cx="20" cy="9" r="4" fill="#0d9488" opacity="0.9"/>
+            <circle cx="60" cy="9" r="4" fill="#0d9488" opacity="0.6"/>
+            <circle cx="100" cy="9" r="4" fill="#0d9488" opacity="0.3"/>
+            <path d="M16 9 L24 9 M56 9 L64 9 M96 9 L104 9" stroke="#fff" stroke-width="1.2"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Physical Storage & Sandbox Topology Graphic -->
+    <div class="stats-topology" aria-hidden="true">
+      <div class="topology-head">
+        <span class="topology-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Physical Storage &amp; Sandbox Topology
+        </span>
+        <span class="topology-meta" id="topo-meta">STORAGE_LIMIT ceiling</span>
+      </div>
+      <svg class="topology-svg" viewBox="0 0 600 24" preserveAspectRatio="none">
+        <rect x="0" y="4" width="600" height="16" rx="4" fill="rgba(14, 14, 16, 0.05)"/>
+        <line x1="510" y1="1" x2="510" y2="23" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <line x1="540" y1="1" x2="540" y2="23" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <rect id="topo-store-fill" x="0" y="4" width="10" height="16" rx="4" fill="#10b981" style="transition: width 0.6s ease;"/>
+        <rect id="topo-sandbox-fill" x="10" y="4" width="60" height="16" rx="2" fill="rgba(217, 119, 6, 0.2)" stroke="#d97706" stroke-width="1" stroke-dasharray="3 2" style="transition: all 0.6s ease;"/>
+      </svg>
+      <div class="topology-legend">
+        <div class="legend-item"><span class="legend-dot" style="background: #10b981;"></span><span>Committed Store</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background: rgba(217, 119, 6, 0.35); border: 1px dashed #d97706;"></span><span>10% Unclaimed Sandbox</span></div>
+        <div class="legend-item"><span class="legend-line" style="border-top: 1.5px dashed #f59e0b;"></span><span>85% Eviction Target</span></div>
+        <div class="legend-item"><span class="legend-line" style="border-top: 1.5px dashed #ef4444;"></span><span>90% Admission Ceiling</span></div>
       </div>
     </div>
   </section>
@@ -618,6 +1071,57 @@
     $('s-sweep').textContent = 'sweep ' + fmtUptime(reaper.last_sweep_age_s) + ' ago';
     $('s-version').textContent = data.version || '—';
     $('s-inflight').textContent = fmtBytes(upload.inflight_bytes) + ' inflight · max ' + fmtBytes(upload.max_single_bytes);
+
+    // Dynamic SVG graphics updates
+    const liveEvents = events.live || 0;
+    const eventsY = Math.max(4, Math.min(22, 22 - Math.min(18, Math.log2(liveEvents + 1) * 5)));
+    const eventsLine = $('svg-events-line');
+    const eventsArea = $('svg-events-area');
+    const eventsPoint = $('svg-events-point');
+    if (eventsLine && eventsArea && eventsPoint) {
+      eventsLine.setAttribute('d', `M0,24 Q30,${eventsY + 4} 60,${eventsY + 2} T120,${eventsY}`);
+      eventsArea.setAttribute('d', `M0,24 Q30,${eventsY + 4} 60,${eventsY + 2} T120,${eventsY} L120,28 L0,28 Z`);
+      eventsPoint.setAttribute('cy', eventsY);
+    }
+
+    const unclaimedLimit = blobs.unclaimed_limit_bytes || 2400000000;
+    const unclaimedBytes = blobs.unclaimed_bytes || 0;
+    const unclaimedPct = unclaimedLimit ? Math.min(100, Math.max(3, (unclaimedBytes / unclaimedLimit) * 100)) : 3;
+    const unclaimedFill = $('svg-unclaimed-fill');
+    if (unclaimedFill) unclaimedFill.setAttribute('width', (unclaimedPct * 1.2).toFixed(1));
+
+    const liveBlobsCount = blobs.live || 0;
+    const blobBlocks = document.querySelectorAll('#svg-blob-blocks rect');
+    blobBlocks.forEach((block, idx) => {
+      if (idx < liveBlobsCount) {
+        block.setAttribute('fill', '#8b5cf6');
+        block.setAttribute('stroke', '#7c3aed');
+        block.setAttribute('opacity', '0.9');
+      } else {
+        block.setAttribute('fill', 'rgba(139, 92, 246, 0.12)');
+        block.setAttribute('stroke', 'rgba(139, 92, 246, 0.25)');
+        block.setAttribute('opacity', '0.5');
+      }
+    });
+
+    const totalDisk = (storage.used_bytes || 0) + (storage.free_bytes || 1);
+    const storeUsed = (events.bytes || 0) + (blobs.bytes || 0) + (storage.used_bytes || 0);
+    const storePct = Math.min(100, Math.max(4, (storeUsed / totalDisk) * 100));
+    const storeFill = $('svg-store-fill');
+    if (storeFill) storeFill.setAttribute('width', (storePct * 1.2).toFixed(1));
+
+    const topoStoreFill = $('topo-store-fill');
+    const topoSandboxFill = $('topo-sandbox-fill');
+    const topoMeta = $('topo-meta');
+    if (topoStoreFill && topoSandboxFill) {
+      const topoWidth = Math.min(500, Math.max(12, (storePct / 100) * 600));
+      topoStoreFill.setAttribute('width', topoWidth.toFixed(1));
+      topoSandboxFill.setAttribute('x', topoWidth.toFixed(1));
+      topoSandboxFill.setAttribute('width', '60');
+    }
+    if (topoMeta) {
+      topoMeta.textContent = fmtBytes(storage.budget_bytes || storage.configured_bytes || 20000000000) + ' ceiling · ' + fmtBytes(storage.free_bytes) + ' disk free';
+    }
   };
 
   const schedule = () => {
@@ -969,6 +1473,301 @@
     });
   }
 
+  const CAPABILITIES = {
+    events: {
+      title: 'Signed events',
+      endpoint: 'POST /api/v1/events',
+      tone: '#10b981',
+      guarantee: 'Relay verifies Ed25519 signature over canonical SHA-256 digest. Server never holds private keys.',
+      raw: `curl -X POST https://1.rabta.space/api/v1/events \\
+  -H "content-type: application/json" \\
+  -d '{
+    "collection": "site/shouts",
+    "created_at": 1793283000,
+    "expires_at": 1793887800,
+    "owner": "ed25519:ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c",
+    "labels": ["public"],
+    "blobs": [],
+    "data": { "text": "Signed in browser. Zero accounts." },
+    "id": "6084fc0692f37f8d952b1012921f2d70d9960f5da20436742529c022647811e5",
+    "sig": "eb9d881af37ca78e3365006101c5aa06f9ce0e9390870e5ae9570262e93869c9dd38574e30f078e4156b2841f7371a2ee3fc2af4a39b06bd4fd7946e020bf904"
+  }'`,
+      code: `<span class="c-cmt">// 1. Canonical JSON (RFC 8785) with sorted keys + Ed25519 signature</span>
+<span class="c-pun">{</span>
+  <span class="c-prop">"collection"</span><span class="c-pun">:</span> <span class="c-str">"site/shouts"</span><span class="c-pun">,</span>
+  <span class="c-prop">"created_at"</span><span class="c-pun">:</span> <span class="c-num">1793283000</span><span class="c-pun">,</span>
+  <span class="c-prop">"expires_at"</span><span class="c-pun">:</span> <span class="c-num">1793887800</span><span class="c-pun">,</span>
+  <span class="c-prop">"owner"</span><span class="c-pun">:</span> <span class="c-str">"ed25519:ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c"</span><span class="c-pun">,</span>
+  <span class="c-prop">"labels"</span><span class="c-pun">:</span> <span class="c-pun">[</span><span class="c-str">"public"</span><span class="c-pun">],</span>
+  <span class="c-prop">"blobs"</span><span class="c-pun">:</span> <span class="c-pun">[],</span>
+  <span class="c-prop">"data"</span><span class="c-pun">:</span> <span class="c-pun">{</span> <span class="c-prop">"text"</span><span class="c-pun">:</span> <span class="c-str">"Signed in browser. Zero accounts."</span> <span class="c-pun">},</span>
+  <span class="c-prop">"id"</span><span class="c-pun">:</span> <span class="c-str">"6084fc0692f37f8d952b1012921f2d70d9960f5da20436742529c022647811e5"</span><span class="c-pun">,</span>
+  <span class="c-prop">"sig"</span><span class="c-pun">:</span> <span class="c-str">"eb9d881af37ca78e3365006101c5aa06f9ce0e9390870e5ae9570262e93869c9dd38574e..."</span>
+<span class="c-pun">}</span>
+
+<span class="c-cmt">// 2. Post to relay — node checks math, stores opaquely</span>
+<span class="c-cmd">$ curl</span> -X POST https://1.rabta.space/api/v1/events \\
+  -H <span class="c-str">"content-type: application/json"</span> -d <span class="c-str">'@envelope.json'</span>`
+    },
+    queries: {
+      title: 'Live queries',
+      endpoint: 'POST /api/v1/events/query',
+      tone: '#0ea5e9',
+      guarantee: 'High-frequency HTTP polling with cursor pagination. Zero persistent socket drop or reconnect thrash.',
+      raw: `curl -X POST https://1.rabta.space/api/v1/events/query \\
+  -H "content-type: application/json" \\
+  -d '{
+    "collection": "canvas/rabta",
+    "labels": ["stroke"],
+    "limit": 50,
+    "after": "eyJsYXN0X2lkIjoiNjA4NGZjMDYiLCJ0cyI6MTc5MzI4MzAwMH0"
+  }'`,
+      code: `<span class="c-cmt">// Poll collection with label filter and cursor pagination</span>
+<span class="c-cmd">$ curl</span> -X POST https://1.rabta.space/api/v1/events/query \\
+  -H <span class="c-str">"content-type: application/json"</span> \\
+  -d <span class="c-str">'{
+    "collection": "canvas/rabta",
+    "labels": ["stroke"],
+    "limit": 50,
+    "after": "eyJsYXN0X2lkIjoiNjA4NGZjMDYiLCJ0cyI6MTc5MzI4MzAwMH0"
+  }'</span>
+
+<span class="c-cmt">// Response: live signed envelopes + opaque next_cursor</span>
+<span class="c-pun">{</span>
+  <span class="c-prop">"events"</span><span class="c-pun">:</span> <span class="c-pun">[</span>
+    <span class="c-pun">{</span>
+      <span class="c-prop">"id"</span><span class="c-pun">:</span> <span class="c-str">"6084fc0692f37f8d952b1012921f2d70d9960f5da20436742529c022647811e5"</span><span class="c-pun">,</span>
+      <span class="c-prop">"owner"</span><span class="c-pun">:</span> <span class="c-str">"ed25519:ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c"</span><span class="c-pun">,</span>
+      <span class="c-prop">"data"</span><span class="c-pun">:</span> <span class="c-pun">{</span> <span class="c-prop">"x"</span><span class="c-pun">:</span> <span class="c-num">412</span><span class="c-pun">,</span> <span class="c-prop">"y"</span><span class="c-pun">:</span> <span class="c-num">188</span><span class="c-pun">,</span> <span class="c-prop">"color"</span><span class="c-pun">:</span> <span class="c-str">"#8b5cf6"</span> <span class="c-pun">},</span>
+      <span class="c-prop">"sig"</span><span class="c-pun">:</span> <span class="c-str">"eb9d881af37ca78e..."</span>
+    <span class="c-pun">}</span>
+  <span class="c-pun">],</span>
+  <span class="c-prop">"next_cursor"</span><span class="c-pun">:</span> <span class="c-str">"eyJsYXN0X2lkIjoiOTFhMzkxYWIiLCJ0cyI6MTc5MzI5MDAwMH0"</span>
+<span class="c-pun">}</span>`
+    },
+    blobs: {
+      title: 'Content-addressed blobs',
+      endpoint: 'PUT /api/v1/blobs',
+      tone: '#8b5cf6',
+      guarantee: 'Raw uploads return SHA-256 content hashes. Claiming events lock blob retention up to 10 years.',
+      raw: `# 1. Stream raw payload (client-side encrypted with XChaCha20)
+curl -X PUT https://1.rabta.space/api/v1/blobs \\
+  -H "content-type: application/octet-stream" \\
+  --data-binary @encrypted_payload.bin
+
+# Response:
+# {"hash":"3a2b7f8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a"}
+
+# 2. Claim in signed event to extend retention (unclaimed blobs expire in 6h):
+# "blobs": ["3a2b7f8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a"]`,
+      code: `<span class="c-cmt">// 1. Upload raw payload (encrypt client-side with XChaCha20)</span>
+<span class="c-cmd">$ curl</span> -X PUT https://1.rabta.space/api/v1/blobs \\
+  -H <span class="c-str">"content-type: application/octet-stream"</span> \\
+  --data-binary <span class="c-str">@encrypted_payload.bin</span>
+
+<span class="c-cmt">// Response: content-addressed SHA-256 hash</span>
+<span class="c-pun">{</span> <span class="c-prop">"hash"</span><span class="c-pun">:</span> <span class="c-str">"3a2b7f8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a"</span> <span class="c-pun">}</span>
+
+<span class="c-cmt">// 2. Claim in signed event to extend retention (unclaimed blobs expire in 6h)</span>
+<span class="c-pun">{</span>
+  <span class="c-prop">"collection"</span><span class="c-pun">:</span> <span class="c-str">"share/rabta"</span><span class="c-pun">,</span>
+  <span class="c-prop">"expires_at"</span><span class="c-pun">:</span> <span class="c-num">1793887800</span><span class="c-pun">,</span>
+  <span class="c-prop">"blobs"</span><span class="c-pun">:</span> <span class="c-pun">[</span><span class="c-str">"3a2b7f8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a"</span><span class="c-pun">],</span>
+  <span class="c-prop">"data"</span><span class="c-pun">:</span> <span class="c-pun">{</span> <span class="c-prop">"cipher"</span><span class="c-pun">:</span> <span class="c-str">"xchacha20-poly1305"</span><span class="c-pun">,</span> <span class="c-prop">"filename"</span><span class="c-pun">:</span> <span class="c-str">"archive.zip"</span> <span class="c-pun">}</span>
+<span class="c-pun">}</span>`
+    },
+    sovereign: {
+      title: 'Yours to run',
+      endpoint: 'docker run · port 3232',
+      tone: '#d97706',
+      guarantee: 'Embedded SQLite in WAL mode with rusqlite. Zero database servers or background daemons to manage.',
+      raw: `# Run a sovereign Rabta node with zero external dependencies
+docker run -d \\
+  --name rabta \\
+  -p 3232:3232 \\
+  -v rabta_data:/data \\
+  --restart unless-stopped \\
+  -e STORAGE_LIMIT=20GB \\
+  ghcr.io/rabta-protocol/rabta:latest
+
+# Verify node health and storage metrics
+curl -s http://localhost:3232/api/v1/health`,
+      code: `<span class="c-cmt"># Run a sovereign Rabta node with zero external dependencies</span>
+<span class="c-cmd">$ docker</span> run -d \\
+  --name rabta \\
+  -p 3232:3232 \\
+  -v rabta_data:/data \\
+  --restart unless-stopped \\
+  -e STORAGE_LIMIT=20GB \\
+  ghcr.io/rabta-protocol/rabta:latest
+
+<span class="c-cmt"># Verify node health and storage metrics</span>
+<span class="c-cmd">$ curl</span> -s http://localhost:3232/api/v1/health
+<span class="c-pun">{</span>
+  <span class="c-prop">"status"</span><span class="c-pun">:</span> <span class="c-str">"ok"</span><span class="c-pun">,</span>
+  <span class="c-prop">"version"</span><span class="c-pun">:</span> <span class="c-str">"0.1.0"</span><span class="c-pun">,</span>
+  <span class="c-prop">"uptime_secs"</span><span class="c-pun">:</span> <span class="c-num">348102</span>
+<span class="c-pun">}</span>`
+    },
+    sync: {
+      title: 'Autonomous peer sync',
+      endpoint: 'POST /api/v1/sync',
+      tone: '#f43f5e',
+      guarantee: 'Merkle walk aborts if >10% buckets diverge to defend against CPU/memory exhaustion attacks.',
+      raw: `curl -X POST http://peer-node:3232/api/v1/sync \\
+  -H "content-type: application/json" \\
+  -d '{
+    "since_seq": 14200,
+    "buckets": [
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "8f434346648f6b96df89dda901c5176b10e6d83961dd3c1ac88b59b2dc327aa4",
+      "0000000000000000000000000000000000000000000000000000000000000000"
+    ]
+  }'`,
+      code: `<span class="c-cmt">// Reconcile peer node divergences via 256-bucket XOR folding Merkle walk</span>
+<span class="c-cmd">$ curl</span> -X POST http://peer-node:3232/api/v1/sync \\
+  -H <span class="c-str">"content-type: application/json"</span> \\
+  -d <span class="c-str">'{
+    "since_seq": 14200,
+    "buckets": [
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "8f434346648f6b96df89dda901c5176b10e6d83961dd3c1ac88b59b2dc327aa4",
+      "0000000000000000000000000000000000000000000000000000000000000000"
+    ]
+  }'</span>
+
+<span class="c-cmt">// Nodes pinpoint mismatched ranges in O(log N) without central coordinators.</span>
+<span class="c-cmt">// Aborts gracefully if &gt;10% of buckets differ to prevent CPU/memory exhaustion.</span>`
+    },
+    defense: {
+      title: 'Machine anti-spam',
+      endpoint: 'Protection engine',
+      tone: '#0d9488',
+      guarantee: 'Anonymous blob uploads are isolated to a 10% staging partition and can never evict committed user events.',
+      raw: `Rabta Host Machine Protection Pipeline:
+1. In-Memory Dedup Ring (64,000 entries)
+   Drops duplicate event pushes in <5µs. Zero SQLite writer lock contention under high traffic.
+2. Global Battery Accounting Engine
+   Peer sync & queries lazily consume CPU/IO tokens. Repeat offenders face exponential backoff (2^strikes).
+3. Storage Sandboxing
+   Unclaimed uploads isolated to 10% staging partition. Anonymous blob traffic CANNOT evict committed user data.`,
+      code: `<span class="c-cmt">┌─────────────────────────────────────────────────────────────┐</span>
+<span class="c-cmt">│ 1. In-Memory Dedup Ring (64,000 entries)                    │</span>
+<span class="c-cmt">│    Drops duplicate event pushes in &lt;5µs.                     │</span>
+<span class="c-cmt">│    Zero SQLite writer lock contention under high traffic.   │</span>
+<span class="c-cmt">├─────────────────────────────────────────────────────────────┤</span>
+<span class="c-cmt">│ 2. Global Battery Accounting Engine                         │</span>
+<span class="c-cmt">│    Peer sync & queries lazily consume CPU/IO tokens.        │</span>
+<span class="c-cmt">│    Repeat offenders face exponential backoff (2^strikes).   │</span>
+<span class="c-cmt">├─────────────────────────────────────────────────────────────┤</span>
+<span class="c-cmt">│ 3. Storage Sandboxing                                       │</span>
+<span class="c-cmt">│    Unclaimed uploads isolated to 10% staging partition.     │</span>
+<span class="c-cmt">│    Anonymous blob traffic CANNOT evict committed user data. │</span>
+<span class="c-cmt">└─────────────────────────────────────────────────────────────┘</span>`
+    }
+  };
+
+  const copyTextToClipboard = async (text) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {}
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const initCapabilities = () => {
+    const features = document.querySelectorAll('.feature');
+    const titleEl = $('inspector-title');
+    const badgeEl = $('inspector-badge');
+    const codeEl = $('inspector-code');
+    const guaranteeEl = $('inspector-guarantee');
+    const copyBtn = $('inspector-copy');
+    const inspector = $('feature-inspector');
+    if (!features.length || !codeEl) return;
+
+    let activeKey = 'events';
+    let copyTimer = null;
+
+    const ICON_COPY = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy wire format</span>`;
+    const ICON_CHECK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Copied!</span>`;
+
+    const select = (key, focus) => {
+      const data = CAPABILITIES[key];
+      if (!data) return;
+      activeKey = key;
+      features.forEach((f) => {
+        const isMatch = f.dataset.cap === key;
+        f.classList.toggle('is-active', isMatch);
+        f.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+        if (isMatch && focus) f.focus();
+      });
+      if (titleEl) titleEl.textContent = data.title;
+      if (badgeEl) {
+        badgeEl.textContent = data.endpoint;
+        badgeEl.style.setProperty('--ins-tone', data.tone);
+      }
+      if (inspector) {
+        inspector.style.setProperty('--ins-tone', data.tone);
+      }
+      if (codeEl) {
+        codeEl.classList.remove('is-switching');
+        void codeEl.offsetWidth;
+        codeEl.innerHTML = data.code;
+        codeEl.classList.add('is-switching');
+      }
+      if (guaranteeEl) {
+        guaranteeEl.textContent = data.guarantee;
+      }
+    };
+
+    features.forEach((feature) => {
+      feature.addEventListener('click', () => {
+        const cap = feature.dataset.cap;
+        if (cap && cap !== activeKey) select(cap, false);
+      });
+      feature.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const cap = feature.dataset.cap;
+          if (cap) select(cap, true);
+        }
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        const data = CAPABILITIES[activeKey];
+        if (!data || !data.raw) return;
+        const ok = await copyTextToClipboard(data.raw);
+        if (ok) {
+          copyBtn.dataset.copied = '1';
+          copyBtn.innerHTML = ICON_CHECK;
+          clearTimeout(copyTimer);
+          copyTimer = setTimeout(() => {
+            delete copyBtn.dataset.copied;
+            copyBtn.innerHTML = ICON_COPY;
+          }, 1800);
+        }
+      });
+    }
+
+    select('events', false);
+  };
+
   const hero = () => {
     if (!window.gsap || reduce) return;
     const tl = window.gsap.timeline({ defaults: { ease: 'power3.out', duration: .7 } });
@@ -979,16 +1778,16 @@
       .from('.hero-actions .btn', { y: 12, opacity: 0, stagger: .08, duration: .45 }, '-=.35')
       .from('.hero-meta span', { opacity: 0, stagger: .05, duration: .3 }, '-=.3')
       .from('.ticker', { opacity: 0, duration: .5 }, '-=.35')
-      .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .05, duration: .5 }, '-=.3')
+      .from('.features .section-head, .feature, .feature-inspector', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
       .from('.demos .section-head', { y: 12, opacity: 0, duration: .5 }, '-=.25')
       .from('.card', { y: 28, opacity: 0, stagger: .09, duration: .65 }, '-=.25')
-      .from('.stats-head, .tile', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.35')
+      .from('.stats-head, .tile, .stats-topology', { y: 16, opacity: 0, stagger: .04, duration: .5 }, '-=.35')
       .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.35')
       .from('footer', { opacity: 0, duration: .4 }, '-=.4');
   };
 
   const boot = () => {
-    const start = () => { hero(); initVisitors(); };
+    const start = () => { hero(); initVisitors(); initCapabilities(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };
