@@ -181,27 +181,12 @@
     border: 1px solid var(--line); border-radius: .95rem;
     background: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
-    cursor: pointer;
-    user-select: none;
-    outline: none;
     transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1), border-color .22s ease, background .22s ease, box-shadow .28s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .feature:hover {
     transform: translateY(-3px);
     border-color: var(--line-strong);
     box-shadow: 0 12px 28px -14px rgba(0, 0, 0, .1);
-  }
-  .feature:active {
-    transform: translateY(-1px) scale(.99);
-  }
-  .feature:focus-visible {
-    outline: 2px solid var(--ink);
-    outline-offset: 2px;
-  }
-  .feature.is-active {
-    border-color: var(--tone);
-    background: color-mix(in srgb, var(--tone) 4%, #fff);
-    box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--tone) 35%, transparent);
   }
   .feature-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
   .feature-icon {
@@ -210,7 +195,7 @@
     transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .28s ease;
   }
   .feature-icon svg { width: 1.15rem; height: 1.15rem; }
-  .feature:hover .feature-icon, .feature.is-active .feature-icon {
+  .feature:hover .feature-icon {
     transform: scale(1.08);
     box-shadow: 0 6px 14px -8px color-mix(in srgb, var(--tone) 60%, transparent);
   }
@@ -218,12 +203,6 @@
     display: inline-flex; align-items: center; gap: .4rem;
     font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle);
   }
-  .feature.is-active .feature-tag { color: var(--tone); font-weight: 500; }
-  .feature-active-dot {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--tone);
-    opacity: 0; transform: scale(.5); transition: opacity .2s, transform .2s;
-  }
-  .feature.is-active .feature-active-dot { opacity: 1; transform: scale(1); }
   .feature h3 { margin: .35rem 0 0; font-size: 1.125rem; font-weight: 600; line-height: 1.25; letter-spacing: -.02em; }
   .feature p { margin: 0; color: var(--muted); font-size: .9375rem; line-height: 1.55; }
   .feature-foot {
@@ -237,109 +216,12 @@
     font-family: var(--mono); font-size: .6875rem; letter-spacing: .02em;
     white-space: nowrap;
   }
-  .feature-action {
-    display: inline-flex; align-items: center; gap: .25rem;
-    font-family: var(--mono); font-size: .72rem; letter-spacing: .02em;
-    color: var(--subtle); opacity: .6;
-    transition: opacity .2s, color .2s, transform .2s;
-    white-space: nowrap;
-  }
-  .feature:hover .feature-action, .feature.is-active .feature-action {
-    opacity: 1; color: var(--tone); transform: translateX(2px);
-  }
   .feature[data-tone="emerald"] { --tone: #10b981; }
   .feature[data-tone="sky"] { --tone: #0ea5e9; }
   .feature[data-tone="violet"] { --tone: #8b5cf6; }
   .feature[data-tone="amber"] { --tone: #d97706; }
   .feature[data-tone="rose"] { --tone: #f43f5e; }
   .feature[data-tone="teal"] { --tone: #0d9488; }
-
-  /* feature inspector */
-  .feature-inspector {
-    margin-top: 1.35rem;
-    border: 1px solid var(--line-strong); border-radius: .95rem;
-    background: #0d0e12;
-    color: #e4e4e7;
-    overflow: hidden;
-    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, .35);
-  }
-  .inspector-head {
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.25rem;
-    padding: .9rem 1.35rem;
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
-    background: #13141a;
-  }
-  .inspector-meta { display: flex; align-items: center; gap: .75rem; min-width: 0; }
-  .inspector-dots { display: flex; align-items: center; gap: .38rem; }
-  .inspector-dots span { width: .6rem; height: .6rem; border-radius: 50%; }
-  .inspector-dots span:nth-child(1) { background: #ef4444; opacity: .85; }
-  .inspector-dots span:nth-child(2) { background: #f59e0b; opacity: .85; }
-  .inspector-dots span:nth-child(3) { background: #10b981; opacity: .85; }
-  .inspector-title {
-    font-size: .875rem; font-weight: 600; color: #fff;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .inspector-badge {
-    font-family: var(--mono); font-size: .75rem; letter-spacing: .02em;
-    padding: .22rem .55rem; border-radius: .35rem;
-    background: rgba(255, 255, 255, .08); color: var(--ins-tone, #10b981);
-    white-space: nowrap;
-  }
-  .inspector-copy {
-    display: inline-flex; align-items: center; gap: .45rem;
-    padding: .4rem .85rem; border-radius: .45rem;
-    border: 1px solid rgba(255, 255, 255, .14);
-    background: rgba(255, 255, 255, .05); color: #d4d4d8;
-    font-family: var(--mono); font-size: .75rem; font-weight: 500;
-    cursor: pointer; user-select: none;
-    transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .inspector-copy:hover {
-    background: rgba(255, 255, 255, .12);
-    color: #fff;
-    border-color: rgba(255, 255, 255, .28);
-    transform: translateY(-1px);
-  }
-  .inspector-copy:active { transform: translateY(0) scale(.97); }
-  .inspector-copy svg { width: .875rem; height: .875rem; }
-  .inspector-copy[data-copied] {
-    color: #34d399; border-color: rgba(52, 211, 153, .45); background: rgba(52, 211, 153, .12);
-  }
-  .inspector-body {
-    position: relative;
-    max-height: 24rem; overflow: auto;
-    padding: 1.35rem 1.5rem;
-    font-family: var(--mono); font-size: .8125rem; line-height: 1.65;
-    color: #d4d4d8;
-    background: #0d0e12;
-    -webkit-overflow-scrolling: touch;
-  }
-  .inspector-body pre { margin: 0; font-family: inherit; font-size: inherit; tab-size: 2; }
-  .inspector-body code { font-family: inherit; font-size: inherit; white-space: pre; }
-  @keyframes code-in {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .inspector-body code.is-switching {
-    animation: code-in .22s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  .c-kw { color: #f472b6; font-weight: 500; }
-  .c-prop { color: #38bdf8; }
-  .c-str { color: #34d399; }
-  .c-num { color: #fbbf24; }
-  .c-cmt { color: #71717a; font-style: italic; }
-  .c-pun { color: #94a3b8; }
-  .c-cmd { color: #a78bfa; font-weight: 500; }
-  .inspector-foot {
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1.25rem;
-    padding: .75rem 1.35rem;
-    border-top: 1px solid rgba(255, 255, 255, .08);
-    background: #101117;
-    font-family: var(--mono); font-size: .75rem; color: #a1a1aa;
-  }
-  .inspector-foot-tag { display: inline-flex; align-items: center; gap: .45rem; }
-  .inspector-foot-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ins-tone, #10b981); }
-  .inspector-guarantee { color: #e4e4e7; }
 
   /* cards */
   .cards { display: grid; gap: 1.15rem; }
@@ -481,13 +363,13 @@
   <section class="section features" aria-labelledby="features-heading">
     <div class="section-head">
       <h2 id="features-heading">Capabilities</h2>
-      <span>six core pillars · wire-level specs</span>
+      <span>six core pillars</span>
     </div>
-    <div class="feature-grid" role="tablist" aria-label="Rabta capabilities">
-      <article class="feature is-active" data-cap="events" data-tone="emerald" role="tab" tabindex="0" aria-selected="true" aria-controls="feature-inspector">
+    <div class="feature-grid">
+      <article class="feature" data-tone="emerald">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M14 9l3 3"/></svg></span>
-          <span class="feature-tag"><code>ed25519</code><span class="feature-active-dot" aria-hidden="true"></span></span>
+          <span class="feature-tag"><code>ed25519</code></span>
         </div>
         <h3>Signed events</h3>
         <p>Every event is canonical JSON, hashed with SHA-256 and signed with Ed25519. Identity is a keypair — no accounts, no sessions, no passwords.</p>
@@ -497,17 +379,13 @@
             <span class="feature-pill">Keypair identity</span>
             <span class="feature-pill">100 KB max</span>
           </div>
-          <span class="feature-action" aria-hidden="true">
-            <span>spec</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
         </div>
       </article>
 
-      <article class="feature" data-cap="queries" data-tone="sky" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
+      <article class="feature" data-tone="sky">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7"/><path d="M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/></svg></span>
-          <span class="feature-tag"><code>query</code><span class="feature-active-dot" aria-hidden="true"></span></span>
+          <span class="feature-tag"><code>query</code></span>
         </div>
         <h3>Live queries</h3>
         <p>Poll any collection through a typed JSON query. Filter by labels or owner, and page results with an opaque cursor.</p>
@@ -517,17 +395,13 @@
             <span class="feature-pill">10 labels</span>
             <span class="feature-pill">HTTP poll</span>
           </div>
-          <span class="feature-action" aria-hidden="true">
-            <span>spec</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
         </div>
       </article>
 
-      <article class="feature" data-cap="blobs" data-tone="violet" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
+      <article class="feature" data-tone="violet">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span>
-          <span class="feature-tag"><code>sha-256</code><span class="feature-active-dot" aria-hidden="true"></span></span>
+          <span class="feature-tag"><code>sha-256</code></span>
         </div>
         <h3>Content-addressed blobs</h3>
         <p>Uploads return their SHA-256, dedupe automatically and expire with the signed events that claim them. Encrypt client-side and the relay only sees ciphertext.</p>
@@ -537,17 +411,13 @@
             <span class="feature-pill">Event-pinned</span>
             <span class="feature-pill">Zero knowledge</span>
           </div>
-          <span class="feature-action" aria-hidden="true">
-            <span>spec</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
         </div>
       </article>
 
-      <article class="feature" data-cap="sovereign" data-tone="amber" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
+      <article class="feature" data-tone="amber">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></span>
-          <span class="feature-tag"><code>rust · sqlite</code><span class="feature-active-dot" aria-hidden="true"></span></span>
+          <span class="feature-tag"><code>rust · sqlite</code></span>
         </div>
         <h3>Yours to run</h3>
         <p>One Rust binary, one SQLite file, one container. No database server, no cloud dependency, no per-user pricing — deploy it anywhere.</p>
@@ -557,17 +427,13 @@
             <span class="feature-pill">WAL mode</span>
             <span class="feature-pill">Single binary</span>
           </div>
-          <span class="feature-action" aria-hidden="true">
-            <span>spec</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
         </div>
       </article>
 
-      <article class="feature" data-cap="sync" data-tone="rose" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
+      <article class="feature" data-tone="rose">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/><path d="M18 8v8"/></svg></span>
-          <span class="feature-tag"><code>merkle · xor</code><span class="feature-active-dot" aria-hidden="true"></span></span>
+          <span class="feature-tag"><code>merkle · xor</code></span>
         </div>
         <h3>Autonomous peer sync</h3>
         <p>Decentralized multi-node replication. Nodes reconcile diverged event sets in milliseconds using a 256-bucket XOR folding Merkle walk without central coordinators.</p>
@@ -577,17 +443,13 @@
             <span class="feature-pill">XOR folding</span>
             <span class="feature-pill">Multi-node</span>
           </div>
-          <span class="feature-action" aria-hidden="true">
-            <span>spec</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
         </div>
       </article>
 
-      <article class="feature" data-cap="defense" data-tone="teal" role="tab" tabindex="0" aria-selected="false" aria-controls="feature-inspector">
+      <article class="feature" data-tone="teal">
         <div class="feature-top">
           <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span class="feature-tag"><code>ring · sandbox</code><span class="feature-active-dot" aria-hidden="true"></span></span>
+          <span class="feature-tag"><code>ring · sandbox</code></span>
         </div>
         <h3>Machine anti-spam</h3>
         <p>Engineered to protect the host machine: a 64k-entry in-memory ring buffer drops spam in microseconds, backed by battery token accounting and isolated staging.</p>
@@ -597,36 +459,8 @@
             <span class="feature-pill">Battery tokens</span>
             <span class="feature-pill">10% staging</span>
           </div>
-          <span class="feature-action" aria-hidden="true">
-            <span>spec</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
         </div>
       </article>
-    </div>
-
-    <!-- Live Protocol & Wire Inspector -->
-    <div class="feature-inspector" id="feature-inspector" role="tabpanel" aria-label="Protocol and wire specification">
-      <div class="inspector-head">
-        <div class="inspector-meta">
-          <div class="inspector-dots" aria-hidden="true">
-            <span></span><span></span><span></span>
-          </div>
-          <span class="inspector-title" id="inspector-title">Signed events</span>
-          <span class="inspector-badge" id="inspector-badge">POST /api/v1/events</span>
-        </div>
-        <button class="inspector-copy" id="inspector-copy" type="button" aria-label="Copy wire format to clipboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <span id="inspector-copy-label">Copy wire format</span>
-        </button>
-      </div>
-      <div class="inspector-body">
-        <pre><code id="inspector-code"></code></pre>
-      </div>
-      <div class="inspector-foot">
-        <span class="inspector-foot-tag">Guarantee</span>
-        <span class="inspector-guarantee" id="inspector-guarantee">Relay verifies Ed25519 signature over canonical SHA-256 digest. Server never holds private keys.</span>
-      </div>
     </div>
   </section>
 
@@ -1034,301 +868,6 @@
     });
   }
 
-  const CAPABILITIES = {
-    events: {
-      title: 'Signed events',
-      endpoint: 'POST /api/v1/events',
-      tone: '#10b981',
-      guarantee: 'Relay verifies Ed25519 signature over canonical SHA-256 digest. Server never holds private keys.',
-      raw: `curl -X POST https://1.rabta.space/api/v1/events \\
-  -H "content-type: application/json" \\
-  -d '{
-    "collection": "site/shouts",
-    "created_at": 1793283000,
-    "expires_at": 1793887800,
-    "owner": "ed25519:ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c",
-    "labels": ["public"],
-    "blobs": [],
-    "data": { "text": "Signed in browser. Zero accounts." },
-    "id": "6084fc0692f37f8d952b1012921f2d70d9960f5da20436742529c022647811e5",
-    "sig": "eb9d881af37ca78e3365006101c5aa06f9ce0e9390870e5ae9570262e93869c9dd38574e30f078e4156b2841f7371a2ee3fc2af4a39b06bd4fd7946e020bf904"
-  }'`,
-      code: `<span class="c-cmt">// 1. Canonical JSON (RFC 8785) with sorted keys + Ed25519 signature</span>
-<span class="c-pun">{</span>
-  <span class="c-prop">"collection"</span><span class="c-pun">:</span> <span class="c-str">"site/shouts"</span><span class="c-pun">,</span>
-  <span class="c-prop">"created_at"</span><span class="c-pun">:</span> <span class="c-num">1793283000</span><span class="c-pun">,</span>
-  <span class="c-prop">"expires_at"</span><span class="c-pun">:</span> <span class="c-num">1793887800</span><span class="c-pun">,</span>
-  <span class="c-prop">"owner"</span><span class="c-pun">:</span> <span class="c-str">"ed25519:ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c"</span><span class="c-pun">,</span>
-  <span class="c-prop">"labels"</span><span class="c-pun">:</span> <span class="c-pun">[</span><span class="c-str">"public"</span><span class="c-pun">],</span>
-  <span class="c-prop">"blobs"</span><span class="c-pun">:</span> <span class="c-pun">[],</span>
-  <span class="c-prop">"data"</span><span class="c-pun">:</span> <span class="c-pun">{</span> <span class="c-prop">"text"</span><span class="c-pun">:</span> <span class="c-str">"Signed in browser. Zero accounts."</span> <span class="c-pun">},</span>
-  <span class="c-prop">"id"</span><span class="c-pun">:</span> <span class="c-str">"6084fc0692f37f8d952b1012921f2d70d9960f5da20436742529c022647811e5"</span><span class="c-pun">,</span>
-  <span class="c-prop">"sig"</span><span class="c-pun">:</span> <span class="c-str">"eb9d881af37ca78e3365006101c5aa06f9ce0e9390870e5ae9570262e93869c9dd38574e..."</span>
-<span class="c-pun">}</span>
-
-<span class="c-cmt">// 2. Post to relay — node checks math, stores opaquely</span>
-<span class="c-cmd">$ curl</span> -X POST https://1.rabta.space/api/v1/events \\
-  -H <span class="c-str">"content-type: application/json"</span> -d <span class="c-str">'@envelope.json'</span>`
-    },
-    queries: {
-      title: 'Live queries',
-      endpoint: 'POST /api/v1/events/query',
-      tone: '#0ea5e9',
-      guarantee: 'High-frequency HTTP polling with cursor pagination. Zero persistent socket drop or reconnect thrash.',
-      raw: `curl -X POST https://1.rabta.space/api/v1/events/query \\
-  -H "content-type: application/json" \\
-  -d '{
-    "collection": "canvas/rabta",
-    "labels": ["stroke"],
-    "limit": 50,
-    "after": "eyJsYXN0X2lkIjoiNjA4NGZjMDYiLCJ0cyI6MTc5MzI4MzAwMH0"
-  }'`,
-      code: `<span class="c-cmt">// Poll collection with label filter and cursor pagination</span>
-<span class="c-cmd">$ curl</span> -X POST https://1.rabta.space/api/v1/events/query \\
-  -H <span class="c-str">"content-type: application/json"</span> \\
-  -d <span class="c-str">'{
-    "collection": "canvas/rabta",
-    "labels": ["stroke"],
-    "limit": 50,
-    "after": "eyJsYXN0X2lkIjoiNjA4NGZjMDYiLCJ0cyI6MTc5MzI4MzAwMH0"
-  }'</span>
-
-<span class="c-cmt">// Response: live signed envelopes + opaque next_cursor</span>
-<span class="c-pun">{</span>
-  <span class="c-prop">"events"</span><span class="c-pun">:</span> <span class="c-pun">[</span>
-    <span class="c-pun">{</span>
-      <span class="c-prop">"id"</span><span class="c-pun">:</span> <span class="c-str">"6084fc0692f37f8d952b1012921f2d70d9960f5da20436742529c022647811e5"</span><span class="c-pun">,</span>
-      <span class="c-prop">"owner"</span><span class="c-pun">:</span> <span class="c-str">"ed25519:ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c"</span><span class="c-pun">,</span>
-      <span class="c-prop">"data"</span><span class="c-pun">:</span> <span class="c-pun">{</span> <span class="c-prop">"x"</span><span class="c-pun">:</span> <span class="c-num">412</span><span class="c-pun">,</span> <span class="c-prop">"y"</span><span class="c-pun">:</span> <span class="c-num">188</span><span class="c-pun">,</span> <span class="c-prop">"color"</span><span class="c-pun">:</span> <span class="c-str">"#8b5cf6"</span> <span class="c-pun">},</span>
-      <span class="c-prop">"sig"</span><span class="c-pun">:</span> <span class="c-str">"eb9d881af37ca78e..."</span>
-    <span class="c-pun">}</span>
-  <span class="c-pun">],</span>
-  <span class="c-prop">"next_cursor"</span><span class="c-pun">:</span> <span class="c-str">"eyJsYXN0X2lkIjoiOTFhMzkxYWIiLCJ0cyI6MTc5MzI5MDAwMH0"</span>
-<span class="c-pun">}</span>`
-    },
-    blobs: {
-      title: 'Content-addressed blobs',
-      endpoint: 'PUT /api/v1/blobs',
-      tone: '#8b5cf6',
-      guarantee: 'Raw uploads return SHA-256 content hashes. Claiming events lock blob retention up to 10 years.',
-      raw: `# 1. Stream raw payload (client-side encrypted with XChaCha20)
-curl -X PUT https://1.rabta.space/api/v1/blobs \\
-  -H "content-type: application/octet-stream" \\
-  --data-binary @encrypted_payload.bin
-
-# Response:
-# {"hash":"3a2b7f8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a"}
-
-# 2. Claim in signed event to extend retention (unclaimed blobs expire in 6h):
-# "blobs": ["3a2b7f8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a"]`,
-      code: `<span class="c-cmt">// 1. Upload raw payload (encrypt client-side with XChaCha20)</span>
-<span class="c-cmd">$ curl</span> -X PUT https://1.rabta.space/api/v1/blobs \\
-  -H <span class="c-str">"content-type: application/octet-stream"</span> \\
-  --data-binary <span class="c-str">@encrypted_payload.bin</span>
-
-<span class="c-cmt">// Response: content-addressed SHA-256 hash</span>
-<span class="c-pun">{</span> <span class="c-prop">"hash"</span><span class="c-pun">:</span> <span class="c-str">"3a2b7f8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a"</span> <span class="c-pun">}</span>
-
-<span class="c-cmt">// 2. Claim in signed event to extend retention (unclaimed blobs expire in 6h)</span>
-<span class="c-pun">{</span>
-  <span class="c-prop">"collection"</span><span class="c-pun">:</span> <span class="c-str">"share/rabta"</span><span class="c-pun">,</span>
-  <span class="c-prop">"expires_at"</span><span class="c-pun">:</span> <span class="c-num">1793887800</span><span class="c-pun">,</span>
-  <span class="c-prop">"blobs"</span><span class="c-pun">:</span> <span class="c-pun">[</span><span class="c-str">"3a2b7f8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a"</span><span class="c-pun">],</span>
-  <span class="c-prop">"data"</span><span class="c-pun">:</span> <span class="c-pun">{</span> <span class="c-prop">"cipher"</span><span class="c-pun">:</span> <span class="c-str">"xchacha20-poly1305"</span><span class="c-pun">,</span> <span class="c-prop">"filename"</span><span class="c-pun">:</span> <span class="c-str">"archive.zip"</span> <span class="c-pun">}</span>
-<span class="c-pun">}</span>`
-    },
-    sovereign: {
-      title: 'Yours to run',
-      endpoint: 'docker run · port 3232',
-      tone: '#d97706',
-      guarantee: 'Embedded SQLite in WAL mode with rusqlite. Zero database servers or background daemons to manage.',
-      raw: `# Run a sovereign Rabta node with zero external dependencies
-docker run -d \\
-  --name rabta \\
-  -p 3232:3232 \\
-  -v rabta_data:/data \\
-  --restart unless-stopped \\
-  -e STORAGE_LIMIT=20GB \\
-  ghcr.io/rabta-protocol/rabta:latest
-
-# Verify node health and storage metrics
-curl -s http://localhost:3232/api/v1/health`,
-      code: `<span class="c-cmt"># Run a sovereign Rabta node with zero external dependencies</span>
-<span class="c-cmd">$ docker</span> run -d \\
-  --name rabta \\
-  -p 3232:3232 \\
-  -v rabta_data:/data \\
-  --restart unless-stopped \\
-  -e STORAGE_LIMIT=20GB \\
-  ghcr.io/rabta-protocol/rabta:latest
-
-<span class="c-cmt"># Verify node health and storage metrics</span>
-<span class="c-cmd">$ curl</span> -s http://localhost:3232/api/v1/health
-<span class="c-pun">{</span>
-  <span class="c-prop">"status"</span><span class="c-pun">:</span> <span class="c-str">"ok"</span><span class="c-pun">,</span>
-  <span class="c-prop">"version"</span><span class="c-pun">:</span> <span class="c-str">"0.1.0"</span><span class="c-pun">,</span>
-  <span class="c-prop">"uptime_secs"</span><span class="c-pun">:</span> <span class="c-num">348102</span>
-<span class="c-pun">}</span>`
-    },
-    sync: {
-      title: 'Autonomous peer sync',
-      endpoint: 'POST /api/v1/sync',
-      tone: '#f43f5e',
-      guarantee: 'Merkle walk aborts if >10% buckets diverge to defend against CPU/memory exhaustion attacks.',
-      raw: `curl -X POST http://peer-node:3232/api/v1/sync \\
-  -H "content-type: application/json" \\
-  -d '{
-    "since_seq": 14200,
-    "buckets": [
-      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "8f434346648f6b96df89dda901c5176b10e6d83961dd3c1ac88b59b2dc327aa4",
-      "0000000000000000000000000000000000000000000000000000000000000000"
-    ]
-  }'`,
-      code: `<span class="c-cmt">// Reconcile peer node divergences via 256-bucket XOR folding Merkle walk</span>
-<span class="c-cmd">$ curl</span> -X POST http://peer-node:3232/api/v1/sync \\
-  -H <span class="c-str">"content-type: application/json"</span> \\
-  -d <span class="c-str">'{
-    "since_seq": 14200,
-    "buckets": [
-      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "8f434346648f6b96df89dda901c5176b10e6d83961dd3c1ac88b59b2dc327aa4",
-      "0000000000000000000000000000000000000000000000000000000000000000"
-    ]
-  }'</span>
-
-<span class="c-cmt">// Nodes pinpoint mismatched ranges in O(log N) without central coordinators.</span>
-<span class="c-cmt">// Aborts gracefully if &gt;10% of buckets differ to prevent CPU/memory exhaustion.</span>`
-    },
-    defense: {
-      title: 'Machine anti-spam',
-      endpoint: 'Protection engine',
-      tone: '#0d9488',
-      guarantee: 'Anonymous blob uploads are isolated to a 10% staging partition and can never evict committed user events.',
-      raw: `Rabta Host Machine Protection Pipeline:
-1. In-Memory Dedup Ring (64,000 entries)
-   Drops duplicate event pushes in <5µs. Zero SQLite writer lock contention under high traffic.
-2. Global Battery Accounting Engine
-   Peer sync & queries lazily consume CPU/IO tokens. Repeat offenders face exponential backoff (2^strikes).
-3. Storage Sandboxing
-   Unclaimed uploads isolated to 10% staging partition. Anonymous blob traffic CANNOT evict committed user data.`,
-      code: `<span class="c-cmt">┌─────────────────────────────────────────────────────────────┐</span>
-<span class="c-cmt">│ 1. In-Memory Dedup Ring (64,000 entries)                    │</span>
-<span class="c-cmt">│    Drops duplicate event pushes in &lt;5µs.                     │</span>
-<span class="c-cmt">│    Zero SQLite writer lock contention under high traffic.   │</span>
-<span class="c-cmt">├─────────────────────────────────────────────────────────────┤</span>
-<span class="c-cmt">│ 2. Global Battery Accounting Engine                         │</span>
-<span class="c-cmt">│    Peer sync & queries lazily consume CPU/IO tokens.        │</span>
-<span class="c-cmt">│    Repeat offenders face exponential backoff (2^strikes).   │</span>
-<span class="c-cmt">├─────────────────────────────────────────────────────────────┤</span>
-<span class="c-cmt">│ 3. Storage Sandboxing                                       │</span>
-<span class="c-cmt">│    Unclaimed uploads isolated to 10% staging partition.     │</span>
-<span class="c-cmt">│    Anonymous blob traffic CANNOT evict committed user data. │</span>
-<span class="c-cmt">└─────────────────────────────────────────────────────────────┘</span>`
-    }
-  };
-
-  const copyTextToClipboard = async (text) => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
-        return true;
-      }
-    } catch {}
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      ta.remove();
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const initCapabilities = () => {
-    const features = document.querySelectorAll('.feature');
-    const titleEl = $('inspector-title');
-    const badgeEl = $('inspector-badge');
-    const codeEl = $('inspector-code');
-    const guaranteeEl = $('inspector-guarantee');
-    const copyBtn = $('inspector-copy');
-    const inspector = $('feature-inspector');
-    if (!features.length || !codeEl) return;
-
-    let activeKey = 'events';
-    let copyTimer = null;
-
-    const ICON_COPY = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy wire format</span>`;
-    const ICON_CHECK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Copied!</span>`;
-
-    const select = (key, focus) => {
-      const data = CAPABILITIES[key];
-      if (!data) return;
-      activeKey = key;
-      features.forEach((f) => {
-        const isMatch = f.dataset.cap === key;
-        f.classList.toggle('is-active', isMatch);
-        f.setAttribute('aria-selected', isMatch ? 'true' : 'false');
-        if (isMatch && focus) f.focus();
-      });
-      if (titleEl) titleEl.textContent = data.title;
-      if (badgeEl) {
-        badgeEl.textContent = data.endpoint;
-        badgeEl.style.setProperty('--ins-tone', data.tone);
-      }
-      if (inspector) {
-        inspector.style.setProperty('--ins-tone', data.tone);
-      }
-      if (codeEl) {
-        codeEl.classList.remove('is-switching');
-        void codeEl.offsetWidth;
-        codeEl.innerHTML = data.code;
-        codeEl.classList.add('is-switching');
-      }
-      if (guaranteeEl) {
-        guaranteeEl.textContent = data.guarantee;
-      }
-    };
-
-    features.forEach((feature) => {
-      feature.addEventListener('click', () => {
-        const cap = feature.dataset.cap;
-        if (cap && cap !== activeKey) select(cap, false);
-      });
-      feature.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          const cap = feature.dataset.cap;
-          if (cap) select(cap, true);
-        }
-      });
-    });
-
-    if (copyBtn) {
-      copyBtn.addEventListener('click', async () => {
-        const data = CAPABILITIES[activeKey];
-        if (!data || !data.raw) return;
-        const ok = await copyTextToClipboard(data.raw);
-        if (ok) {
-          copyBtn.dataset.copied = '1';
-          copyBtn.innerHTML = ICON_CHECK;
-          clearTimeout(copyTimer);
-          copyTimer = setTimeout(() => {
-            delete copyBtn.dataset.copied;
-            copyBtn.innerHTML = ICON_COPY;
-          }, 1800);
-        }
-      });
-    }
-
-    select('events', false);
-  };
-
   const hero = () => {
     if (!window.gsap || reduce) return;
     const tl = window.gsap.timeline({ defaults: { ease: 'power3.out', duration: .7 } });
@@ -1339,7 +878,7 @@ curl -s http://localhost:3232/api/v1/health`,
       .from('.hero-actions .btn', { y: 12, opacity: 0, stagger: .08, duration: .45 }, '-=.35')
       .from('.hero-meta span', { opacity: 0, stagger: .05, duration: .3 }, '-=.3')
       .from('.ticker', { opacity: 0, duration: .5 }, '-=.35')
-      .from('.features .section-head, .feature, .feature-inspector', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
+      .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
       .from('.demos .section-head', { y: 12, opacity: 0, duration: .5 }, '-=.25')
       .from('.card', { y: 28, opacity: 0, stagger: .09, duration: .65 }, '-=.25')
       .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.18')
@@ -1347,7 +886,7 @@ curl -s http://localhost:3232/api/v1/health`,
   };
 
   const boot = () => {
-    const start = () => { hero(); initVisitors(); initCapabilities(); };
+    const start = () => { hero(); initVisitors(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };
