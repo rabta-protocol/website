@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#ffffff" />
+<title>Rabta Price Tape — Bitcoin, signed, live</title>
+<meta name="description" content="A collaborative Bitcoin price tape: every visitor's browser fetches BTC/USD from CoinGecko, signs it with a local Ed25519 key and publishes it to a Rabta relay at random 1-15s intervals. The chart is rebuilt from the relay's signed event history — no database, no accounts." />
+<meta name="keywords" content="Rabta, bitcoin, BTC, price chart, CoinGecko, signed events, Ed25519, live polling, SVG chart, self-hosted" />
+<link rel="canonical" href="https://rabta.space/btc.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Rabta" />
+<meta property="og:title" content="Rabta Price Tape — Bitcoin, signed, live" />
+<meta property="og:description" content="Every tick is fetched from CoinGecko, signed in a browser and published to a Rabta relay. The chart is just the relay's event history, drawn." />
+<meta property="og:url" content="https://rabta.space/btc.html" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e0e10'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='32' font-weight='600' fill='%23f7931a' text-anchor='middle'%3E%E2%82%BF%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://1.rabta.space" crossorigin />
+<link rel="preconnect" href="https://api.coingecko.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #0e0e10;
+    --muted: #52525b;
+    --subtle: #62626d;
+    --line: rgba(14, 14, 16, .08);
+    --line-strong: rgba(14, 14, 16, .16);
+    --btc: #f7931a;
+    --up: #059669;
+    --down: #e11d48;
+    --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+  }
+  * { box-sizing: border-box; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: #ffedd5; color: #7c2d12; }
+
+  main { width: 100%; max-width: 60rem; margin: 0 auto; padding: 1.25rem 1.5rem 3rem; }
+  @media (min-width: 48rem) { main { padding: 1.75rem 2.5rem 4rem; } }
+
+  header.topbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem;
+    width: 100%; max-width: 60rem; margin: 0 auto; padding: 1.1rem 1.5rem 0;
+  }
+  @media (min-width: 48rem) { header.topbar { padding: 1.4rem 2.5rem 0; } }
+  .brand {
+    display: inline-flex; align-items: center; gap: .55rem;
+    font-weight: 700; font-size: 1.05rem; letter-spacing: -.02em;
+    color: var(--ink); text-decoration: none;
+  }
+  .brand-mark {
+    display: grid; place-items: center;
+    width: 1.6rem; height: 1.6rem; border-radius: .45rem;
+    background: var(--ink); color: var(--btc);
+    font-family: var(--mono); font-size: .95rem; font-weight: 600;
+  }
+  .brand-box {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+    padding: .22rem .5rem; border: 1px solid var(--line-strong); border-radius: .35rem;
+    color: var(--btc);
+  }
+  .topbar .nav { display: flex; gap: 1rem; margin-left: auto; }
+  .nav a {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--subtle); text-decoration: none;
+  }
+  .nav a:hover { color: var(--ink); }
+
+  .eyebrow {
+    display: inline-flex; flex-wrap: wrap; align-items: center; gap: .5rem;
+    margin-top: 3rem;
+    padding: .4rem .7rem .4rem .55rem;
+    border: 1px solid var(--line); border-radius: 999px;
+    background: #fff;
+    font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+    color: #52525b;
+  }
+  .eyebrow .sep { color: rgba(14, 14, 16, .25); }
+  .live-dot { position: relative; width: .4rem; height: .4rem; flex: none; border-radius: 50%; background: var(--btc); }
+  .live-dot::after {
+    content: ""; position: absolute; inset: -3px; border-radius: 50%;
+    border: 1px solid var(--btc); opacity: 0; animation: ping 2.2s cubic-bezier(0, 0, .2, 1) infinite;
+  }
+  @keyframes ping { 0% { transform: scale(.6); opacity: .9; } 80%, 100% { transform: scale(1.9); opacity: 0; } }
+
+  h1 { margin: 1.1rem 0 0; font-size: clamp(2.4rem, 7vw, 4.5rem); line-height: .95; letter-spacing: -.05em; font-weight: 600; }
+  .lede { max-width: 42rem; margin: 1.1rem 0 0; font-size: 1.0625rem; color: var(--muted); }
+  .lede b { color: var(--ink); }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.2rem; }
+  .hero-meta span {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+    padding: .3rem .55rem; border: 1px solid var(--line); border-radius: .35rem; color: var(--subtle);
+  }
+
+  /* the big price */
+  .price-row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; }
+  .price-main { display: flex; flex-direction: column; gap: .3rem; }
+  .price-label { font-family: var(--mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--subtle); }
+  .price-big {
+    display: flex; align-items: baseline; gap: .6rem;
+    font-family: var(--mono); font-weight: 600;
+    font-size: clamp(2.6rem, 7.5vw, 4.2rem);
+    letter-spacing: -.03em; line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .price-big .cur { font-size: .45em; color: var(--subtle); font-weight: 500; }
+  .price-big .cents { font-size: .45em; color: var(--subtle); font-weight: 500; }
+  .price-big[data-flash="up"] { animation: flash-up .7s ease; }
+  .price-big[data-flash="down"] { animation: flash-down .7s ease; }
+  @keyframes flash-up { 0% { color: var(--up); } 100% { color: var(--ink); } }
+  @keyframes flash-down { 0% { color: var(--down); } 100% { color: var(--ink); } }
+  .price-side { display: flex; align-items: center; gap: .6rem; padding-bottom: .5rem; }
+  .chg {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-family: var(--mono); font-size: .8125rem; font-weight: 500;
+    padding: .35rem .6rem; border-radius: .45rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .chg[data-dir="up"] { color: var(--up); background: rgba(5, 150, 105, .08); }
+  .chg[data-dir="down"] { color: var(--down); background: rgba(225, 29, 72, .07); }
+  .chg[data-dir="flat"] { color: var(--subtle); background: rgba(14, 14, 16, .04); }
+  .next-tick { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .75rem; letter-spacing: .04em; color: var(--subtle); font-variant-numeric: tabular-nums; }
+  .next-tick svg { display: block; }
+
+  .board { margin-top: 2.75rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .35rem 1rem; margin-bottom: 1rem; }
+  .section-head h2 { margin: 0; font-size: 1.25rem; letter-spacing: -.02em; font-weight: 600; }
+  .section-head span { font-family: var(--mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--subtle); }
+
+  /* the chart */
+  .chart-wrap {
+    position: relative;
+    border: 1px solid var(--line); border-radius: 1rem;
+    background:
+      radial-gradient(120% 90% at 85% -10%, rgba(247, 147, 26, .07), transparent 55%),
+      linear-gradient(180deg, #fffdfa, #fff);
+    overflow: hidden;
+  }
+  .chart-wrap svg { display: block; width: 100%; height: 21rem; touch-action: pan-y; }
+  .chart-empty {
+    position: absolute; inset: 0;
+    display: grid; place-items: center; padding: 1.5rem;
+    font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--subtle); text-align: center;
+    pointer-events: none;
+  }
+  .chart-empty[hidden] { display: none; }
+  .chart-tip {
+    position: absolute; z-index: 2;
+    transform: translate(-50%, -100%);
+    padding: .5rem .65rem;
+    border: 1px solid var(--line-strong); border-radius: .55rem;
+    background: #0e0e10; color: #fff;
+    font-family: var(--mono); font-size: .72rem; line-height: 1.5;
+    pointer-events: none; white-space: nowrap;
+    box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .4);
+  }
+  .chart-tip[data-dir="up"] .tip-delta { color: #34d399; }
+  .chart-tip[data-dir="down"] .tip-delta { color: #fb7185; }
+  .chart-tip .tip-meta { color: #a1a1aa; }
+  .chart-tip[hidden] { display: none; }
+
+  /* stats */
+  .stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; margin-top: .75rem; }
+  @media (min-width: 46rem) { .stat-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .stat {
+    padding: .8rem .9rem;
+    border: 1px solid var(--line); border-radius: .8rem;
+    background: #fff;
+    display: flex; flex-direction: column; gap: .25rem;
+  }
+  .stat b { font-family: var(--mono); font-weight: 600; font-size: .95rem; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .stat span { font-family: var(--mono); font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; color: var(--subtle); }
+
+  /* tick log */
+  .tape { list-style: none; margin: .85rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+  .tape li {
+    display: grid; grid-template-columns: auto auto 1fr auto; align-items: baseline; gap: .9rem;
+    padding: .5rem .75rem;
+    border: 1px solid var(--line); border-radius: .55rem;
+    background: #fff;
+    font-family: var(--mono); font-size: .75rem; font-variant-numeric: tabular-nums;
+    overflow: hidden;
+  }
+  .tape .t-at { color: var(--subtle); }
+  .tape .t-price { font-weight: 600; min-width: 8.5ch; }
+  .tape li[data-dir="up"] .t-price::after { content: " ▲"; color: var(--up); font-weight: 400; }
+  .tape li[data-dir="down"] .t-price::after { content: " ▼"; color: var(--down); font-weight: 400; }
+  .tape .t-owner { color: var(--subtle); overflow: hidden; text-overflow: ellipsis; }
+  .tape .t-tag { color: var(--btc); }
+  .tape li.entering { animation: tick-in .5s cubic-bezier(.2, .8, .2, 1) both; }
+  @keyframes tick-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .tape-empty {
+    margin: .85rem 0 0; padding: 1.25rem 1rem;
+    border: 1px dashed var(--line-strong); border-radius: .9rem;
+    font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--subtle); text-align: center;
+  }
+  .tape-empty[hidden] { display: none; }
+
+  footer {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem;
+    margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .06em; color: var(--subtle);
+  }
+  footer .footer-links { display: flex; gap: 1.1rem; }
+  footer a { color: var(--subtle); text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="index.html" aria-label="Rabta home">
+    <span class="brand-mark" aria-hidden="true">₿</span>
+    <span>rabta</span>
+    <span class="brand-box">price tape</span>
+  </a>
+  <nav class="nav" aria-label="Demos">
+    <a href="paint.html">canvas</a>
+    <a href="world.html">world</a>
+  </nav>
+</header>
+
+<main>
+  <span class="eyebrow">
+    <span class="live-dot" data-dot aria-hidden="true"></span><span data-state>connecting</span>
+    <span class="sep" aria-hidden="true">/</span><span>feed · coingecko</span>
+  </span>
+  <h1>The price tape</h1>
+  <p class="lede">Every visitor's browser fetches <b>BTC/USD from CoinGecko</b>, signs the tick with a local Ed25519 key, and publishes it to the relay after a <b>random 1–15s beat</b>. The chart isn't stored anywhere — it's the relay's event history, redrawn.</p>
+  <div class="hero-meta">
+    <span>ed25519</span><span>1–15s jitter</span><span>6h ttl</span><span>polling</span>
+  </div>
+
+  <div class="price-row">
+    <div class="price-main">
+      <span class="price-label">BTC / USD</span>
+      <div class="price-big" id="price-big" aria-live="polite"><span class="cur">$</span><span id="price-int">—</span><span class="cents" id="price-frac"></span></div>
+    </div>
+    <div class="price-side">
+      <span class="chg" id="chg" data-dir="flat">— 24h</span>
+      <span class="next-tick">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+          <circle cx="9" cy="9" r="7" fill="none" stroke="rgba(14,14,16,.1)" stroke-width="2"/>
+          <circle id="tick-ring" cx="9" cy="9" r="7" fill="none" stroke="#f7931a" stroke-width="2" stroke-linecap="round" stroke-dasharray="43.98" stroke-dashoffset="43.98" transform="rotate(-90 9 9)"/>
+        </svg>
+        <span id="next-label" role="timer">next tick…</span>
+      </span>
+    </div>
+  </div>
+
+  <section class="board" aria-labelledby="tape-heading">
+    <div class="section-head">
+      <h2 id="tape-heading">Signed tape</h2>
+      <span>btc/ticks · last 100 events</span>
+    </div>
+    <div class="chart-wrap" id="chart-wrap">
+      <svg id="chart" aria-label="Bitcoin price chart built from signed relay events" role="img"></svg>
+      <div class="chart-tip" id="chart-tip" hidden></div>
+      <div class="chart-empty" id="chart-empty">Seeding the tape — first signed tick…</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat"><b id="stat-high">—</b><span>tape high</span></div>
+      <div class="stat"><b id="stat-low">—</b><span>tape low</span></div>
+      <div class="stat"><b id="stat-avg">—</b><span>tape avg</span></div>
+      <div class="stat"><b id="stat-ticks">—</b><span>ticks</span></div>
+      <div class="stat"><b id="stat-nodes">—</b><span>signers</span></div>
+    </div>
+  </section>
+
+  <section class="board" aria-labelledby="log-heading">
+    <div class="section-head">
+      <h2 id="log-heading">Tick log</h2>
+      <span>newest first · you or a peer</span>
+    </div>
+    <ol class="tape" id="tape"></ol>
+    <p class="tape-empty" id="tape-empty">No ticks yet — this page posts the first one.</p>
+  </section>
+
+  <footer>
+    <span>btc/ticks · ed25519 / polling / 6h ttl</span>
+    <div class="footer-links">
+      <a href="llms.txt">llms.txt</a>
+      <a href="https://github.com/rabta-protocol/rabta" target="_blank" rel="noreferrer">github</a>
+      <a href="https://1.rabta.space" target="_blank" rel="noreferrer">1.rabta.space</a>
+    </div>
+  </footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js" defer></script>
+<script>
+(() => {
+  const RELAY = 'https://1.rabta.space';
+  const COLLECTION = 'btc/ticks';
+  const PRICE_LABEL = 'price';
+  const TICK_TTL = 6 * 60 * 60;
+  const QUERY_LIMIT = 100;
+  const POINTS_MAX = QUERY_LIMIT;
+  const TAPE_ROWS = 8;
+  const POLL_MS = 3500;
+  const COINGECKO = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true';
+  const STORE_IDENTITY = 'rabta.canvas.identity.v1';
+  const RING_CIRC = 2 * Math.PI * 7;
+
+  const $ = (id) => document.getElementById(id);
+  const stateEl = document.querySelector('[data-state]');
+  const priceInt = $('price-int');
+  const priceFrac = $('price-frac');
+  const priceBig = $('price-big');
+  const chgEl = $('chg');
+  const tickRing = $('tick-ring');
+  const nextLabel = $('next-label');
+  const chartSvg = $('chart');
+  const chartWrap = $('chart-wrap');
+  const chartTip = $('chart-tip');
+  const chartEmpty = $('chart-empty');
+  const tapeList = $('tape');
+  const tapeEmpty = $('tape-empty');
+  const statHigh = $('stat-high');
+  const statLow = $('stat-low');
+  const statAvg = $('stat-avg');
+  const statTicks = $('stat-ticks');
+  const statNodes = $('stat-nodes');
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const svgEl = (tag) => document.createElementNS(NS, tag);
+
+  const state = {
+    points: [],
+    seen: new Set(),
+    connected: false,
+    clockOffset: 0,
+    pollTimer: null,
+    pollBusy: false,
+    tickTimer: null,
+    tickAt: 0,
+    tickBusy: false,
+    lastShown: null,
+    ownerTag: null,
+    canSign: false,
+    priceChg: null
+  };
+
+  const now = () => Math.floor(Date.now() / 1000) + state.clockOffset;
+
+  const syncClock = (response) => {
+    const date = response && response.headers ? response.headers.get('date') : null;
+    if (!date) return;
+    const seconds = Math.floor(Date.parse(date) / 1000);
+    if (!Number.isFinite(seconds)) return;
+    state.clockOffset = Math.min(86400, Math.max(-86400, seconds - Math.floor(Date.now() / 1000)));
+  };
+
+  /* ---- signing plumbing (same envelope shape as the other demos) ---- */
+
+  const bytesToHex = (bytes) => {
+    let out = '';
+    for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, '0');
+    return out;
+  };
+  const bytesToBase64 = (bytes) => {
+    let raw = '';
+    for (let i = 0; i < bytes.length; i++) raw += String.fromCharCode(bytes[i]);
+    return btoa(raw);
+  };
+  const base64ToBytes = (value) => {
+    const raw = atob(value);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  };
+  const canonical = (value) => {
+    if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
+    if (value && typeof value === 'object') {
+      return '{' + Object.keys(value).sort().map((key) => JSON.stringify(key) + ':' + canonical(value[key])).join(',') + '}';
+    }
+    return JSON.stringify(value);
+  };
+
+  const loadIdentity = () => {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(STORE_IDENTITY) || 'null'); } catch {}
+    if (saved && typeof saved.public === 'string') {
+      try { state.ownerTag = 'ed25519:' + bytesToHex(base64ToBytes(saved.public)); } catch {}
+    }
+    if (!window.nacl || !window.crypto || !window.crypto.subtle) return null;
+    if (saved && typeof saved.secret === 'string') {
+      try {
+        const secretKey = base64ToBytes(saved.secret);
+        if (secretKey.length === 64 && state.ownerTag) return { secretKey, owner: state.ownerTag };
+      } catch {}
+    }
+    const pair = nacl.sign.keyPair();
+    try {
+      localStorage.setItem(STORE_IDENTITY, JSON.stringify({ secret: bytesToBase64(pair.secretKey), public: bytesToBase64(pair.publicKey) }));
+    } catch {}
+    state.ownerTag = 'ed25519:' + bytesToHex(pair.publicKey);
+    return { secretKey: pair.secretKey, owner: state.ownerTag };
+  };
+
+  const queryEvents = async () => {
+    const res = await fetch(RELAY + '/api/v1/events/query', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ collection: COLLECTION, labels: [PRICE_LABEL], limit: QUERY_LIMIT }),
+      cache: 'no-store'
+    });
+    syncClock(res);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error((body && (body.code || body.error)) || ('HTTP ' + res.status));
+    }
+    return res.json();
+  };
+
+  const parseTick = (event) => {
+    if (!event || typeof event !== 'object') return null;
+    const labels = Array.isArray(event.labels) ? event.labels : [];
+    if (!labels.includes(PRICE_LABEL)) return null;
+    const data = event.data || {};
+    const p = Number(data.p);
+    const at = Number(event.created_at);
+    const id = typeof event.id === 'string' ? event.id : '';
+    if (data.v !== 1 || !Number.isFinite(p) || p <= 0 || p > 1e9 || !Number.isFinite(at) || !id) return null;
+    return { id, p, at, owner: typeof event.owner === 'string' ? event.owner : '' };
+  };
+
+  const setState = (mode) => {
+    state.connected = mode === 'live';
+    stateEl.textContent = mode;
+  };
+
+  /* ---- formatting ---- */
+
+  const money = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const moneyShort = (n) => '$' + (n >= 10000 ? (n / 1000).toFixed(1) + 'k' : n.toLocaleString('en-US', { maximumFractionDigits: 2 }));
+  const clock = (at) => new Date(at * 1000).toLocaleTimeString('en-GB', { hour12: false });
+  const shortOwner = (owner) => (owner ? owner.replace('ed25519:', '').slice(0, 6) : 'peer');
+
+  /* ---- chart ---- */
+
+  const PAD = { l: 14, r: 58, t: 26, b: 30 };
+
+  const smoothPath = (pts) => {
+    if (!pts.length) return '';
+    if (pts.length === 1) return 'M' + pts[0][0] + ',' + pts[0][1];
+    let d = 'M' + pts[0][0] + ',' + pts[0][1];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+      const c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      const c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += 'C' + c1x + ',' + c1y + ',' + c2x + ',' + c2y + ',' + p2[0] + ',' + p2[1];
+    }
+    return d;
+  };
+
+  const drawChart = () => {
+    const W = chartWrap.clientWidth || 600;
+    const H = chartWrap.clientHeight || 336;
+    chartSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    chartSvg.textContent = '';
+
+    const defs = svgEl('defs');
+    defs.innerHTML =
+      '<linearGradient id="gFill" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#f7931a" stop-opacity=".22"/>' +
+      '<stop offset="1" stop-color="#f7931a" stop-opacity="0"/></linearGradient>' +
+      '<filter id="gGlow" x="-30%" y="-30%" width="160%" height="160%">' +
+      '<feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#f7931a" flood-opacity=".5"/></filter>';
+    chartSvg.appendChild(defs);
+
+    const pts = state.points;
+    if (pts.length === 0) return;
+
+    const innerW = W - PAD.l - PAD.r;
+    const innerH = H - PAD.t - PAD.b;
+    const t0 = pts[0].at, t1 = pts[pts.length - 1].at;
+    const span = Math.max(1, t1 - t0);
+    let lo = Infinity, hi = -Infinity;
+    pts.forEach((pt) => { if (pt.p < lo) lo = pt.p; if (pt.p > hi) hi = pt.p; });
+    const padY = Math.max((hi - lo) * 0.12, hi * 0.0004, 0.5);
+    lo -= padY; hi += padY;
+
+    const x = (at) => PAD.l + ((at - t0) / span) * innerW;
+    const y = (p) => PAD.t + (1 - (p - lo) / (hi - lo)) * innerH;
+
+    const screen = pts.map((pt) => [x(pt.at), y(pt.p), pt]);
+    state.screenPts = screen;
+
+    /* horizontal grid + price labels */
+    const grid = svgEl('g');
+    for (let i = 0; i <= 3; i++) {
+      const gy = PAD.t + (innerH * i) / 3;
+      const value = hi - ((hi - lo) * i) / 3;
+      const line = svgEl('line');
+      line.setAttribute('x1', PAD.l); line.setAttribute('x2', W - PAD.r + 8);
+      line.setAttribute('y1', gy); line.setAttribute('y2', gy);
+      line.setAttribute('stroke', 'rgba(14,14,16,.06)');
+      line.setAttribute('stroke-dasharray', '3 5');
+      grid.appendChild(line);
+      const label = svgEl('text');
+      label.setAttribute('x', W - PAD.r + 12); label.setAttribute('y', gy + 3.5);
+      label.setAttribute('fill', '#a1a1aa');
+      label.setAttribute('font-family', 'var(--mono)'); label.setAttribute('font-size', '10');
+      label.textContent = moneyShort(value);
+      grid.appendChild(label);
+    }
+    /* time labels */
+    const tLabel = (at, anchor) => {
+      const label = svgEl('text');
+      label.setAttribute('x', anchor === 'end' ? W - PAD.r + 8 : PAD.l);
+      label.setAttribute('y', H - 10);
+      label.setAttribute('fill', '#a1a1aa');
+      label.setAttribute('font-family', 'var(--mono)'); label.setAttribute('font-size', '10');
+      label.setAttribute('text-anchor', anchor || 'start');
+      label.textContent = clock(at);
+      return label;
+    };
+    grid.appendChild(tLabel(t0, 'start'));
+    if (span > 90) grid.appendChild(tLabel(t1, 'end'));
+    chartSvg.appendChild(grid);
+
+    if (screen.length === 1) {
+      const [sx, sy] = screen[0];
+      const dot = svgEl('circle');
+      dot.setAttribute('cx', sx); dot.setAttribute('cy', sy); dot.setAttribute('r', '5');
+      dot.setAttribute('fill', '#f7931a');
+      dot.setAttribute('filter', 'url(#gGlow)');
+      chartSvg.appendChild(dot);
+      const label = svgEl('text');
+      label.setAttribute('x', sx + 10); label.setAttribute('y', sy - 10);
+      label.setAttribute('fill', '#0e0e10');
+      label.setAttribute('font-family', 'var(--mono)'); label.setAttribute('font-size', '11'); label.setAttribute('font-weight', '600');
+      label.textContent = money(pts[0].p);
+      chartSvg.appendChild(label);
+      return;
+    }
+
+    const lineD = smoothPath(screen);
+    const areaD = lineD + ' L' + screen[screen.length - 1][0] + ',' + (H - PAD.b) + ' L' + screen[0][0] + ',' + (H - PAD.b) + ' Z';
+
+    const area = svgEl('path');
+    area.setAttribute('d', areaD);
+    area.setAttribute('fill', 'url(#gFill)');
+    chartSvg.appendChild(area);
+
+    const line = svgEl('path');
+    line.setAttribute('d', lineD);
+    line.setAttribute('fill', 'none');
+    line.setAttribute('stroke', '#f7931a');
+    line.setAttribute('stroke-width', '2.25');
+    line.setAttribute('stroke-linejoin', 'round');
+    line.setAttribute('stroke-linecap', 'round');
+    line.setAttribute('vector-effect', 'non-scaling-stroke');
+    line.setAttribute('filter', 'url(#gGlow)');
+    chartSvg.appendChild(line);
+
+    /* high / low flags */
+    let iMax = 0, iMin = 0;
+    pts.forEach((pt, i) => { if (pt.p > pts[iMax].p) iMax = i; if (pt.p < pts[iMin].p) iMin = i; });
+    [['high', iMax, '#059669'], ['low', iMin, '#e11d48']].forEach(([_, i, color]) => {
+      const [sx, sy] = screen[i];
+      if (sx < PAD.l + innerW * 0.12) return;
+      const flag = svgEl('g');
+      const dot = svgEl('circle');
+      dot.setAttribute('cx', sx); dot.setAttribute('cy', sy); dot.setAttribute('r', '3');
+      dot.setAttribute('fill', color);
+      const label = svgEl('text');
+      label.setAttribute('x', sx); label.setAttribute('y', sy - 9);
+      label.setAttribute('fill', color);
+      label.setAttribute('font-family', 'var(--mono)'); label.setAttribute('font-size', '9.5'); label.setAttribute('font-weight', '600');
+      label.setAttribute('text-anchor', 'middle');
+      label.textContent = moneyShort(pts[i].p);
+      flag.append(dot, label);
+      chartSvg.appendChild(flag);
+    });
+
+    /* live marker at the last point */
+    const [lx, ly] = screen[screen.length - 1];
+    const halo = svgEl('circle');
+    halo.setAttribute('cx', lx); halo.setAttribute('cy', ly); halo.setAttribute('r', '7');
+    halo.setAttribute('fill', 'rgba(247,147,26,.18)');
+    halo.setAttribute('class', 'halo');
+    const dot = svgEl('circle');
+    dot.setAttribute('cx', lx); dot.setAttribute('cy', ly); dot.setAttribute('r', '4');
+    dot.setAttribute('fill', '#f7931a');
+    dot.setAttribute('stroke', '#fff'); dot.setAttribute('stroke-width', '1.5');
+    dot.setAttribute('filter', 'url(#gGlow)');
+    chartSvg.append(halo, dot);
+  };
+
+  const styleHalo = () => {
+    let el = document.getElementById('halo-style');
+    if (el) return;
+    el = document.createElement('style');
+    el.id = 'halo-style';
+    el.textContent =
+      '@keyframes halo { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(2.6); } }' +
+      ' .halo { animation: halo 2.4s ease-out infinite; transform-origin: center; transform-box: fill-box; }';
+    document.head.appendChild(el);
+  };
+
+  /* crosshair + tooltip */
+  const hideTip = () => { chartTip.hidden = true; };
+  chartWrap.addEventListener('pointermove', (e) => {
+    const pts = state.screenPts;
+    if (!pts || pts.length < 2) { hideTip(); return; }
+    const rect = chartWrap.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    let best = 0, bestD = Infinity;
+    pts.forEach((pt, i) => {
+      const d = Math.abs(pt[0] - px);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    if (bestD > 60) { hideTip(); return; }
+    const [sx, sy, pt] = pts[best];
+    const prev = pts[best - 1] || pt;
+    const delta = pt[2].p - prev[2].p;
+    chartTip.hidden = false;
+    chartTip.dataset.dir = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+    chartTip.innerHTML =
+      '<div>' + money(pt[2].p) + ' <span class="tip-delta">' + (delta >= 0 ? '+' : '−') + money(Math.abs(delta)).slice(1) + '</span></div>' +
+      '<div class="tip-meta">' + clock(pt[2].at) + ' · ' + (pt[2].owner === state.ownerTag ? 'you' : shortOwner(pt[2].owner)) + '</div>';
+    chartTip.style.left = Math.min(Math.max(sx, 70), rect.width - 70) + 'px';
+    chartTip.style.top = Math.max(sy - 12, 30) + 'px';
+  });
+  chartWrap.addEventListener('pointerleave', hideTip);
+
+  /* ---- stats, tape, big price ---- */
+
+  const refreshStats = () => {
+    const pts = state.points;
+    if (!pts.length) return;
+    let hi = -Infinity, lo = Infinity, sum = 0;
+    const owners = new Set();
+    pts.forEach((pt) => { if (pt.p > hi) hi = pt.p; if (pt.p < lo) lo = pt.p; sum += pt.p; owners.add(pt.owner); });
+    statHigh.textContent = moneyShort(hi);
+    statLow.textContent = moneyShort(lo);
+    statAvg.textContent = moneyShort(sum / pts.length);
+    statTicks.textContent = String(pts.length);
+    statNodes.textContent = String(owners.size);
+  };
+
+  const rollPrice = (from, to) => {
+    const start = performance.now();
+    const dur = 500;
+    const step = (t) => {
+      const k = Math.min(1, (t - start) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      const value = from + (to - from) * eased;
+      const [whole, frac] = value.toFixed(2).split('.');
+      priceInt.textContent = Number(whole).toLocaleString('en-US');
+      priceFrac.textContent = '.' + frac;
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
+  const setPrice = (value) => {
+    const prev = state.lastShown;
+    const [whole, frac] = value.toFixed(2).split('.');
+    if (prev === null) {
+      priceInt.textContent = Number(whole).toLocaleString('en-US');
+      priceFrac.textContent = '.' + frac;
+    } else if (value !== prev) {
+      rollPrice(prev, value);
+      priceBig.dataset.flash = value > prev ? 'up' : 'down';
+      setTimeout(() => delete priceBig.dataset.flash, 720);
+    }
+    state.lastShown = value;
+  };
+
+  const setChange = (chg) => {
+    state.priceChg = chg;
+    if (!Number.isFinite(chg)) { chgEl.dataset.dir = 'flat'; chgEl.textContent = '— 24h'; return; }
+    const dir = chg > 0.005 ? 'up' : chg < -0.005 ? 'down' : 'flat';
+    chgEl.dataset.dir = dir;
+    chgEl.textContent = (chg >= 0 ? '▲ +' : '▼ ') + chg.toFixed(2) + '% 24h';
+  };
+
+  const tapeTag = (pt) => (pt.owner === state.ownerTag ? 'you' : shortOwner(pt.owner));
+
+  const pushTapeRow = (pt, animate) => {
+    const prev = state.points[state.points.length - 2];
+    const dir = prev ? (pt.p > prev.p ? 'up' : pt.p < prev.p ? 'down' : 'flat') : 'flat';
+    const row = document.createElement('li');
+    row.dataset.dir = dir;
+    if (animate) row.classList.add('entering');
+    row.innerHTML =
+      '<span class="t-at">' + clock(pt.at) + '</span>' +
+      '<span class="t-price">' + money(pt.p) + '</span>' +
+      '<span class="t-owner">' + (pt.owner ? pt.owner.replace('ed25519:', '').slice(0, 20) + '…' : 'peer') + '</span>' +
+      '<span class="t-tag">' + tapeTag(pt) + '</span>';
+    tapeList.prepend(row);
+    while (tapeList.children.length > TAPE_ROWS) tapeList.lastChild.remove();
+  };
+
+  const hydrate = (events, animateNew) => {
+    const parsed = (Array.isArray(events) ? events : [])
+      .map(parseTick)
+      .filter(Boolean)
+      .sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1));
+    let added = false;
+    parsed.forEach((pt) => {
+      if (state.seen.has(pt.id)) return;
+      state.seen.add(pt.id);
+      state.points.push(pt);
+      added = true;
+      if (animateNew) pushTapeRow(pt, true);
+    });
+    state.points.sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1));
+    if (state.points.length > POINTS_MAX) {
+      const drop = state.points.splice(0, state.points.length - POINTS_MAX);
+      drop.forEach((pt) => state.seen.delete(pt.id));
+    }
+    if (!animateNew && state.points.length) {
+      tapeList.textContent = '';
+      state.points.slice(-TAPE_ROWS).forEach((pt) => pushTapeRow(pt, false));
+    }
+    if (added || !state.lastShown) {
+      const last = state.points[state.points.length - 1];
+      if (last) setPrice(last.p);
+      drawChart();
+      refreshStats();
+      chartEmpty.hidden = state.points.length > 0;
+      tapeEmpty.hidden = state.points.length > 0;
+    }
+  };
+
+  /* ---- relay poll loop ---- */
+
+  const poll = async () => {
+    clearTimeout(state.pollTimer);
+    if (document.hidden) {
+      state.pollTimer = setTimeout(poll, POLL_MS * 2);
+      return;
+    }
+    if (state.pollBusy) {
+      state.pollTimer = setTimeout(poll, 1000);
+      return;
+    }
+    state.pollBusy = true;
+    try {
+      const body = await queryEvents();
+      hydrate(body.events, true);
+      setState('live');
+    } catch {
+      setState('offline');
+    } finally {
+      state.pollBusy = false;
+      state.pollTimer = setTimeout(poll, POLL_MS);
+    }
+  };
+
+  /* ---- price fetch + random beat posting ---- */
+
+  const fetchPrice = async () => {
+    const res = await fetch(COINGECKO, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const body = await res.json();
+    const box = body && body.bitcoin;
+    const price = box && Number(box.usd);
+    if (!Number.isFinite(price) || price <= 0) throw new Error('bad payload');
+    state.lastPrice = { value: price, at: performance.now() };
+    setChange(Number(box.usd_24h_change));
+    return price;
+  };
+
+  const priceForTick = async () => {
+    const cached = state.lastPrice;
+    if (cached && performance.now() - cached.at < 2500) return cached.value;
+    return fetchPrice();
+  };
+
+  const postTick = async (price) => {
+    const identity = loadIdentity();
+    if (!identity) throw new Error('signing unavailable');
+    const at = now();
+    const fields = {
+      collection: COLLECTION,
+      created_at: at,
+      expires_at: at + TICK_TTL,
+      owner: identity.owner,
+      labels: ['btc', PRICE_LABEL],
+      blobs: [],
+      data: { v: 1, p: price, src: 'coingecko' }
+    };
+    const bytes = new TextEncoder().encode(canonical(fields));
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    const signature = nacl.sign.detached(digest, identity.secretKey);
+    const envelope = { ...fields, id: bytesToHex(digest), sig: bytesToHex(signature) };
+    const res = await fetch(RELAY + '/api/v1/events', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(envelope)
+    });
+    syncClock(res);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error((body && (body.code || body.error)) || ('HTTP ' + res.status));
+    }
+    return { id: envelope.id, p: price, at, owner: identity.owner };
+  };
+
+  const scheduleNext = (delayMs) => {
+    clearTimeout(state.tickTimer);
+    state.tickAt = performance.now() + delayMs;
+    state.tickTimer = setTimeout(tick, delayMs);
+  };
+
+  const tick = async () => {
+    clearTimeout(state.tickTimer);
+    if (!state.canSign) {
+      nextLabel.textContent = 'read-only tape';
+      tickRing.setAttribute('stroke-dashoffset', RING_CIRC);
+      return;
+    }
+    if (document.hidden) {
+      scheduleNext(2000);
+      return;
+    }
+    if (state.tickBusy) {
+      scheduleNext(1500);
+      return;
+    }
+    state.tickBusy = true;
+    try {
+      const price = await priceForTick();
+      setPrice(price);
+      try {
+        const tickData = await postTick(price);
+        if (!state.seen.has(tickData.id)) {
+          state.seen.add(tickData.id);
+          state.points.push(tickData);
+          pushTapeRow(tickData, true);
+          drawChart();
+          refreshStats();
+          chartEmpty.hidden = true;
+          tapeEmpty.hidden = true;
+        }
+      } catch (postError) {
+        nextLabel.textContent = 'relay hiccup — retrying';
+      }
+      setState('live');
+      scheduleNext(1000 + Math.random() * 14000);
+    } catch {
+      /* coingecko unreachable or rate-limited: sit one out */
+      nextLabel.textContent = 'price feed busy — retrying';
+      setState(state.connected ? 'live' : 'offline');
+      scheduleNext(4000);
+    } finally {
+      state.tickBusy = false;
+    }
+  };
+
+  /* countdown ring */
+  setInterval(() => {
+    if (!state.canSign) return;
+    const remain = state.tickAt - performance.now();
+    if (remain <= 0) return;
+    nextLabel.textContent = 'next tick ' + (remain / 1000).toFixed(1) + 's';
+    const full = 15000;
+    tickRing.setAttribute('stroke-dashoffset', String(RING_CIRC * Math.min(1, Math.max(0, remain) / full)));
+  }, 100);
+
+  /* ---- boot ---- */
+
+  const init = async () => {
+    styleHalo();
+    state.canSign = !!loadIdentity();
+    if (!state.canSign) nextLabel.textContent = 'read-only tape';
+    try {
+      setPrice(await fetchPrice());
+    } catch {}
+    try {
+      const body = await queryEvents();
+      hydrate(body.events, false);
+      setState('live');
+    } catch {
+      setState('offline');
+    }
+    poll();
+    scheduleNext(1000 + Math.random() * 14000);
+    if ('ResizeObserver' in window) new ResizeObserver(drawChart).observe(chartWrap);
+    window.addEventListener('resize', drawChart);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

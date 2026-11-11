@@ -226,7 +226,6 @@
   /* cards */
   .cards { display: grid; gap: 1.15rem; }
   @media (min-width: 46rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 66rem) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .card {
     position: relative; isolation: isolate;
     display: flex; flex-direction: column; gap: .35rem;
@@ -247,6 +246,8 @@
   .card[data-tone="emerald"] { --tone: #10b981; }
   .card[data-tone="violet"] { --tone: #8b5cf6; }
   .card[data-tone="sky"] { --tone: #0ea5e9; }
+  .card[data-tone="amber"] { --tone: #f59e0b; }
+  .card[data-tone="orange"] { --tone: #f7931a; }
   .card-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
   .card-index { font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; color: var(--subtle); }
   .card-icon {
@@ -468,7 +469,7 @@
   <section class="section demos" aria-labelledby="demos-heading">
     <div class="section-head">
       <h2 id="demos-heading">Demos</h2>
-      <span>three demos · one relay</span>
+      <span>four demos · one relay</span>
     </div>
     <div class="cards">
       <a class="card" href="paint.html" data-tone="violet">
@@ -504,6 +505,18 @@
         <p>A public board where every message is signed in your browser and polled live by everyone else on the page.</p>
         <div class="card-foot">
           <code>site/shouts</code>
+          <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+        </div>
+      </a>
+      <a class="card" href="btc.html" data-tone="orange">
+        <div class="card-top">
+          <span class="card-index">04</span>
+          <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 7.5h4a2 2 0 0 1 0 4h-4zM9.5 11.5h4.5a2 2 0 0 1 0 4H9.5zM9.5 6v12M11.5 6v1.5M11.5 16.5V18"/></svg></span>
+        </div>
+        <h3>Price tape</h3>
+        <p>BTC/USD is fetched from CoinGecko, signed in your browser and posted to the relay on a random 1–15s beat. The SVG chart is just the event history, redrawn.</p>
+        <div class="card-foot">
+          <code>btc/ticks</code>
           <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
         </div>
       </a>
