@@ -243,7 +243,7 @@
   <h1>The price tape</h1>
   <p class="lede">Every visitor's browser fetches <b>BTC/USD from CoinGecko</b>, signs the tick with a local Ed25519 key, and publishes it to the relay after a <b>random 1–15s beat</b>. The chart isn't stored anywhere — it's the relay's event history, redrawn.</p>
   <div class="hero-meta">
-    <span>ed25519</span><span>1–15s jitter</span><span>6h ttl</span><span>polling</span>
+    <span>ed25519</span><span>1–15s jitter</span><span>280d ttl</span><span>polling</span>
   </div>
 
   <div class="price-row">
@@ -292,7 +292,7 @@
   </section>
 
   <footer>
-    <span>btc/ticks · ed25519 / polling / 6h ttl</span>
+    <span>btc/ticks · ed25519 / polling / 280d ttl</span>
     <div class="footer-links">
       <a href="llms.txt">llms.txt</a>
       <a href="https://github.com/rabta-protocol/rabta" target="_blank" rel="noreferrer">github</a>
@@ -307,7 +307,7 @@
   const RELAY = 'https://1.rabta.space';
   const COLLECTION = 'btc/ticks';
   const PRICE_LABEL = 'price';
-  const TICK_TTL = 6 * 60 * 60;
+  const TICK_TTL = 280 * 24 * 60 * 60;
   const QUERY_LIMIT = 100;
   const POINTS_MAX = QUERY_LIMIT;
   const TAPE_ROWS = 8;
