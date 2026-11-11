@@ -7,7 +7,6 @@ Files
   index.html   overview, capabilities, visitor feed, live node stats
   shout.html   public signed shoutbox, last 24 shouts
   paint.html   collaborative canvas
-  share.html   encrypted file drop
   world.html   signed comments on a world map
   world-map.svg  equirectangular land silhouette
   llms.txt     agent-readable project summary
