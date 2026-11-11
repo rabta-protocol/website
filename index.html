@@ -155,6 +155,36 @@
   .ticker-item::after { content: ""; width: 3px; height: 3px; border-radius: 50%; background: #a7f3d0; }
   @keyframes ticker { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
 
+  /* reactions */
+  .reaction-row { display: flex; flex-wrap: wrap; gap: .8rem; }
+  .reaction {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: .55rem;
+    min-width: 6.4rem; padding: 1.1rem .8rem .9rem;
+    border: 1px solid var(--line); border-radius: .9rem;
+    background: #fff; cursor: pointer; font: inherit; color: inherit;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
+    transition: transform .25s cubic-bezier(.2, .8, .2, 1), border-color .2s ease, box-shadow .25s ease;
+  }
+  .reaction:hover { transform: translateY(-3px); border-color: var(--line-strong); box-shadow: 0 14px 28px -16px rgba(0, 0, 0, .14); }
+  .reaction:active { transform: translateY(0) scale(.93); }
+  .reaction:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .reaction-emoji { font-size: 1.9rem; line-height: 1; transition: transform .25s cubic-bezier(.2, .8, .2, 1); }
+  .reaction:hover .reaction-emoji { transform: scale(1.15) rotate(-5deg); }
+  .reaction-count {
+    font-family: var(--mono); font-size: .8125rem; font-weight: 500; color: var(--subtle);
+    font-variant-numeric: tabular-nums;
+  }
+  .reaction[data-bumped] .reaction-emoji { animation: reaction-pop .45s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes reaction-pop { 0% { transform: scale(.6); } 55% { transform: scale(1.35) rotate(6deg); } 100% { transform: scale(1); } }
+  .reaction-float {
+    position: absolute; left: 50%; top: .7rem;
+    font-family: var(--mono); font-size: .8rem; font-weight: 600; color: var(--accent);
+    pointer-events: none; animation: reaction-float 1s ease-out forwards;
+  }
+  @keyframes reaction-float { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -2.4rem); } }
+  .reaction-note { margin: 1rem 0 0; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; color: var(--subtle); }
+
   /* sections */
   .section { margin-top: 5.5rem; }
   @media (min-width: 48rem) { .section { margin-top: 7rem; } }
@@ -361,6 +391,24 @@
       </div>
     </div>
   </div>
+
+  <section class="section reactions" aria-labelledby="reactions-heading">
+    <div class="section-head">
+      <h2 id="reactions-heading">Reactions</h2>
+      <span>site/reactions · signed · last 30 days</span>
+    </div>
+    <div class="reaction-row" id="reaction-row" role="group" aria-label="React — every click posts a signed event">
+      <button class="reaction" data-r="up" type="button" aria-label="Thumbs up"><span class="reaction-emoji">👍</span><span class="reaction-count" data-count>—</span></button>
+      <button class="reaction" data-r="heart" type="button" aria-label="Heart"><span class="reaction-emoji">❤️</span><span class="reaction-count" data-count>—</span></button>
+      <button class="reaction" data-r="fire" type="button" aria-label="Fire"><span class="reaction-emoji">🔥</span><span class="reaction-count" data-count>—</span></button>
+      <button class="reaction" data-r="laugh" type="button" aria-label="Laughing"><span class="reaction-emoji">😂</span><span class="reaction-count" data-count>—</span></button>
+      <button class="reaction" data-r="wow" type="button" aria-label="Wow"><span class="reaction-emoji">😮</span><span class="reaction-count" data-count>—</span></button>
+      <button class="reaction" data-r="sad" type="button" aria-label="Crying"><span class="reaction-emoji">😢</span><span class="reaction-count" data-count>—</span></button>
+      <button class="reaction" data-r="party" type="button" aria-label="Party"><span class="reaction-emoji">🎉</span><span class="reaction-count" data-count>—</span></button>
+      <button class="reaction" data-r="rocket" type="button" aria-label="Rocket"><span class="reaction-emoji">🚀</span><span class="reaction-count" data-count>—</span></button>
+    </div>
+    <p class="reaction-note" id="reaction-note">Every click is an ed25519-signed event — counts come straight from the relay's count route.</p>
+  </section>
 
   <section class="section features" aria-labelledby="features-heading">
     <div class="section-head">
@@ -885,6 +933,140 @@
     track.classList.add('is-ready');
   };
 
+  /* ---------- reactions ---------- */
+  const REACTIONS = [
+    { id: 'up', emoji: '👍' }, { id: 'heart', emoji: '❤️' }, { id: 'fire', emoji: '🔥' }, { id: 'laugh', emoji: '😂' },
+    { id: 'wow', emoji: '😮' }, { id: 'sad', emoji: '😢' }, { id: 'party', emoji: '🎉' }, { id: 'rocket', emoji: '🚀' }
+  ];
+  const REACTIONS_COLLECTION = 'site/reactions';
+  const REACTION_WINDOW = 30 * 24 * 60 * 60;
+  const REACTION_TTL = REACTION_WINDOW;
+
+  const countEvents = async (collection, labels, gte) => {
+    const res = await fetch(RELAY + '/api/v1/events/query/count', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ collection, labels, created_at: { gte } }),
+      cache: 'no-store'
+    });
+    syncRelayClock(res);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error((body && (body.code || body.error)) || ('HTTP ' + res.status));
+    }
+    const body = await res.json();
+    const count = Number(body && body.count);
+    return Number.isFinite(count) && count >= 0 ? count : 0;
+  };
+
+  const initReactions = () => {
+    const row = $('reaction-row');
+    const note = $('reaction-note');
+    if (!row) return;
+    const buttons = Array.from(row.querySelectorAll('.reaction'));
+    const counts = {};
+    const pending = [];
+    let posting = false;
+    let refreshTimer = null;
+
+    const canSign = !!(window.nacl && window.crypto && window.crypto.subtle && loadIdentity());
+    if (!canSign && note) note.textContent = 'Counts are read-only here — the signing library is unavailable.';
+
+    const fmt = (n) => (n >= 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : n.toLocaleString('en-US'));
+
+    const paint = (id) => {
+      const btn = buttons.find((b) => b.dataset.r === id);
+      const el = btn && btn.querySelector('[data-count]');
+      if (el) el.textContent = fmt(counts[id] || 0);
+    };
+
+    const refresh = async () => {
+      const gte = visitNow() - REACTION_WINDOW;
+      await Promise.all(REACTIONS.map(async (r) => {
+        try {
+          counts[r.id] = await countEvents(REACTIONS_COLLECTION, [r.id], gte);
+          paint(r.id);
+        } catch {}
+      }));
+    };
+
+    const refreshSoon = () => {
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(refresh, 900);
+    };
+
+    const postReaction = async (id) => {
+      const identity = loadIdentity();
+      if (!identity) throw new Error('signing unavailable');
+      const at = visitNow();
+      const fields = {
+        collection: REACTIONS_COLLECTION,
+        created_at: at,
+        expires_at: at + REACTION_TTL,
+        owner: identity.owner,
+        labels: [id],
+        blobs: [],
+        data: { v: 1, e: id }
+      };
+      const bytes = new TextEncoder().encode(canonical(fields));
+      const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+      const signature = nacl.sign.detached(digest, identity.secretKey);
+      const envelope = { ...fields, id: bytesToHex(digest), sig: bytesToHex(signature) };
+      const res = await fetch(RELAY + '/api/v1/events', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(envelope)
+      });
+      syncRelayClock(res);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+    };
+
+    const drain = async () => {
+      if (posting) return;
+      posting = true;
+      while (pending.length) {
+        const id = pending.shift();
+        try {
+          await postReaction(id);
+        } catch {
+          counts[id] = Math.max(0, (counts[id] || 1) - 1);
+          paint(id);
+        }
+      }
+      posting = false;
+      refreshSoon();
+    };
+
+    const burst = (btn) => {
+      if (reduce) return;
+      const float = document.createElement('span');
+      float.className = 'reaction-float';
+      float.textContent = '+1';
+      btn.appendChild(float);
+      setTimeout(() => float.remove(), 1000);
+    };
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.r;
+        if (!id) return;
+        counts[id] = (counts[id] || 0) + 1;
+        paint(id);
+        btn.removeAttribute('data-bumped');
+        void btn.offsetWidth;
+        btn.setAttribute('data-bumped', '1');
+        burst(btn);
+        if (canSign) {
+          pending.push(id);
+          drain();
+        }
+      });
+    });
+
+    refresh();
+    setInterval(() => { if (!document.hidden) refresh(); }, 10000);
+  };
+
   const hero = () => {
     if (!window.gsap || reduce) return;
     const tl = window.gsap.timeline({ defaults: { ease: 'power3.out', duration: .7 } });
@@ -894,6 +1076,7 @@
       .from('.lede', { y: 16, opacity: 0, duration: .6 }, '-=.45')
       .from('.hero-actions .btn', { y: 12, opacity: 0, stagger: .08, duration: .45 }, '-=.35')
       .from('.ticker', { opacity: 0, duration: .5 }, '-=.35')
+      .from('.reactions .section-head, .reaction', { y: 16, opacity: 0, stagger: .04, duration: .45 }, '-=.25')
       .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
       .from('.demos .section-head', { y: 12, opacity: 0, duration: .5 }, '-=.25')
       .from('.card', { y: 28, opacity: 0, stagger: .09, duration: .65 }, '-=.25')
@@ -902,7 +1085,7 @@
   };
 
   const boot = () => {
-    const start = () => { initFeaturesMarquee(); hero(); initVisitors(); };
+    const start = () => { initFeaturesMarquee(); hero(); initVisitors(); initReactions(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };
