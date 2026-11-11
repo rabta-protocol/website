@@ -51,6 +51,7 @@
   html, body { margin: 0; }
   body {
     min-height: 100vh;
+    overflow-x: clip;
     background: var(--bg);
     color: var(--ink);
     font-family: var(--sans);
@@ -170,12 +171,20 @@
   }
   .section-head span { font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle); }
 
-  /* features */
-  .feature-grid { display: grid; gap: 1rem; }
-  @media (min-width: 44rem) { .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 66rem) { .feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  /* features — one row, infinite drift, full-bleed */
+  .feature-marquee {
+    margin-inline: calc(50% - 50vw);
+    overflow-x: clip;
+    padding-block: .4rem;
+  }
+  .feature-track { display: flex; width: max-content; }
+  .feature-track.is-ready { animation: feature-drift 55s linear infinite; }
+  .feature-marquee:hover .feature-track.is-ready { animation-play-state: paused; }
+  .feature-group { display: flex; gap: 1rem; flex: none; align-items: stretch; }
+  @keyframes feature-drift { from { transform: translate3d(-50%, 0, 0); } to { transform: translate3d(0, 0, 0); } }
   .feature {
     position: relative;
+    flex: none; width: min(23rem, 82vw);
     display: flex; flex-direction: column; gap: .7rem;
     min-height: 14.5rem; padding: 1.4rem 1.5rem;
     border: 1px solid var(--line); border-radius: .95rem;
@@ -367,12 +376,14 @@
       <h2 id="features-heading">Capabilities</h2>
       <span>six core pillars</span>
     </div>
-    <div class="feature-grid">
-      <article class="feature" data-tone="emerald">
-        <div class="feature-top">
-          <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M14 9l3 3"/></svg></span>
-          <span class="feature-tag"><code>ed25519</code></span>
-        </div>
+    <div class="feature-marquee">
+      <div class="feature-track" id="feature-track">
+        <div class="feature-group">
+          <article class="feature" data-tone="emerald">
+            <div class="feature-top">
+              <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M14 9l3 3"/></svg></span>
+              <span class="feature-tag"><code>ed25519</code></span>
+            </div>
         <h3>Signed events</h3>
         <p>Every event is canonical JSON, hashed with SHA-256 and signed with Ed25519. Identity is a keypair — no accounts, no sessions, no passwords.</p>
         <div class="feature-foot">
@@ -463,6 +474,8 @@
           </div>
         </div>
       </article>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -870,6 +883,17 @@
     });
   }
 
+  const initFeaturesMarquee = () => {
+    const track = $('feature-track');
+    const group = track && track.querySelector('.feature-group');
+    if (!track || !group || track.children.length > 1) return;
+    if (reduce) return;
+    const clone = group.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    track.appendChild(clone);
+    track.classList.add('is-ready');
+  };
+
   const hero = () => {
     if (!window.gsap || reduce) return;
     const tl = window.gsap.timeline({ defaults: { ease: 'power3.out', duration: .7 } });
@@ -888,7 +912,7 @@
   };
 
   const boot = () => {
-    const start = () => { hero(); initVisitors(); };
+    const start = () => { initFeaturesMarquee(); hero(); initVisitors(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };
