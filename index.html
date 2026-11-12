@@ -206,6 +206,55 @@
     .tug-emoji { font-size: 1.6rem; }
   }
 
+  /* relays */
+  .relay-grid { display: grid; gap: 1.15rem; }
+  @media (min-width: 46rem) { .relay-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .relay {
+    display: flex; flex-direction: column; gap: 1.1rem;
+    padding: 1.55rem 1.65rem;
+    border: 1px solid var(--line); border-radius: .95rem;
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
+  }
+  .relay-top { display: flex; align-items: center; gap: .6rem; }
+  .relay-dot {
+    width: .5rem; height: .5rem; border-radius: 50%; background: #d4d4d8; flex: none;
+    transition: background .3s ease, box-shadow .3s ease;
+  }
+  .relay.is-live .relay-dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(16, 185, 129, .15); }
+  .relay.is-offline .relay-dot { background: #f87171; box-shadow: 0 0 0 3px rgba(239, 68, 68, .12); }
+  .relay-host { font-family: var(--mono); font-size: .9rem; font-weight: 600; letter-spacing: .01em; }
+  .relay-version {
+    margin-left: auto; font-family: var(--mono); font-size: .6875rem; letter-spacing: .06em;
+    color: var(--subtle); border: 1px solid var(--line); border-radius: 999px; padding: .18rem .55rem;
+  }
+  .relay-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+  .relay-num { display: flex; flex-direction: column; gap: .15rem; }
+  .relay-num-label { font-family: var(--mono); font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: var(--subtle); }
+  .relay-num-value {
+    font-family: var(--mono); font-size: 1.25rem; font-weight: 600; color: var(--ink);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .relay-battery { display: flex; flex-direction: column; gap: .4rem; }
+  .relay-battery-head {
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle);
+  }
+  .relay-battery-bar { height: .6rem; border-radius: 999px; background: #f4f4f5; border: 1px solid var(--line); overflow: hidden; }
+  .relay-battery-fill {
+    height: 100%; width: 0; border-radius: 999px;
+    background: linear-gradient(90deg, #6ee7b7, var(--accent));
+    transition: width .6s cubic-bezier(.2, .8, .2, 1), background .3s ease;
+  }
+  .relay.is-low .relay-battery-fill { background: linear-gradient(90deg, #fcd34d, #f59e0b); }
+  .relay.is-critical .relay-battery-fill { background: linear-gradient(90deg, #fca5a5, #ef4444); }
+  .relay-battery-sub { font-family: var(--mono); font-size: .625rem; letter-spacing: .06em; color: var(--subtle); }
+  .relay-foot {
+    margin-top: auto; display: flex; justify-content: space-between; gap: .5rem;
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .05em; color: var(--subtle);
+    font-variant-numeric: tabular-nums;
+  }
+  .relay-note { margin: 1rem 0 0; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; color: var(--subtle); }
+
   /* sections */
   .section { margin-top: 5.5rem; }
   @media (min-width: 48rem) { .section { margin-top: 7rem; } }
@@ -427,6 +476,52 @@
       <button class="tug-side" data-side="ice" type="button" aria-label="Pull for team ice"><span class="tug-emoji">🧊</span><span class="tug-count" data-count>—</span><span class="tug-tag">team ice</span></button>
     </div>
     <p class="tug-note" id="tug-note">Every pull is an ed25519-signed event — the rope reads live from the relay's count route.</p>
+  </section>
+
+  <section class="section relays" aria-labelledby="relays-heading">
+    <div class="section-head">
+      <h2 id="relays-heading">Relays</h2>
+      <span>two nodes · one fleet · live /stats</span>
+    </div>
+    <div class="relay-grid">
+      <article class="relay" data-relay="https://1.rabta.space">
+        <div class="relay-top">
+          <span class="relay-dot" aria-hidden="true"></span>
+          <span class="relay-host">1.rabta.space</span>
+          <span class="relay-version" data-version>—</span>
+        </div>
+        <div class="relay-nums">
+          <div class="relay-num"><span class="relay-num-label">events</span><span class="relay-num-value" data-events>—</span></div>
+          <div class="relay-num"><span class="relay-num-label">blobs</span><span class="relay-num-value" data-blobs>—</span></div>
+          <div class="relay-num"><span class="relay-num-label">storage</span><span class="relay-num-value" data-storage>—</span></div>
+        </div>
+        <div class="relay-battery">
+          <div class="relay-battery-head"><span>battery</span><span data-battery-pct>—</span></div>
+          <div class="relay-battery-bar" role="img" aria-label="Relay battery level"><div class="relay-battery-fill" data-battery-fill></div></div>
+          <span class="relay-battery-sub" data-battery-sub></span>
+        </div>
+        <div class="relay-foot"><span data-foot></span></div>
+      </article>
+      <article class="relay" data-relay="https://rabta.t3nk.com">
+        <div class="relay-top">
+          <span class="relay-dot" aria-hidden="true"></span>
+          <span class="relay-host">rabta.t3nk.com</span>
+          <span class="relay-version" data-version>—</span>
+        </div>
+        <div class="relay-nums">
+          <div class="relay-num"><span class="relay-num-label">events</span><span class="relay-num-value" data-events>—</span></div>
+          <div class="relay-num"><span class="relay-num-label">blobs</span><span class="relay-num-value" data-blobs>—</span></div>
+          <div class="relay-num"><span class="relay-num-label">storage</span><span class="relay-num-value" data-storage>—</span></div>
+        </div>
+        <div class="relay-battery">
+          <div class="relay-battery-head"><span>battery</span><span data-battery-pct>—</span></div>
+          <div class="relay-battery-bar" role="img" aria-label="Relay battery level"><div class="relay-battery-fill" data-battery-fill></div></div>
+          <span class="relay-battery-sub" data-battery-sub></span>
+        </div>
+        <div class="relay-foot"><span data-foot></span></div>
+      </article>
+    </div>
+    <p class="relay-note">Every number is read live from each node's public <code>/api/v1/stats</code> route — battery is the node's push-token budget, regenerated every minute.</p>
   </section>
 
   <section class="section features" aria-labelledby="features-heading">
@@ -1420,6 +1515,86 @@
     loadHistory().then(poll);
   };
 
+  /* ---------- relays ---------- */
+  const initRelays = () => {
+    const cards = Array.from(document.querySelectorAll('.relay[data-relay]'));
+    if (!cards.length) return;
+
+    const fmtCount = (n) => (n >= 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : n.toLocaleString('en-US'));
+    const fmtBytes = (n) => {
+      if (!Number.isFinite(n) || n <= 0) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+      let i = 0;
+      while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+      return (n >= 100 ? Math.round(n) : n >= 10 ? n.toFixed(1) : n.toFixed(2)) + ' ' + units[i];
+    };
+    const fmtUptime = (s) => {
+      const d = Math.floor(s / 86400);
+      const h = Math.floor((s % 86400) / 3600);
+      if (d) return d + 'd' + (h ? ' ' + h + 'h' : '');
+      if (h) return h + 'h';
+      return Math.floor(s / 60) + 'm';
+    };
+
+    const refresh = async () => {
+      await Promise.all(cards.map(async (card) => {
+        const pick = (name) => card.querySelector('[data-' + name + ']');
+        try {
+          const res = await fetch(card.dataset.relay + '/api/v1/stats', { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const body = await res.json();
+          const events = body && body.events ? Number(body.events.live) : NaN;
+          const blobs = body && body.blobs ? Number(body.blobs.live) : NaN;
+          const used = (body && body.events ? Number(body.events.bytes) : 0) + (body && body.blobs ? Number(body.blobs.bytes) : 0);
+          const battery = body && body.peers && body.peers.battery ? body.peers.battery : null;
+          const evEl = pick('events');
+          if (evEl) evEl.textContent = Number.isFinite(events) ? fmtCount(events) : '—';
+          const blEl = pick('blobs');
+          if (blEl) blEl.textContent = Number.isFinite(blobs) ? fmtCount(blobs) : '—';
+          const stEl = pick('storage');
+          if (stEl) stEl.textContent = fmtBytes(used);
+          const verEl = pick('version');
+          if (verEl) verEl.textContent = body && body.version ? 'v' + body.version : '—';
+          const pctEl = pick('battery-pct');
+          const fillEl = pick('battery-fill');
+          const subEl = pick('battery-sub');
+          const pct = battery && Number(battery.max) > 0 ? Math.max(0, Math.min(100, (Number(battery.remaining) / Number(battery.max)) * 100)) : null;
+          if (pct !== null && fillEl) {
+            fillEl.style.width = pct.toFixed(1) + '%';
+            if (pctEl) pctEl.textContent = Math.round(pct) + '%';
+            card.classList.toggle('is-low', pct < 50 && pct >= 20);
+            card.classList.toggle('is-critical', pct < 20);
+          }
+          if (subEl) {
+            const regen = battery ? Number(battery.regen_per_min) : NaN;
+            subEl.textContent = Number.isFinite(regen) ? 'regen ' + fmtCount(regen) + '/min' : '';
+          }
+          const footEl = pick('foot');
+          if (footEl) {
+            const up = Number(body.uptime_s);
+            footEl.textContent = 'up ' + (Number.isFinite(up) ? fmtUptime(up) : '—');
+          }
+          card.classList.add('is-live');
+          card.classList.remove('is-offline');
+        } catch {
+          card.classList.remove('is-live', 'is-low', 'is-critical');
+          card.classList.add('is-offline');
+          const fillEl = pick('battery-fill');
+          if (fillEl) fillEl.style.width = '0%';
+          const pctEl = pick('battery-pct');
+          if (pctEl) pctEl.textContent = 'offline';
+          const subEl = pick('battery-sub');
+          if (subEl) subEl.textContent = '';
+          const footEl = pick('foot');
+          if (footEl) footEl.textContent = 'unreachable';
+        }
+      }));
+    };
+
+    refresh();
+    setInterval(() => { if (!document.hidden) refresh(); }, 15000);
+  };
+
   const hero = () => {
     if (!window.gsap || reduce) return;
     const tl = window.gsap.timeline({ defaults: { ease: 'power3.out', duration: .7 } });
@@ -1430,6 +1605,7 @@
       .from('.hero-actions .btn', { y: 12, opacity: 0, stagger: .08, duration: .45 }, '-=.35')
       .from('.ticker', { opacity: 0, duration: .5 }, '-=.35')
       .from('.tugofwar .section-head, .tug-side', { y: 16, opacity: 0, stagger: .04, duration: .45 }, '-=.25')
+      .from('.relays .section-head, .relay', { y: 16, opacity: 0, stagger: .05, duration: .45 }, '-=.25')
       .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
       .from('.demo .section-head, .board-toolbar, .board-frame, .board-note', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.25')
       .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.18')
@@ -1437,7 +1613,7 @@
   };
 
   const boot = () => {
-    const start = () => { initFeaturesMarquee(); hero(); initVisitors(); initTug(); initCanvasDemo(); };
+    const start = () => { initFeaturesMarquee(); hero(); initVisitors(); initTug(); initRelays(); initCanvasDemo(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };
