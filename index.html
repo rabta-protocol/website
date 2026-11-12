@@ -277,64 +277,48 @@
   .feature[data-tone="rose"] { --tone: #f43f5e; }
   .feature[data-tone="teal"] { --tone: #0d9488; }
 
-  /* cards */
-  .cards { display: grid; gap: 1.15rem; }
-  @media (min-width: 46rem) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .card {
-    position: relative; isolation: isolate;
-    display: flex; flex-direction: column; gap: .35rem;
-    min-height: 16.5rem; padding: 1.55rem 1.65rem;
-    border: 1px solid var(--line); border-radius: .95rem;
-    background: #fff;
-    color: inherit; text-decoration: none; overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
-    transition: transform .32s cubic-bezier(0.16, 1, 0.3, 1), border-color .24s ease, background .24s ease, box-shadow .32s cubic-bezier(0.16, 1, 0.3, 1);
+  /* live demo — canvas */
+  .board-shell { display: flex; flex-direction: column; gap: 1rem; }
+  .board-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .8rem 1.25rem; }
+  .board-swatches { display: flex; gap: .45rem; }
+  .board-swatch {
+    width: 1.7rem; height: 1.7rem; border-radius: .55rem;
+    border: 1px solid var(--line); cursor: pointer; padding: 0;
+    transition: transform .2s cubic-bezier(.2, .8, .2, 1), box-shadow .2s ease;
   }
-  .card:hover, .card:focus-visible {
-    transform: translateY(-4px); border-color: var(--line-strong);
-    background: #fafafa;
-    box-shadow: 0 16px 32px -16px rgba(0, 0, 0, .1);
+  .board-swatch:hover { transform: scale(1.12); }
+  .board-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--ink); transform: scale(1.05); }
+  .board-sizes { display: flex; gap: .45rem; }
+  .board-size {
+    display: grid; place-items: center; width: 1.7rem; height: 1.7rem;
+    border: 1px solid var(--line); border-radius: .55rem; background: #fff; cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .card:active { transform: translateY(-1px) scale(.99); }
-  .card:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-  .card[data-tone="emerald"] { --tone: #10b981; }
-  .card[data-tone="violet"] { --tone: #8b5cf6; }
-  .card[data-tone="sky"] { --tone: #0ea5e9; }
-  .card[data-tone="amber"] { --tone: #f59e0b; }
-  .card[data-tone="orange"] { --tone: #f7931a; }
-  .card-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
-  .card-index { font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; color: var(--subtle); }
-  .card-icon {
-    display: grid; place-items: center; width: 2.35rem; height: 2.35rem;
-    border: 1px solid var(--line); border-radius: .65rem; background: #fff; color: var(--tone);
-    transition: transform .32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .32s ease;
+  .board-size span { display: block; border-radius: 50%; background: var(--ink); }
+  .board-size[data-size="4"] span { width: 3px; height: 3px; }
+  .board-size[data-size="10"] span { width: 7px; height: 7px; }
+  .board-size[data-size="22"] span { width: 11px; height: 11px; }
+  .board-size[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+  .board-meta {
+    margin-left: auto; display: flex; align-items: center; gap: 1.1rem;
+    font-family: var(--mono); font-size: .75rem; letter-spacing: .04em; color: var(--subtle);
   }
-  .card-icon svg { width: 1.1rem; height: 1.1rem; }
-  .card:hover .card-icon { transform: rotate(-6deg) scale(1.08); box-shadow: 0 8px 18px -12px color-mix(in srgb, var(--tone) 70%, transparent); }
-  .card h3 { margin: 1.55rem 0 .35rem; font-size: 1.375rem; font-weight: 600; line-height: 1.2; letter-spacing: -.025em; }
-  .card p { margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.55; }
-  .card-foot { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: auto; padding-top: 1.25rem; }
-  .card-foot code { font-family: var(--mono); font-size: .75rem; letter-spacing: .04em; color: var(--subtle); transition: color .24s; }
-  .card:hover .card-foot code { color: var(--tone); }
-  .card-arrow { color: var(--subtle); transform: translateX(-3px); opacity: .35; transition: transform .32s cubic-bezier(0.16, 1, 0.3, 1), opacity .24s, color .24s; }
-  .card:hover .card-arrow { transform: translateX(0); opacity: 1; color: var(--ink); }
-  @media (max-width: 45.99rem) { .card { min-height: 0; } }
-  .cards-one { grid-template-columns: minmax(0, 1fr); }
-  .card-hero {
-    display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center; gap: 1.35rem;
-    min-height: 0; padding: 1.75rem 2rem;
+  .board-full { display: inline-flex; align-items: center; gap: .3rem; color: var(--ink); text-decoration: none; font-weight: 500; }
+  .board-full:hover { color: #8b5cf6; }
+  .board-full svg { width: .8rem; height: .8rem; }
+  .board-frame {
+    position: relative; align-self: center; width: 100%; max-width: 40rem;
+    border: 1px solid var(--line); border-radius: 1rem; overflow: hidden;
+    background: #0e0e10; box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
   }
-  .card-hero .card-body { display: flex; flex-direction: column; gap: .35rem; }
-  .card-hero h3 { margin: 0; font-size: 1.45rem; }
-  .card-hero p { margin: 0; max-width: 46rem; }
-  .card-hero .card-side { display: flex; align-items: center; gap: 1rem; }
-  .card-hero .card-side code { font-family: var(--mono); font-size: .75rem; letter-spacing: .04em; color: var(--subtle); transition: color .24s; }
-  .card-hero:hover .card-side code { color: var(--tone); }
-  @media (max-width: 40rem) {
-    .card-hero { grid-template-columns: auto minmax(0, 1fr); align-items: start; padding: 1.4rem 1.4rem; }
-    .card-hero .card-side { grid-column: 2; justify-self: start; }
+  .board { display: block; width: 100%; aspect-ratio: 1 / 1; cursor: crosshair; touch-action: none; }
+  .board-hint {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    margin: 0; padding: 2rem; text-align: center; pointer-events: none;
+    font-family: var(--mono); font-size: .8rem; letter-spacing: .05em; color: rgba(255, 255, 255, .45);
   }
+  .board-note { margin: 0; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; color: var(--subtle); }
+  @media (max-width: 30rem) { .board-meta { margin-left: 0; } }
 
   /* visitors */
   .visitors { margin-top: 5.5rem; padding-top: 2rem; border-top: 1px solid var(--line); }
@@ -556,20 +540,26 @@
   <section class="section demo" aria-labelledby="demo-heading">
     <div class="section-head">
       <h2 id="demo-heading">Live demo</h2>
-      <span>one relay · signed strokes</span>
+      <span>canvas · signed strokes · one relay</span>
     </div>
-    <div class="cards cards-one">
-      <a class="card card-hero" href="paint.html" data-tone="violet">
-        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3Z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5Z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></span>
-        <div class="card-body">
-          <h3>Canvas</h3>
-          <p>Realtime 1000×1000 board. Strokes are signed in your browser, then polled by every viewer.</p>
+    <div class="board-shell">
+      <div class="board-toolbar">
+        <div class="board-swatches" id="board-swatches" role="group" aria-label="Stroke color"></div>
+        <div class="board-sizes" role="group" aria-label="Brush size">
+          <button class="board-size" data-size="4" type="button" aria-label="Thin brush" aria-pressed="false"><span></span></button>
+          <button class="board-size" data-size="10" type="button" aria-label="Medium brush" aria-pressed="true"><span></span></button>
+          <button class="board-size" data-size="22" type="button" aria-label="Thick brush" aria-pressed="false"><span></span></button>
         </div>
-        <div class="card-side">
-          <code>canvas/rabta</code>
-          <span class="card-arrow" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+        <div class="board-meta">
+          <span id="board-stats">0 strokes · 0 painters</span>
+          <a class="board-full" href="paint.html">full board<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
         </div>
-      </a>
+      </div>
+      <div class="board-frame">
+        <canvas id="board" class="board" role="img" aria-label="Collaborative canvas — drag to paint a signed stroke"></canvas>
+        <p class="board-hint" id="board-hint">Loading signed strokes…</p>
+      </div>
+      <p class="board-note">Every stroke is an ed25519-signed event — drawn live by everyone viewing this page.</p>
     </div>
   </section>
 
@@ -1072,6 +1062,364 @@
     setInterval(() => { if (!document.hidden) refresh(); }, 10000);
   };
 
+  /* ---------- live demo — collaborative canvas ---------- */
+  const CANVAS_COLLECTION = 'canvas/rabta';
+  const CANVAS_TTL = 30 * 24 * 60 * 60;
+  const CANVAS_MAX_POINTS = 1200;
+  const CANVAS_MAX_PAGES = 4;
+  const CANVAS_COLORS = ['#ffffff', '#ff5c7a', '#ff8a3d', '#ffd166', '#7cffb2', '#3ddc97', '#38bdf8', '#6366f1', '#a855f7', '#f472b6'];
+
+  const initCanvasDemo = () => {
+    const canvasEl = $('board');
+    const hint = $('board-hint');
+    const statsEl = $('board-stats');
+    if (!canvasEl || !hint || !statsEl) return;
+    const ctx = canvasEl.getContext('2d');
+    if (!ctx) return;
+
+    const strokes = [];
+    const owners = new Set();
+    const seen = new Set();
+    const strokeKeys = new Set();
+    const outbox = [];
+    let posting = false;
+    let color = '#3ddc97';
+    let brush = 10;
+    let active = null;
+    let activePointer = null;
+    let redrawQueued = false;
+    let pollTimer = null;
+    let pollBusy = false;
+    let historyDone = false;
+
+    const canSign = !!(window.nacl && window.crypto && window.crypto.subtle && loadIdentity());
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const randomHex = (len) => {
+      const bytes = new Uint8Array(Math.ceil(len / 2));
+      crypto.getRandomValues(bytes);
+      return bytesToHex(bytes).slice(0, len);
+    };
+
+    const updateStats = () => {
+      statsEl.textContent = strokes.length + ' strokes · ' + owners.size + ' painters';
+    };
+
+    const updateHint = () => {
+      if (strokes.length) { hint.style.display = 'none'; return; }
+      hint.style.display = 'flex';
+      hint.textContent = !historyDone
+        ? 'Loading signed strokes from 1.rabta.space…'
+        : canSign
+          ? 'Drag to paint — every stroke is signed with your key.'
+          : 'Signing unavailable here — watching live strokes only.';
+    };
+
+    const drawStroke = (stroke, preview) => {
+      if (!stroke || !stroke.points.length) return;
+      const pts = stroke.points;
+      ctx.save();
+      ctx.strokeStyle = stroke.color;
+      ctx.fillStyle = stroke.color;
+      ctx.lineWidth = stroke.width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.globalAlpha = .96;
+      if (preview) {
+        ctx.shadowColor = stroke.color;
+        ctx.shadowBlur = Math.min(22, 4 + stroke.width * 1.4);
+      }
+      if (pts.length === 1) {
+        ctx.beginPath();
+        ctx.arc(pts[0][0], pts[0][1], Math.max(stroke.width / 2, .7), 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length - 1; i++) {
+          const mx = (pts[i][0] + pts[i + 1][0]) / 2;
+          const my = (pts[i][1] + pts[i + 1][1]) / 2;
+          ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
+        }
+        ctx.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+        ctx.stroke();
+      }
+      ctx.restore();
+    };
+
+    const redraw = () => {
+      ctx.clearRect(0, 0, 1000, 1000);
+      for (let i = 0; i < strokes.length; i++) drawStroke(strokes[i], false);
+      if (active) drawStroke(active, true);
+    };
+
+    const scheduleRedraw = () => {
+      if (redrawQueued) return;
+      redrawQueued = true;
+      requestAnimationFrame(() => { redrawQueued = false; redraw(); });
+    };
+
+    const resize = () => {
+      const rect = canvasEl.getBoundingClientRect();
+      if (!rect.width) return;
+      const ratio = Math.min(window.devicePixelRatio || 1, 2.5);
+      const px = Math.max(1, Math.round(rect.width * ratio));
+      if (canvasEl.width !== px) { canvasEl.width = px; canvasEl.height = px; }
+      ctx.setTransform(px / 1000, 0, 0, px / 1000, 0, 0);
+      redraw();
+    };
+
+    const addStroke = (stroke) => {
+      if (!stroke) return false;
+      const key = stroke.sid ? stroke.owner + '|' + stroke.sid + '|' + stroke.seq : 'id:' + stroke.id;
+      if (strokeKeys.has(key)) return false;
+      strokeKeys.add(key);
+      if (stroke.id) seen.add(stroke.id);
+      owners.add(stroke.owner);
+      strokes.push(stroke);
+      while (strokes.length > 500) strokes.shift();
+      updateStats();
+      updateHint();
+      scheduleRedraw();
+      return true;
+    };
+
+    const compareEvents = (a, b) => {
+      const ta = Number(a.created_at) || 0;
+      const tb = Number(b.created_at) || 0;
+      if (ta !== tb) return ta - tb;
+      const da = a.data || {};
+      const db = b.data || {};
+      if (da.sid && da.sid === db.sid) return (Number(da.seq) || 0) - (Number(db.seq) || 0);
+      const ia = String(a.id || '');
+      const ib = String(b.id || '');
+      return ia < ib ? -1 : ia > ib ? 1 : 0;
+    };
+
+    const parseEvent = (event) => {
+      if (!event || typeof event !== 'object' || typeof event.id !== 'string') return null;
+      const data = event.data;
+      if (!data || data.v !== 1 || typeof data.color !== 'string' || !Array.isArray(data.p)) return null;
+      if (data.p.length < 2 || data.p.length > CANVAS_MAX_POINTS * 2 || data.p.length % 2 !== 0) return null;
+      if (!/^#[0-9a-f]{6}$/i.test(data.color)) return null;
+      const w = Number(data.w);
+      if (!Number.isFinite(w)) return null;
+      const owner = typeof event.owner === 'string' ? event.owner.toLowerCase() : '';
+      if (!/^ed25519:[0-9a-f]{64}$/.test(owner)) return null;
+      const points = [];
+      for (let i = 0; i < data.p.length; i += 2) {
+        const x = Number(data.p[i]);
+        const y = Number(data.p[i + 1]);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+        points.push([clamp(Math.round(x), 0, 1000), clamp(Math.round(y), 0, 1000)]);
+      }
+      const sid = typeof data.sid === 'string' && /^[0-9a-f]{1,64}$/i.test(data.sid) ? data.sid.toLowerCase() : '';
+      const seq = Number.isInteger(data.seq) && data.seq >= 0 && data.seq < 100000 ? data.seq : 0;
+      const at = Number.isFinite(event.created_at) ? event.created_at : visitNow();
+      return { id: event.id, owner, color: data.color.toLowerCase(), width: clamp(Math.round(w), 1, 48), points, sid, seq, at };
+    };
+
+    const addEvent = (event) => {
+      if (!event || typeof event.id !== 'string' || seen.has(event.id)) return false;
+      const stroke = parseEvent(event);
+      if (!stroke) { seen.add(event.id); return false; }
+      return addStroke(stroke);
+    };
+
+    const fetchPage = async (cursor) => {
+      const query = { collection: CANVAS_COLLECTION, limit: 100 };
+      if (cursor) query.cursor = cursor;
+      const res = await fetch(RELAY + '/api/v1/events/query', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(query),
+        cache: 'no-store'
+      });
+      syncRelayClock(res);
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error((body && (body.code || body.error)) || ('HTTP ' + res.status));
+      }
+      return res.json();
+    };
+
+    const loadHistory = async () => {
+      const collected = [];
+      let cursor = null;
+      let pages = 0;
+      try {
+        do {
+          const body = await fetchPage(cursor);
+          if (Array.isArray(body.events)) collected.push(...body.events);
+          cursor = body.next_cursor || null;
+          pages += 1;
+        } while (cursor && pages < CANVAS_MAX_PAGES);
+        collected.sort(compareEvents);
+        for (const event of collected) addEvent(event);
+      } catch {}
+      historyDone = true;
+      updateHint();
+    };
+
+    const poll = async () => {
+      clearTimeout(pollTimer);
+      if (document.hidden) { pollTimer = setTimeout(poll, 5000); return; }
+      if (pollBusy) { pollTimer = setTimeout(poll, 1000); return; }
+      pollBusy = true;
+      try {
+        const collected = [];
+        let cursor = null;
+        let pages = 0;
+        let unseen = true;
+        do {
+          const body = await fetchPage(cursor);
+          const events = Array.isArray(body.events) ? body.events : [];
+          collected.push(...events);
+          unseen = events.some((event) => event && typeof event.id === 'string' && !seen.has(event.id));
+          cursor = unseen ? (body.next_cursor || null) : null;
+          pages += 1;
+        } while (cursor && pages < 3);
+        collected.sort(compareEvents);
+        for (const event of collected) addEvent(event);
+      } catch {}
+      pollBusy = false;
+      pollTimer = setTimeout(poll, 4000);
+    };
+
+    const buildEnvelope = async (data, createdAt) => {
+      const identity = loadIdentity();
+      const fields = {
+        collection: CANVAS_COLLECTION,
+        created_at: createdAt,
+        expires_at: createdAt + CANVAS_TTL,
+        owner: identity.owner,
+        labels: ['stroke'],
+        blobs: [],
+        data
+      };
+      const bytes = new TextEncoder().encode(canonical(fields));
+      const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+      const signature = nacl.sign.detached(digest, identity.secretKey);
+      return { ...fields, id: bytesToHex(digest), sig: bytesToHex(signature) };
+    };
+
+    const drain = async () => {
+      if (posting) return;
+      posting = true;
+      while (outbox.length) {
+        const item = outbox[0];
+        try {
+          const res = await fetch(RELAY + '/api/v1/events', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(item.envelope)
+          });
+          syncRelayClock(res);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          outbox.shift();
+        } catch {
+          item.attempts = (item.attempts || 0) + 1;
+          if (item.attempts >= 3) outbox.shift();
+          else break;
+        }
+      }
+      posting = false;
+      if (outbox.length) setTimeout(drain, 1500);
+    };
+
+    const commitStroke = async (finished) => {
+      if (!finished || !finished.points.length) return;
+      const at = visitNow() - 1;
+      const sid = randomHex(8);
+      const chunks = [];
+      for (let start = 0; start < finished.points.length;) {
+        const end = Math.min(start + CANVAS_MAX_POINTS, finished.points.length);
+        chunks.push(finished.points.slice(start, end));
+        if (end >= finished.points.length) break;
+        start = end - 1;
+      }
+      for (let seq = 0; seq < chunks.length; seq++) {
+        const points = chunks[seq].map((p) => [clamp(Math.round(p[0]), 0, 1000), clamp(Math.round(p[1]), 0, 1000)]);
+        addStroke({ id: 'local:' + sid + ':' + seq, owner: loadIdentity().owner, color: finished.color, width: finished.width, points, sid, seq, at });
+        try {
+          const envelope = await buildEnvelope({ v: 1, sid, seq, color: finished.color, w: finished.width, p: points.flat() }, at);
+          outbox.push({ envelope, attempts: 0 });
+          drain();
+        } catch {}
+      }
+    };
+
+    const canvasPoint = (event) => {
+      const rect = canvasEl.getBoundingClientRect();
+      return [
+        clamp(((event.clientX - rect.left) / rect.width) * 1000, 0, 1000),
+        clamp(((event.clientY - rect.top) / rect.height) * 1000, 0, 1000)
+      ];
+    };
+
+    canvasEl.addEventListener('pointerdown', (event) => {
+      if (!canSign || active) return;
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      activePointer = event.pointerId;
+      try { canvasEl.setPointerCapture(event.pointerId); } catch {}
+      active = { color, width: brush, points: [canvasPoint(event)] };
+      scheduleRedraw();
+    });
+
+    canvasEl.addEventListener('pointermove', (event) => {
+      if (!active || event.pointerId !== activePointer) return;
+      const p = canvasPoint(event);
+      const last = active.points[active.points.length - 1];
+      const dx = p[0] - last[0];
+      const dy = p[1] - last[1];
+      if (dx * dx + dy * dy < 4) return;
+      active.points.push(p);
+      scheduleRedraw();
+    });
+
+    const finishStroke = (event) => {
+      if (!active || event.pointerId !== activePointer) return;
+      const finished = active;
+      active = null;
+      activePointer = null;
+      try { canvasEl.releasePointerCapture(event.pointerId); } catch {}
+      if (finished.points.length) commitStroke(finished);
+      else scheduleRedraw();
+    };
+
+    canvasEl.addEventListener('pointerup', finishStroke);
+    canvasEl.addEventListener('pointercancel', finishStroke);
+
+    const swatches = $('board-swatches');
+    if (swatches) {
+      CANVAS_COLORS.forEach((hex) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'board-swatch';
+        btn.style.background = hex;
+        btn.setAttribute('aria-label', 'Color ' + hex);
+        btn.setAttribute('aria-pressed', hex === color ? 'true' : 'false');
+        btn.addEventListener('click', () => {
+          color = hex;
+          swatches.querySelectorAll('.board-swatch').forEach((el) => el.setAttribute('aria-pressed', el === btn ? 'true' : 'false'));
+        });
+        swatches.appendChild(btn);
+      });
+    }
+    document.querySelectorAll('.board-size').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        brush = Number(btn.dataset.size) || 10;
+        document.querySelectorAll('.board-size').forEach((el) => el.setAttribute('aria-pressed', el === btn ? 'true' : 'false'));
+      });
+    });
+
+    resize();
+    window.addEventListener('resize', resize);
+    updateStats();
+    updateHint();
+    loadHistory().then(poll);
+  };
+
   const hero = () => {
     if (!window.gsap || reduce) return;
     const tl = window.gsap.timeline({ defaults: { ease: 'power3.out', duration: .7 } });
@@ -1083,14 +1431,13 @@
       .from('.ticker', { opacity: 0, duration: .5 }, '-=.35')
       .from('.tugofwar .section-head, .tug-side', { y: 16, opacity: 0, stagger: .04, duration: .45 }, '-=.25')
       .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
-      .from('.demo .section-head', { y: 12, opacity: 0, duration: .5 }, '-=.25')
-      .from('.card', { y: 28, opacity: 0, stagger: .09, duration: .65 }, '-=.25')
+      .from('.demo .section-head, .board-toolbar, .board-frame, .board-note', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.25')
       .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.18')
       .from('footer', { opacity: 0, duration: .4 }, '-=.4');
   };
 
   const boot = () => {
-    const start = () => { initFeaturesMarquee(); hero(); initVisitors(); initTug(); };
+    const start = () => { initFeaturesMarquee(); hero(); initVisitors(); initTug(); initCanvasDemo(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };
