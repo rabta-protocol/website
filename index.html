@@ -74,30 +74,6 @@
     width: min(50rem, 94vw); height: 20rem; pointer-events: none;
     background: radial-gradient(closest-side, rgba(16, 185, 129, .13), transparent 72%);
   }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: .5rem;
-    padding: .45rem .8rem .45rem .65rem;
-    border: 1px solid var(--line); border-radius: 999px;
-    background: #fff;
-    font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
-    color: #52525b; cursor: pointer; user-select: none;
-    transition: transform .25s cubic-bezier(0.16, 1, 0.3, 1), border-color .2s ease, background .2s ease, box-shadow .25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .eyebrow:hover {
-    border-color: var(--line-strong);
-    background: #fafafa;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, .06);
-  }
-  .eyebrow:active { transform: translateY(0) scale(.97); }
-  .eyebrow[data-copied] { border-color: #6ee7b7; background: #ecfdf5; color: #047857; }
-  .live-dot { position: relative; width: .4rem; height: .4rem; flex: none; border-radius: 50%; background: var(--accent); }
-  .live-dot::after {
-    content: ""; position: absolute; inset: -3px; border-radius: 50%;
-    border: 1px solid var(--accent); opacity: 0; animation: ping 2.2s cubic-bezier(0, 0, .2, 1) infinite;
-  }
-  @keyframes ping { 0% { transform: scale(.6); opacity: .9; } 80%, 100% { transform: scale(1.9); opacity: 0; } }
-
   .hero-title {
     display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: .5rem 1rem;
     margin: 1.75rem 0 0;
@@ -439,10 +415,6 @@
 <body>
 <main>
   <section class="hero">
-    <button class="eyebrow node-chip" type="button" title="Copy node URL">
-      <span class="live-dot" aria-hidden="true"></span>
-      <span class="node-chip-text">node live · 1.rabta.space</span>
-    </button>
     <h1 class="hero-title"><span class="word">rabta</span></h1>
     <p class="pron">raa-b-ta</p>
     <p class="lede">Stop trusting corporations. <b>Build your own apps.</b> <b>Encrypt everything.</b> Push once — access it everywhere. Every demo below is signed in your browser and served by a live Rabta node — no accounts, no database server, no cloud.</p>
@@ -710,8 +682,6 @@
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const $ = (id) => document.getElementById(id);
-  const nodeChip = document.querySelector('.node-chip');
-  const nodeChipText = document.querySelector('.node-chip-text');
 
   /* ---------- recent visitors ---------- */
   const visitList = $('visit-list');
@@ -1005,22 +975,6 @@
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) pollVisits();
   });
-
-  if (nodeChip) {
-    let copiedTimer = null;
-    nodeChip.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(NODE_URL);
-      } catch {}
-      nodeChip.dataset.copied = '1';
-      nodeChipText.textContent = 'copied · 1.rabta.space';
-      clearTimeout(copiedTimer);
-      copiedTimer = setTimeout(() => {
-        delete nodeChip.dataset.copied;
-        nodeChipText.textContent = 'node live · 1.rabta.space';
-      }, 1600);
-    });
-  }
 
   const initFeaturesMarquee = () => {
     const track = $('feature-track');
@@ -1639,8 +1593,7 @@
   const hero = () => {
     if (!window.gsap || reduce) return;
     const tl = window.gsap.timeline({ defaults: { ease: 'power3.out', duration: .7 } });
-    tl.from('.eyebrow', { y: 10, opacity: 0, duration: .45 })
-      .from('.hero-title .word', { y: 34, opacity: 0, duration: .85 }, '-=.2')
+    tl.from('.hero-title .word', { y: 34, opacity: 0, duration: .85 })
       .from('.pron', { opacity: 0, x: -8, duration: .5 }, '-=.55')
       .from('.lede', { y: 16, opacity: 0, duration: .6 }, '-=.45')
       .from('.hero-actions .btn', { y: 12, opacity: 0, stagger: .08, duration: .45 }, '-=.35')
