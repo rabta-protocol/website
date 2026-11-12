@@ -66,8 +66,14 @@
   @media (min-width: 48rem) { main { padding: 2.25rem 3rem 6.5rem; } }
 
   /* hero */
-  .hero { padding: 4rem 0 0; }
+  .hero { position: relative; padding: 4rem 0 0; text-align: center; }
   @media (min-width: 48rem) { .hero { padding: 6.5rem 0 0; } }
+  .hero::before {
+    content: ""; position: absolute; z-index: -1;
+    left: 50%; top: 1.5rem; transform: translateX(-50%);
+    width: min(50rem, 94vw); height: 20rem; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(16, 185, 129, .13), transparent 72%);
+  }
   .eyebrow {
     display: inline-flex; align-items: center; gap: .5rem;
     padding: .45rem .8rem .45rem .65rem;
@@ -93,7 +99,7 @@
   @keyframes ping { 0% { transform: scale(.6); opacity: .9; } 80%, 100% { transform: scale(1.9); opacity: 0; } }
 
   .hero-title {
-    display: flex; flex-wrap: wrap; align-items: flex-end; gap: .5rem 1rem;
+    display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: .5rem 1rem;
     margin: 1.75rem 0 0;
     font-size: clamp(4.25rem, 13vw, 8.75rem);
     line-height: .86;
@@ -108,11 +114,11 @@
     color: var(--muted); white-space: nowrap;
   }
   .lede {
-    max-width: 44rem; margin: 2rem 0 0;
+    max-width: 44rem; margin: 2rem auto 0;
     font-size: clamp(1.25rem, 2.1vw, 1.65rem); line-height: 1.55; letter-spacing: -.02em; color: var(--muted);
   }
   .lede b { color: var(--ink); font-weight: 600; }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2.25rem; }
+  .hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; margin-top: 2.25rem; }
   .btn {
     display: inline-flex; align-items: center; gap: .5rem;
     padding: .85rem 1.35rem; border-radius: 999px; border: 1px solid transparent;
