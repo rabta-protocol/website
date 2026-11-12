@@ -249,22 +249,12 @@
   }
   .section-head span { font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle); }
 
-  /* features — one row, infinite drift, full-bleed */
-  .feature-marquee {
-    margin-inline: calc(50% - 50vw);
-    overflow-x: clip;
-    padding-block: .4rem;
-  }
-  .feature-track { display: flex; width: max-content; }
-  .feature-track.is-ready { animation: feature-drift 55s linear infinite; }
-  .feature-marquee:hover .feature-track.is-ready { animation-play-state: paused; }
-  .feature-group { display: flex; gap: 1rem; flex: none; align-items: stretch; }
-  @keyframes feature-drift { from { transform: translate3d(-50%, 0, 0); } to { transform: translate3d(0, 0, 0); } }
+  /* features */
+  .feature-grid { display: grid; gap: 1.15rem; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
   .feature {
     position: relative;
-    flex: none; width: min(23rem, 82vw);
     display: flex; flex-direction: column; gap: .7rem;
-    min-height: 14.5rem; padding: 1.4rem 1.5rem;
+    padding: 1.4rem 1.5rem;
     border: 1px solid var(--line); border-radius: .95rem;
     background: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
@@ -309,6 +299,54 @@
   .feature[data-tone="amber"] { --tone: #d97706; }
   .feature[data-tone="rose"] { --tone: #f43f5e; }
   .feature[data-tone="teal"] { --tone: #0d9488; }
+
+  /* features — run your own relay */
+  .run-panel {
+    display: grid; gap: 1.25rem; align-items: center;
+    padding: 1.55rem 1.65rem; margin-bottom: 1.15rem;
+    border: 1px solid var(--line); border-radius: .95rem;
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
+  }
+  @media (min-width: 56rem) { .run-panel { grid-template-columns: minmax(0, .85fr) minmax(0, 1.3fr); } }
+  .run-copy h3 { margin: 0; font-size: 1.125rem; font-weight: 600; letter-spacing: -.02em; }
+  .run-copy p { margin: .45rem 0 0; color: var(--muted); font-size: .9375rem; line-height: 1.55; }
+  .run-switch-row { display: flex; align-items: center; gap: .7rem; margin-top: 1.05rem; }
+  .run-switch { display: inline-flex; align-items: center; gap: .55rem; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; }
+  .run-track { position: relative; width: 2.5rem; height: 1.35rem; border-radius: 999px; background: #d4d4d8; flex: none; transition: background .25s ease; }
+  .run-knob {
+    position: absolute; top: .14rem; left: .14rem; width: 1.07rem; height: 1.07rem; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    transition: transform .25s cubic-bezier(.2, .8, .2, 1);
+  }
+  .run-switch[aria-checked="true"] .run-track { background: var(--accent); }
+  .run-switch[aria-checked="true"] .run-knob { transform: translateX(1.15rem); }
+  .run-switch:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 999px; }
+  .run-switch-label { font-family: var(--mono); font-size: .75rem; letter-spacing: .04em; color: var(--ink); white-space: nowrap; }
+  .run-switch-label b { font-weight: 600; }
+  .run-hint { display: block; margin-top: .55rem; font-family: var(--mono); font-size: .6875rem; letter-spacing: .03em; color: var(--subtle); }
+  .run-window {
+    background: #0e0e10; border-radius: .8rem; overflow: hidden;
+    box-shadow: 0 10px 24px -16px rgba(0, 0, 0, .35);
+  }
+  .run-head {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    padding: .55rem .9rem; border-bottom: 1px solid rgba(255, 255, 255, .08);
+  }
+  .run-head span { font-family: var(--mono); font-size: .6875rem; letter-spacing: .06em; color: #71717a; }
+  .run-copy-btn {
+    padding: .28rem .7rem; border: 1px solid rgba(110, 231, 183, .35); border-radius: 999px;
+    background: none; cursor: pointer; font-family: var(--mono); font-size: .625rem;
+    letter-spacing: .08em; text-transform: uppercase; color: #6ee7b7;
+    transition: background .2s ease;
+  }
+  .run-copy-btn:hover { background: rgba(16, 185, 129, .14); }
+  .run-copy-btn.is-copied { background: rgba(16, 185, 129, .22); }
+  .run-pre { margin: 0; padding: .85rem 1rem; overflow-x: auto; }
+  .run-pre code { font-family: var(--mono); font-size: .78rem; line-height: 1.75; color: #a1a1aa; white-space: pre; display: block; }
+  .run-pre .c-w { color: #e4e4e7; }
+  .run-pre .c-f { color: #38bdf8; }
+  .run-pre .c-v { color: #6ee7b7; }
+  .run-pre .c-d { color: #52525b; }
 
   /* live demo — canvas */
   .board-shell { display: flex; flex-direction: column; gap: 1rem; }
@@ -518,12 +556,34 @@
   <section class="section features" aria-labelledby="features-heading">
     <div class="section-head">
       <h2 id="features-heading">Capabilities</h2>
-      <span>six core pillars</span>
+      <span>six pillars · one command</span>
     </div>
-    <div class="feature-marquee">
-      <div class="feature-track" id="feature-track">
-        <div class="feature-group">
-          <article class="feature" data-tone="emerald">
+    <div class="run-panel">
+      <div class="run-copy">
+        <h3>Run your own relay</h3>
+        <p>One Rust binary, one SQLite file, one container — flip sync on and your node joins the public mesh with a single env var.</p>
+        <div class="run-switch-row">
+          <button class="run-switch" id="run-switch" role="switch" aria-checked="true" type="button">
+            <span class="run-track" aria-hidden="true"><span class="run-knob"></span></span>
+            <span class="run-switch-label">sync with <b>1.rabta.space</b></span>
+          </button>
+        </div>
+        <span class="run-hint" id="run-hint">your node pulls the public mesh and mirrors what it has</span>
+      </div>
+      <div class="run-window">
+        <div class="run-head"><span>docker · ghcr.io/rabta-protocol/rabta:latest</span><button class="run-copy-btn" id="run-copy" type="button">copy</button></div>
+        <pre class="run-pre" id="run-pre"><code><span class="c-w">docker run</span> <span class="c-f">-d</span> <span class="c-d">\</span>
+  <span class="c-f">--name</span> <span class="c-w">rabta</span> <span class="c-d">\</span>
+  <span class="c-f">-p</span> <span class="c-v">3232:3232</span> <span class="c-d">\</span>
+  <span class="c-f">-v</span> <span class="c-v">rabta:/data</span> <span class="c-d">\</span>
+  <span class="c-f">--restart</span> <span class="c-v">unless-stopped</span> <span class="c-d">\</span>
+  <span class="c-f">-e</span> <span class="c-w">STORAGE_LIMIT=</span><span class="c-v">20GB</span> <span class="c-d">\</span>
+  <span class="c-f">-e</span> <span class="c-w">SYNC=</span><span class="c-v">https://1.rabta.space</span> <span class="c-d">\</span>
+  <span class="c-v">ghcr.io/rabta-protocol/rabta:latest</span></code></pre>
+      </div>
+    </div>
+    <div class="feature-grid">
+      <article class="feature" data-tone="emerald">
             <div class="feature-top">
               <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M14 9l3 3"/></svg></span>
               <span class="feature-tag"><code>ed25519</code></span>
@@ -618,8 +678,6 @@
           </div>
         </div>
       </article>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -978,15 +1036,63 @@
     if (!document.hidden) pollVisits();
   });
 
-  const initFeaturesMarquee = () => {
-    const track = $('feature-track');
-    const group = track && track.querySelector('.feature-group');
-    if (!track || !group || track.children.length > 1) return;
-    if (reduce) return;
-    const clone = group.cloneNode(true);
-    clone.setAttribute('aria-hidden', 'true');
-    track.appendChild(clone);
-    track.classList.add('is-ready');
+  /* ---------- run your own relay ---------- */
+  const RUN_SYNC_URL = 'https://1.rabta.space';
+  const RUN_HEAD_HTML = '<span class="c-w">docker run</span> <span class="c-f">-d</span> <span class="c-d">\\</span>';
+  const RUN_LINES_HTML = [
+    '  <span class="c-f">--name</span> <span class="c-w">rabta</span> <span class="c-d">\\</span>',
+    '  <span class="c-f">-p</span> <span class="c-v">3232:3232</span> <span class="c-d">\\</span>',
+    '  <span class="c-f">-v</span> <span class="c-v">rabta:/data</span> <span class="c-d">\\</span>',
+    '  <span class="c-f">--restart</span> <span class="c-v">unless-stopped</span> <span class="c-d">\\</span>',
+    '  <span class="c-f">-e</span> <span class="c-w">STORAGE_LIMIT=</span><span class="c-v">20GB</span> <span class="c-d">\\</span>'
+  ];
+  const RUN_SYNC_HTML = '  <span class="c-f">-e</span> <span class="c-w">SYNC=</span><span class="c-v">' + RUN_SYNC_URL + '</span> <span class="c-d">\\</span>';
+  const RUN_IMG_HTML = '  <span class="c-v">ghcr.io/rabta-protocol/rabta:latest</span>';
+  const runHtml = (sync) => [RUN_HEAD_HTML, ...RUN_LINES_HTML, ...(sync ? [RUN_SYNC_HTML] : []), RUN_IMG_HTML].join('\n');
+  const runPlain = (sync) => [
+    'docker run -d \\',
+    '  --name rabta \\',
+    '  -p 3232:3232 \\',
+    '  -v rabta:/data \\',
+    '  --restart unless-stopped \\',
+    '  -e STORAGE_LIMIT=20GB \\',
+    ...(sync ? ['  -e SYNC=' + RUN_SYNC_URL + ' \\'] : []),
+    '  ghcr.io/rabta-protocol/rabta:latest'
+  ].join('\n');
+
+  const initRunPanel = () => {
+    const pre = $('run-pre');
+    const code = pre && pre.querySelector('code');
+    const sw = $('run-switch');
+    const hint = $('run-hint');
+    const cp = $('run-copy');
+    if (!pre || !code || !sw || !cp || pre.dataset.ready) return;
+    pre.dataset.ready = '1';
+    let sync = true;
+    let copiedTimer = null;
+    const render = () => {
+      code.innerHTML = runHtml(sync);
+      sw.setAttribute('aria-checked', sync ? 'true' : 'false');
+      if (hint) {
+        hint.textContent = sync
+          ? 'your node pulls the public mesh and mirrors what it has'
+          : 'standalone node — data stays in your volume; flip sync on to join the mesh';
+      }
+    };
+    sw.addEventListener('click', () => { sync = !sync; render(); });
+    cp.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(runPlain(sync));
+      } catch {}
+      cp.textContent = 'copied ✓';
+      cp.classList.add('is-copied');
+      clearTimeout(copiedTimer);
+      copiedTimer = setTimeout(() => {
+        cp.textContent = 'copy';
+        cp.classList.remove('is-copied');
+      }, 1600);
+    });
+    render();
   };
 
   /* ---------- tug of war ---------- */
@@ -1602,14 +1708,14 @@
       .from('.ticker', { opacity: 0, duration: .5 }, '-=.35')
       .from('.tugofwar .section-head, .tug-side', { y: 16, opacity: 0, stagger: .04, duration: .45 }, '-=.25')
       .from('.relays .section-head, .relay', { y: 16, opacity: 0, stagger: .05, duration: .45 }, '-=.25')
-      .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
+      .from('.features .section-head, .run-panel, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
       .from('.demo .section-head, .board-toolbar, .board-frame, .board-note', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.25')
       .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.18')
       .from('footer', { opacity: 0, duration: .4 }, '-=.4');
   };
 
   const boot = () => {
-    const start = () => { initFeaturesMarquee(); hero(); initVisitors(); initTug(); initRelays(); initCanvasDemo(); };
+    const start = () => { initRunPanel(); hero(); initVisitors(); initTug(); initRelays(); initCanvasDemo(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };
