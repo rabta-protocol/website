@@ -354,7 +354,18 @@
   }
   .board-full { display: inline-flex; align-items: center; gap: .3rem; color: var(--ink); text-decoration: none; font-weight: 500; }
   .board-full:hover { color: #8b5cf6; }
+  button.board-full { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
   .board-full svg { width: .8rem; height: .8rem; }
+  .board-full .fs-exit { display: none; }
+  .board-full[aria-pressed="true"] .fs-enter { display: none; }
+  .board-full[aria-pressed="true"] .fs-exit { display: inline; }
+  .board-frame:fullscreen, .board-frame:-webkit-full-screen {
+    max-width: none; width: 100%; height: 100%;
+    border: 0; border-radius: 0; display: grid; place-items: center;
+  }
+  .board-frame:fullscreen .board, .board-frame:-webkit-full-screen .board {
+    width: min(100vw, 100vh); height: min(100vw, 100vh);
+  }
   .board-frame {
     position: relative; align-self: center; width: 100%; max-width: 40rem;
     border: 1px solid var(--line); border-radius: 1rem; overflow: hidden;
@@ -632,7 +643,7 @@
     </div>
   </section>
 
-  <section class="section demo" aria-labelledby="demo-heading">
+  <section class="section demo" id="demo" aria-labelledby="demo-heading">
     <div class="section-head">
       <h2 id="demo-heading">Live demo</h2>
       <span>canvas · signed strokes · one relay</span>
@@ -647,10 +658,10 @@
         </div>
         <div class="board-meta">
           <span id="board-stats">0 strokes · 0 painters</span>
-          <a class="board-full" href="paint.html">full board<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+          <button class="board-full" id="board-fs" type="button" aria-pressed="false" aria-label="Toggle fullscreen canvas">fullscreen<svg class="fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"/></svg><svg class="fs-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3m8 0h3a2 2 0 0 0 2-2v-3"/></svg></button>
         </div>
       </div>
-      <div class="board-frame">
+      <div class="board-frame" id="board-frame">
         <canvas id="board" class="board" role="img" aria-label="Collaborative canvas — drag to paint a signed stroke"></canvas>
         <p class="board-hint" id="board-hint">Loading signed strokes…</p>
       </div>
@@ -1507,6 +1518,30 @@
         document.querySelectorAll('.board-size').forEach((el) => el.setAttribute('aria-pressed', el === btn ? 'true' : 'false'));
       });
     });
+
+    const frame = $('board-frame');
+    const fsBtn = $('board-fs');
+    const isFs = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+    const syncFs = () => {
+      if (fsBtn) fsBtn.setAttribute('aria-pressed', isFs() ? 'true' : 'false');
+      requestAnimationFrame(resize);
+      setTimeout(resize, 250);
+    };
+    if (fsBtn && frame) {
+      fsBtn.addEventListener('click', () => {
+        try {
+          if (isFs()) {
+            const exit = document.exitFullscreen || document.webkitExitFullscreen;
+            if (exit) Promise.resolve(exit.call(document)).catch(() => {});
+          } else {
+            const req = frame.requestFullscreen || frame.webkitRequestFullscreen;
+            if (req) Promise.resolve(req.call(frame)).catch(() => {});
+          }
+        } catch {}
+      });
+    }
+    document.addEventListener('fullscreenchange', syncFs);
+    document.addEventListener('webkitfullscreenchange', syncFs);
 
     resize();
     window.addEventListener('resize', resize);
