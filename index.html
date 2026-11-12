@@ -418,52 +418,6 @@
     </div>
   </section>
 
-  <section class="section relays" aria-labelledby="relays-heading">
-    <div class="section-head">
-      <h2 id="relays-heading">Free public relays</h2>
-      <span>run by volunteers · live /stats</span>
-    </div>
-    <div class="relay-grid">
-      <article class="relay" data-relay="https://1.rabta.space">
-        <div class="relay-top">
-          <span class="relay-dot" aria-hidden="true"></span>
-          <span class="relay-host">1.rabta.space</span>
-          <span class="relay-version" data-version>—</span>
-        </div>
-        <div class="relay-nums">
-          <div class="relay-num"><span class="relay-num-label">events</span><span class="relay-num-value" data-events>—</span></div>
-          <div class="relay-num"><span class="relay-num-label">blobs</span><span class="relay-num-value" data-blobs>—</span></div>
-          <div class="relay-num"><span class="relay-num-label">storage</span><span class="relay-num-value" data-storage>—</span></div>
-        </div>
-        <div class="relay-battery">
-          <div class="relay-battery-head"><span>battery</span><span data-battery-pct>—</span></div>
-          <div class="relay-battery-bar" role="img" aria-label="Relay battery level"><div class="relay-battery-fill" data-battery-fill></div></div>
-          <span class="relay-battery-sub" data-battery-sub></span>
-        </div>
-        <div class="relay-foot"><span data-foot></span></div>
-      </article>
-      <article class="relay" data-relay="https://rabta.t3nk.com">
-        <div class="relay-top">
-          <span class="relay-dot" aria-hidden="true"></span>
-          <span class="relay-host">rabta.t3nk.com</span>
-          <span class="relay-version" data-version>—</span>
-        </div>
-        <div class="relay-nums">
-          <div class="relay-num"><span class="relay-num-label">events</span><span class="relay-num-value" data-events>—</span></div>
-          <div class="relay-num"><span class="relay-num-label">blobs</span><span class="relay-num-value" data-blobs>—</span></div>
-          <div class="relay-num"><span class="relay-num-label">storage</span><span class="relay-num-value" data-storage>—</span></div>
-        </div>
-        <div class="relay-battery">
-          <div class="relay-battery-head"><span>battery</span><span data-battery-pct>—</span></div>
-          <div class="relay-battery-bar" role="img" aria-label="Relay battery level"><div class="relay-battery-fill" data-battery-fill></div></div>
-          <span class="relay-battery-sub" data-battery-sub></span>
-        </div>
-        <div class="relay-foot"><span data-foot></span></div>
-      </article>
-    </div>
-    <p class="relay-note">Two volunteer-run nodes, one fleet — every number is read live from each node's public <code>/api/v1/stats</code> route, and battery is the node's push-token budget, regenerated every minute.</p>
-  </section>
-
   <section class="section features" aria-labelledby="features-heading">
     <div class="section-head">
       <h2 id="features-heading">Capabilities</h2>
@@ -634,6 +588,52 @@
       <ol class="visit-list" id="visit-list" aria-live="polite"></ol>
       <p class="visit-empty" id="visit-empty">Locating the last ten visitors…</p>
     </div>
+  </section>
+
+  <section class="section relays" aria-labelledby="relays-heading">
+    <div class="section-head">
+      <h2 id="relays-heading">Free public relays</h2>
+      <span>run by volunteers · live /stats</span>
+    </div>
+    <div class="relay-grid">
+      <article class="relay" data-relay="https://1.rabta.space">
+        <div class="relay-top">
+          <span class="relay-dot" aria-hidden="true"></span>
+          <span class="relay-host">1.rabta.space</span>
+          <span class="relay-version" data-version>—</span>
+        </div>
+        <div class="relay-nums">
+          <div class="relay-num"><span class="relay-num-label">events</span><span class="relay-num-value" data-events>—</span></div>
+          <div class="relay-num"><span class="relay-num-label">blobs</span><span class="relay-num-value" data-blobs>—</span></div>
+          <div class="relay-num"><span class="relay-num-label">storage</span><span class="relay-num-value" data-storage>—</span></div>
+        </div>
+        <div class="relay-battery">
+          <div class="relay-battery-head"><span>battery</span><span data-battery-pct>—</span></div>
+          <div class="relay-battery-bar" role="img" aria-label="Relay battery level"><div class="relay-battery-fill" data-battery-fill></div></div>
+          <span class="relay-battery-sub" data-battery-sub></span>
+        </div>
+        <div class="relay-foot"><span data-foot></span></div>
+      </article>
+      <article class="relay" data-relay="https://rabta.t3nk.com">
+        <div class="relay-top">
+          <span class="relay-dot" aria-hidden="true"></span>
+          <span class="relay-host">rabta.t3nk.com</span>
+          <span class="relay-version" data-version>—</span>
+        </div>
+        <div class="relay-nums">
+          <div class="relay-num"><span class="relay-num-label">events</span><span class="relay-num-value" data-events>—</span></div>
+          <div class="relay-num"><span class="relay-num-label">blobs</span><span class="relay-num-value" data-blobs>—</span></div>
+          <div class="relay-num"><span class="relay-num-label">storage</span><span class="relay-num-value" data-storage>—</span></div>
+        </div>
+        <div class="relay-battery">
+          <div class="relay-battery-head"><span>battery</span><span data-battery-pct>—</span></div>
+          <div class="relay-battery-bar" role="img" aria-label="Relay battery level"><div class="relay-battery-fill" data-battery-fill></div></div>
+          <span class="relay-battery-sub" data-battery-sub></span>
+        </div>
+        <div class="relay-foot"><span data-foot></span></div>
+      </article>
+    </div>
+    <p class="relay-note">Two volunteer-run nodes, one fleet — every number is read live from each node's public <code>/api/v1/stats</code> route, and battery is the node's push-token budget, regenerated every minute.</p>
   </section>
 
   <footer>
@@ -1504,10 +1504,10 @@
       .from('.pron', { opacity: 0, x: -8, duration: .5 }, '-=.55')
       .from('.lede', { y: 16, opacity: 0, duration: .6 }, '-=.45')
       .from('.hero-actions .btn', { y: 12, opacity: 0, stagger: .08, duration: .45 }, '-=.35')
-      .from('.relays .section-head, .relay', { y: 16, opacity: 0, stagger: .05, duration: .45 }, '-=.25')
       .from('.features .section-head, .run-panel, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
       .from('.demo .section-head, .board-toolbar, .board-frame, .board-note', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.25')
       .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.18')
+      .from('.relays .section-head, .relay', { y: 16, opacity: 0, stagger: .05, duration: .45 }, '-=.25')
       .from('footer', { opacity: 0, duration: .4 }, '-=.4');
   };
 
