@@ -4,7 +4,7 @@ Rabta website
 Static demos for Rabta, served from rabta.space via GitHub Pages.
 
 Files
-  index.html   overview, capabilities, tug of war, relay stats, embedded canvas, visitors
+  index.html   overview, capabilities, tug of war, free public relay stats, embedded canvas, visitors
   shout.html   public signed shoutbox, last 24 shouts
   btc.html     bitcoin price tape, coingecko feed, signed ticks
   world.html   signed comments on a world map
