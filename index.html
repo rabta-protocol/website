@@ -123,52 +123,60 @@
   .btn-agent:active { transform: translateY(0) scale(.98); }
 
   /* relays */
-  .relay-grid { display: grid; gap: 1.15rem; }
-  @media (min-width: 46rem) { .relay-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .relay {
-    display: flex; flex-direction: column; gap: 1.1rem;
-    padding: 1.55rem 1.65rem;
+  .relay-table-wrap {
+    overflow-x: auto;
     border: 1px solid var(--line); border-radius: .95rem;
     background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
   }
-  .relay-top { display: flex; align-items: center; gap: .6rem; }
+  .relay-table { width: 100%; min-width: 56rem; border-collapse: collapse; font-family: var(--mono); }
+  .relay-table thead th {
+    padding: .75rem 1.1rem; border-bottom: 1px solid var(--line); background: #fafafa;
+    font-size: .625rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--subtle); text-align: left; white-space: nowrap;
+  }
+  .relay-table tbody th, .relay-table tbody td {
+    padding: 1.05rem 1.1rem; border-bottom: 1px solid var(--line);
+    text-align: left; vertical-align: middle; white-space: nowrap;
+  }
+  .relay-table tbody th { font-weight: 400; }
+  .relay-table tbody tr:last-child th, .relay-table tbody tr:last-child td { border-bottom: 0; }
+  .relay-table tbody tr { transition: background .2s ease; }
+  .relay-table tbody tr:hover { background: #fafafa; }
+  .relay-id { min-width: 12.5rem; }
+  .relay-id-line { display: flex; align-items: center; gap: .55rem; }
   .relay-dot {
     width: .5rem; height: .5rem; border-radius: 50%; background: #d4d4d8; flex: none;
     transition: background .3s ease, box-shadow .3s ease;
   }
   .relay.is-live .relay-dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(16, 185, 129, .15); }
   .relay.is-offline .relay-dot { background: #f87171; box-shadow: 0 0 0 3px rgba(239, 68, 68, .12); }
-  .relay-host { font-family: var(--mono); font-size: .9rem; font-weight: 600; letter-spacing: .01em; }
+  .relay-host { font-size: .9rem; font-weight: 600; letter-spacing: .01em; }
   .relay-version {
-    margin-left: auto; font-family: var(--mono); font-size: .6875rem; letter-spacing: .06em;
-    color: var(--subtle); border: 1px solid var(--line); border-radius: 999px; padding: .18rem .55rem;
+    display: inline-block; margin: .3rem 0 0 1.05rem;
+    font-size: .6875rem; letter-spacing: .06em; color: var(--subtle);
+    border: 1px solid var(--line); border-radius: 999px; padding: .18rem .55rem;
   }
-  .relay-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
-  .relay-num { display: flex; flex-direction: column; gap: .15rem; }
-  .relay-num-label { font-family: var(--mono); font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: var(--subtle); }
-  .relay-num-value {
-    font-family: var(--mono); font-size: 1.25rem; font-weight: 600; color: var(--ink);
-    font-variant-numeric: tabular-nums; white-space: nowrap;
+  .rt-num {
+    font-size: 1.05rem; font-weight: 600; color: var(--ink);
+    font-variant-numeric: tabular-nums;
   }
-  .relay-battery { display: flex; flex-direction: column; gap: .4rem; }
-  .relay-battery-head {
-    display: flex; justify-content: space-between;
-    font-family: var(--mono); font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle);
+  .relay.is-offline .rt-num { color: var(--subtle); }
+  .relay-battery { min-width: 11.5rem; }
+  .relay-battery-row { display: flex; align-items: center; gap: .6rem; }
+  .relay-battery-pct {
+    min-width: 2.9rem; text-align: right;
+    font-size: .6875rem; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums;
   }
-  .relay-battery-bar { height: .6rem; border-radius: 999px; background: #f4f4f5; border: 1px solid var(--line); overflow: hidden; }
+  .relay-battery-bar { flex: 1; height: .6rem; border-radius: 999px; background: #f4f4f5; border: 1px solid var(--line); overflow: hidden; }
   .relay-battery-fill {
-    height: 100%; width: 0; border-radius: 999px;
+    display: block; height: 100%; width: 0; border-radius: 999px;
     background: linear-gradient(90deg, #6ee7b7, var(--accent));
     transition: width .6s cubic-bezier(.2, .8, .2, 1), background .3s ease;
   }
   .relay.is-low .relay-battery-fill { background: linear-gradient(90deg, #fcd34d, #f59e0b); }
   .relay.is-critical .relay-battery-fill { background: linear-gradient(90deg, #fca5a5, #ef4444); }
-  .relay-battery-sub { font-family: var(--mono); font-size: .625rem; letter-spacing: .06em; color: var(--subtle); }
-  .relay-foot {
-    margin-top: auto; display: flex; justify-content: space-between; gap: .5rem;
-    font-family: var(--mono); font-size: .6875rem; letter-spacing: .05em; color: var(--subtle);
-    font-variant-numeric: tabular-nums;
-  }
+  .relay-battery-sub { display: block; margin-top: .35rem; font-size: .625rem; letter-spacing: .06em; color: var(--subtle); }
+  .rt-sub { font-size: .6875rem; color: var(--subtle); font-variant-numeric: tabular-nums; }
   .relay-note { margin: 1rem 0 0; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; color: var(--subtle); }
 
   /* sections */
@@ -602,43 +610,55 @@
       <h2 id="relays-heading">Free public relays</h2>
       <span>run by volunteers · live /stats</span>
     </div>
-    <div class="relay-grid">
-      <article class="relay" data-relay="https://1.rabta.space">
-        <div class="relay-top">
-          <span class="relay-dot" aria-hidden="true"></span>
-          <span class="relay-host">1.rabta.space</span>
-          <span class="relay-version" data-version>—</span>
-        </div>
-        <div class="relay-nums">
-          <div class="relay-num"><span class="relay-num-label">events</span><span class="relay-num-value" data-events>—</span></div>
-          <div class="relay-num"><span class="relay-num-label">blobs</span><span class="relay-num-value" data-blobs>—</span></div>
-          <div class="relay-num"><span class="relay-num-label">storage</span><span class="relay-num-value" data-storage>—</span></div>
-        </div>
-        <div class="relay-battery">
-          <div class="relay-battery-head"><span>battery</span><span data-battery-pct>—</span></div>
-          <div class="relay-battery-bar" role="img" aria-label="Relay battery level"><div class="relay-battery-fill" data-battery-fill></div></div>
-          <span class="relay-battery-sub" data-battery-sub></span>
-        </div>
-        <div class="relay-foot"><span data-foot></span></div>
-      </article>
-      <article class="relay" data-relay="https://rabta.t3nk.com">
-        <div class="relay-top">
-          <span class="relay-dot" aria-hidden="true"></span>
-          <span class="relay-host">rabta.t3nk.com</span>
-          <span class="relay-version" data-version>—</span>
-        </div>
-        <div class="relay-nums">
-          <div class="relay-num"><span class="relay-num-label">events</span><span class="relay-num-value" data-events>—</span></div>
-          <div class="relay-num"><span class="relay-num-label">blobs</span><span class="relay-num-value" data-blobs>—</span></div>
-          <div class="relay-num"><span class="relay-num-label">storage</span><span class="relay-num-value" data-storage>—</span></div>
-        </div>
-        <div class="relay-battery">
-          <div class="relay-battery-head"><span>battery</span><span data-battery-pct>—</span></div>
-          <div class="relay-battery-bar" role="img" aria-label="Relay battery level"><div class="relay-battery-fill" data-battery-fill></div></div>
-          <span class="relay-battery-sub" data-battery-sub></span>
-        </div>
-        <div class="relay-foot"><span data-foot></span></div>
-      </article>
+    <div class="relay-table-wrap">
+      <table class="relay-table">
+        <thead>
+          <tr>
+            <th scope="col">relay</th>
+            <th scope="col">events</th>
+            <th scope="col">blobs</th>
+            <th scope="col">storage</th>
+            <th scope="col">battery</th>
+            <th scope="col">uptime</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="relay" data-relay="https://1.rabta.space">
+            <th class="relay-id" scope="row">
+              <span class="relay-id-line"><span class="relay-dot" aria-hidden="true"></span><span class="relay-host">1.rabta.space</span></span>
+              <span class="relay-version" data-version>—</span>
+            </th>
+            <td class="rt-num" data-events>—</td>
+            <td class="rt-num" data-blobs>—</td>
+            <td class="rt-num" data-storage>—</td>
+            <td class="relay-battery">
+              <span class="relay-battery-row">
+                <span class="relay-battery-bar" role="img" aria-label="Relay battery level"><span class="relay-battery-fill" data-battery-fill></span></span>
+                <span class="relay-battery-pct" data-battery-pct>—</span>
+              </span>
+              <span class="relay-battery-sub" data-battery-sub></span>
+            </td>
+            <td class="rt-sub" data-foot>—</td>
+          </tr>
+          <tr class="relay" data-relay="https://rabta.t3nk.com">
+            <th class="relay-id" scope="row">
+              <span class="relay-id-line"><span class="relay-dot" aria-hidden="true"></span><span class="relay-host">rabta.t3nk.com</span></span>
+              <span class="relay-version" data-version>—</span>
+            </th>
+            <td class="rt-num" data-events>—</td>
+            <td class="rt-num" data-blobs>—</td>
+            <td class="rt-num" data-storage>—</td>
+            <td class="relay-battery">
+              <span class="relay-battery-row">
+                <span class="relay-battery-bar" role="img" aria-label="Relay battery level"><span class="relay-battery-fill" data-battery-fill></span></span>
+                <span class="relay-battery-pct" data-battery-pct>—</span>
+              </span>
+              <span class="relay-battery-sub" data-battery-sub></span>
+            </td>
+            <td class="rt-sub" data-foot>—</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <p class="relay-note">Two volunteer-run nodes, one fleet — every number is read live from each node's public <code>/api/v1/stats</code> route, and battery is the node's push-token budget, regenerated every minute.</p>
   </section>
@@ -1515,7 +1535,7 @@
       .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
       .from('.demo .section-head, .board-toolbar, .board-frame, .board-note', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.25')
       .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.18')
-      .from('.relays .section-head, .relay', { y: 16, opacity: 0, stagger: .05, duration: .45 }, '-=.25')
+      .from('.relays .section-head, .relay-table-wrap', { y: 16, opacity: 0, stagger: .05, duration: .45 }, '-=.25')
       .from('footer', { opacity: 0, duration: .4 }, '-=.4');
   };
 
