@@ -652,7 +652,7 @@
   <section class="section demo" id="demo" aria-labelledby="demo-heading">
     <div class="section-head">
       <h2 id="demo-heading">Live demo</h2>
-      <span>canvas · signed strokes · one relay</span>
+      <span>canvas · signed strokes · 3d ttl</span>
     </div>
     <div class="board-shell">
       <div class="board-toolbar">
@@ -671,7 +671,7 @@
         <canvas id="board" class="board" role="img" aria-label="Collaborative canvas — drag to paint a signed stroke"></canvas>
         <p class="board-hint" id="board-hint">Loading signed strokes…</p>
       </div>
-      <p class="board-note">Every stroke is an ed25519-signed event — drawn live by everyone viewing this page.</p>
+      <p class="board-note">Every stroke is an ed25519-signed event — drawn live by everyone viewing this page; strokes expire after 3 days, so the board clears itself.</p>
     </div>
   </section>
 
@@ -1176,7 +1176,7 @@
 
   /* ---------- live demo — collaborative canvas ---------- */
   const CANVAS_COLLECTION = 'canvas/rabta';
-  const CANVAS_TTL = 30 * 24 * 60 * 60;
+  const CANVAS_TTL = 3 * 24 * 60 * 60;
   const CANVAS_MAX_POINTS = 1200;
   const CANVAS_MAX_PAGES = 4;
   const CANVAS_COLORS = ['#ffffff', '#ff5c7a', '#ff8a3d', '#ffd166', '#7cffb2', '#3ddc97', '#38bdf8', '#6366f1', '#a855f7', '#f472b6'];
