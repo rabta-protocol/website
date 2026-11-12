@@ -235,7 +235,7 @@
   /* features — run your own relay */
   .run-panel {
     display: grid; gap: 1.25rem; align-items: center;
-    padding: 1.55rem 1.65rem; margin-bottom: 1.15rem;
+    padding: 1.55rem 1.65rem;
     border: 1px solid var(--line); border-radius: .95rem;
     background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
   }
@@ -418,10 +418,10 @@
     </div>
   </section>
 
-  <section class="section features" aria-labelledby="features-heading">
+  <section class="section install" id="install" aria-labelledby="install-heading">
     <div class="section-head">
-      <h2 id="features-heading">Capabilities</h2>
-      <span>six pillars · one command</span>
+      <h2 id="install-heading">Installation</h2>
+      <span>docker · one command · sync toggle</span>
     </div>
     <div class="run-panel">
       <div class="run-copy">
@@ -453,6 +453,13 @@
   <span class="c-f">-e</span> <span class="c-w">SYNC=</span><span class="c-v">https://1.rabta.space</span> <span class="c-d">\</span>
   <span class="c-v">ghcr.io/rabta-protocol/rabta:latest</span></code></pre>
       </div>
+    </div>
+  </section>
+
+  <section class="section features" aria-labelledby="features-heading">
+    <div class="section-head">
+      <h2 id="features-heading">Capabilities</h2>
+      <span>six core pillars</span>
     </div>
     <div class="feature-grid">
       <article class="feature" data-tone="emerald">
@@ -1504,7 +1511,8 @@
       .from('.pron', { opacity: 0, x: -8, duration: .5 }, '-=.55')
       .from('.lede', { y: 16, opacity: 0, duration: .6 }, '-=.45')
       .from('.hero-actions .btn', { y: 12, opacity: 0, stagger: .08, duration: .45 }, '-=.35')
-      .from('.features .section-head, .run-panel, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
+      .from('.install .section-head, .run-panel', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.3')
+      .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
       .from('.demo .section-head, .board-toolbar, .board-frame, .board-note', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.25')
       .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.18')
       .from('.relays .section-head, .relay', { y: 16, opacity: 0, stagger: .05, duration: .45 }, '-=.25')

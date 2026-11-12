@@ -4,7 +4,7 @@ Rabta website
 Static demos for Rabta, served from rabta.space via GitHub Pages.
 
 Files
-  index.html   overview, free public relay stats, capabilities, embedded canvas, visitors
+  index.html   overview, installation, capabilities, embedded canvas, visitors, free public relay stats
   llms.txt     agent-readable project summary
   og*.jpg      1200x630 social cards
 
