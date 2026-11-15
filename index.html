@@ -490,7 +490,7 @@
         <p>Every event is canonical JSON, hashed with SHA-256 and signed with Ed25519. Identity is a keypair — no accounts, no sessions, no passwords.</p>
         <div class="feature-foot">
           <div class="feature-pills">
-            <span class="feature-pill">RFC 8785</span>
+            <span class="feature-pill">Canonical JSON</span>
             <span class="feature-pill">Keypair identity</span>
             <span class="feature-pill">100 KB max</span>
           </div>
@@ -503,12 +503,12 @@
           <span class="feature-tag"><code>query</code></span>
         </div>
         <h3>Live queries</h3>
-        <p>Poll any collection through a typed JSON query. Filter by labels or owner, and page results with an opaque cursor.</p>
+        <p>Poll any collection over HTTP query parameters. Match exact collections or globs, filter by labels or owner, and page results with an opaque cursor.</p>
         <div class="feature-foot">
           <div class="feature-pills">
             <span class="feature-pill">Cursor paging</span>
-            <span class="feature-pill">10 labels</span>
-            <span class="feature-pill">HTTP poll</span>
+            <span class="feature-pill">Collection globs</span>
+            <span class="feature-pill">ETag 304</span>
           </div>
         </div>
       </article>
@@ -519,11 +519,11 @@
           <span class="feature-tag"><code>sha-256</code></span>
         </div>
         <h3>Content-addressed blobs</h3>
-        <p>Uploads return their SHA-256, dedupe automatically and expire with the signed events that claim them. Encrypt client-side and the relay only sees ciphertext.</p>
+        <p>Uploads are sealed <code>RABTA1</code> containers: they return their SHA-256, dedupe automatically and expire with the signed events that claim them. The relay only sees ciphertext.</p>
         <div class="feature-foot">
           <div class="feature-pills">
+            <span class="feature-pill">RABTA1</span>
             <span class="feature-pill">Auto dedup</span>
-            <span class="feature-pill">Event-pinned</span>
             <span class="feature-pill">Zero knowledge</span>
           </div>
         </div>
@@ -567,12 +567,12 @@
           <span class="feature-tag"><code>ring · sandbox</code></span>
         </div>
         <h3>Machine anti-spam</h3>
-        <p>Engineered to protect the host machine: a 64k-entry in-memory ring buffer drops spam in microseconds, backed by battery token accounting and isolated staging.</p>
+        <p>Engineered to protect the host machine: a 64k-entry in-memory ring buffer drops spam in microseconds, backed by a 1M-unit battery with read-only and sync-disabled tiers.</p>
         <div class="feature-foot">
           <div class="feature-pills">
             <span class="feature-pill">64k ring &lt;5µs</span>
-            <span class="feature-pill">Battery tokens</span>
-            <span class="feature-pill">10% staging</span>
+            <span class="feature-pill">1M units</span>
+            <span class="feature-pill">3 tiers</span>
           </div>
         </div>
       </article>
@@ -634,7 +634,7 @@
   <section class="section relays" aria-labelledby="relays-heading">
     <div class="section-head">
       <h2 id="relays-heading">Free public relays</h2>
-      <span>run by volunteers · live /stats</span>
+      <span>run by volunteers · live /node</span>
     </div>
     <div class="relay-table-wrap">
       <table class="relay-table">
@@ -686,11 +686,11 @@
         </tbody>
       </table>
     </div>
-    <p class="relay-note">Two volunteer-run nodes, one fleet — every number is read live from each node's public <code>/api/v1/stats</code> route, and battery is the node's push-token budget, regenerated every minute.</p>
+    <p class="relay-note">Two volunteer-run nodes, one fleet — every number is read live from each node's public <code>/api/v1/node</code> route, and battery is the node's write budget, regenerated every minute.</p>
   </section>
 
   <footer>
-    <span>ed25519 / polling / 7d ttl</span>
+    <span>ed25519 / polling / 300d max ttl</span>
     <div class="footer-links">
       <a href="llms.txt">llms.txt</a>
       <a href="https://github.com/rabta-protocol/rabta" target="_blank" rel="noreferrer">github</a>
@@ -733,12 +733,8 @@
   };
 
   const queryEvents = async (collection, limit) => {
-    const res = await fetch(RELAY + '/api/v1/events/query', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ collection, limit }),
-      cache: 'no-store'
-    });
+    const params = new URLSearchParams({ collection, limit: String(limit) });
+    const res = await fetch(RELAY + '/api/v1/events?' + params, { cache: 'no-store' });
     syncRelayClock(res);
     if (!res.ok) {
       const body = await res.json().catch(() => null);
@@ -1252,14 +1248,9 @@
     };
 
     const fetchPage = async (cursor) => {
-      const query = { collection: CANVAS_COLLECTION, limit: 100 };
-      if (cursor) query.cursor = cursor;
-      const res = await fetch(RELAY + '/api/v1/events/query', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(query),
-        cache: 'no-store'
-      });
+      const params = new URLSearchParams({ collection: CANVAS_COLLECTION, limit: '100' });
+      if (cursor) params.set('cursor', cursor);
+      const res = await fetch(RELAY + '/api/v1/events?' + params, { cache: 'no-store' });
       syncRelayClock(res);
       if (!res.ok) {
         const body = await res.json().catch(() => null);
@@ -1488,12 +1479,14 @@
       await Promise.all(cards.map(async (card) => {
         const pick = (name) => card.querySelector('[data-' + name + ']');
         try {
-          const res = await fetch(card.dataset.relay + '/api/v1/stats', { cache: 'no-store' });
+          const res = await fetch(card.dataset.relay + '/api/v1/node', { cache: 'no-store' });
           if (!res.ok) throw new Error('HTTP ' + res.status);
           const body = await res.json();
           const events = body && body.events ? Number(body.events.live) : NaN;
           const blobs = body && body.blobs ? Number(body.blobs.live) : NaN;
-          const used = (body && body.events ? Number(body.events.bytes) : 0) + (body && body.blobs ? Number(body.blobs.bytes) : 0);
+          const used = body && body.storage
+            ? Number(body.storage.used_bytes)
+            : (body && body.events ? Number(body.events.bytes) : 0) + (body && body.blobs ? Number(body.blobs.bytes) : 0);
           const battery = body && body.peers && body.peers.battery ? body.peers.battery : null;
           const evEl = pick('events');
           if (evEl) evEl.textContent = Number.isFinite(events) ? fmtCount(events) : '—';
@@ -1515,7 +1508,10 @@
           }
           if (subEl) {
             const regen = battery ? Number(battery.regen_per_min) : NaN;
-            subEl.textContent = Number.isFinite(regen) ? 'regen ' + fmtCount(regen) + '/min' : '';
+            const mode = battery && battery.mode ? String(battery.mode) : '';
+            subEl.textContent = Number.isFinite(regen)
+              ? 'regen ' + fmtCount(regen) + '/min' + (mode ? ' · ' + mode.replace('_', '-') : '')
+              : '';
           }
           const footEl = pick('foot');
           if (footEl) {

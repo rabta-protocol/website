@@ -1,18 +1,19 @@
 # Rabta
 
-> Self-hosted backend for signed events, live query polling, and content-addressed file uploads. One Rust binary, one SQLite file, one Docker container. No accounts, no database server, no cloud.
+> Self-hosted sync relay for signed events, live query polling and content-addressed encrypted blobs. One Rust binary, one SQLite file, one Docker container. No accounts, no database server, no cloud.
 
 ## Docs
 
-- [README](https://github.com/rabta-protocol/rabta/blob/main/README.md): What Rabta is, quick start, use cases, FAQ.
-- [API reference](https://github.com/rabta-protocol/rabta/blob/main/api.md): Every route, envelope format, signing, blob plane, limits, client examples.
-- [Compose stack](https://github.com/rabta-protocol/rabta/blob/main/compose.yml): Ready Portainer/Docker Compose example.
+- [README](https://github.com/rabta-protocol/rabta/blob/main/README.md): What Rabta is, quick start, configuration, FAQ.
+- [API reference](https://github.com/rabta-protocol/rabta/blob/main/api.md): Every route, envelope format, signing, blob plane, battery, limits, client examples.
+- [Ecosystem](https://github.com/rabta-protocol/awesome-rabta): Community relays and client libraries.
 
 ## Quick Start
 
 ```bash
-docker run -d --name rabta -p 3232:3232 -v rabta:/data --restart unless-stopped -e STORAGE_LIMIT=20GB ghcr.io/rabta-protocol/rabta:latest
+docker run -d --name rabta -p 127.0.0.1:3232:3232 -v rabta:/data --restart unless-stopped -e STORAGE_LIMIT=20GB ghcr.io/rabta-protocol/rabta:latest
 curl -s http://localhost:3232/api/v1/health
+curl -s http://localhost:3232/api/v1/node
 ```
 
 ## Key Facts
@@ -20,13 +21,16 @@ curl -s http://localhost:3232/api/v1/health
 - Language: Rust 2024, Axum, SQLite (rusqlite bundled)
 - Container: ghcr.io/rabta-protocol/rabta:latest, linux/amd64 + linux/arm64, port 3232
 - Auth: none. Ed25519 signed events. Put behind TLS + authenticated reverse proxy for public use.
-- Events: canonical JSON sorted keys, SHA-256 id, Ed25519 sig over digest
-- Event limits: 100KB, TTL 60s to 10 years, 10 labels, collection ^[a-z0-9/_-]{1,32}$
-- Blobs: PUT /api/v1/blobs returns SHA-256. Unclaimed expire after 6h. An event claims 0-8 hashes through its `blobs` array and extends their life to its own expiry.
-- Storage: STORAGE_LIMIT default 20GB covers envelopes + claimed blobs. Admission 90%, eviction target 85%. Events evicted first, largest footprint first. WHITELIST_PUBKEYS pins up to 64 keys from eviction.
-- Delivery: poll POST /api/v1/events/query. Filters for collection, labels and owner, newest first, opaque `next_cursor`, 1-100 rows per page.
-- API: POST /api/v1/events, POST /api/v1/events/query, GET /api/v1/events/{id}, GET /api/v1/events/{id}/size, PUT /api/v1/blobs, GET /api/v1/blobs/{hash}, GET /api/v1/health, GET /api/v1/stats, GET /api/v1/node
-- OpenAPI: GET /api/v1/openapi.json. Route index: GET /
+- Events: required envelope fields are `collection`, `created_at`, `expires_at`, `owner`, `labels`, `blobs` (always present, 0-8 hashes), `data` (JSON object) plus `id`/`sig`. Canonical JSON sorts keys and uses compact separators; `id` is SHA-256 of the canonical digest fields; `sig` is Ed25519 over the 32-byte digest.
+- Event limits: 100KB, TTL 60s to 300 days, 10 labels, collection `^[a-z0-9/_-]{1,32}$`.
+- Blobs: `PUT /api/v1/blobs` accepts only `RABTA1` client-encrypted containers (`"RABTA1" | ver(1)=1 | salt(16) | ciphertext | tag(16)`, min 64 bytes) and returns the SHA-256 of the bytes. Unclaimed blobs expire 6 hours after upload; an event claims 0-8 hashes through its `blobs` array and extends their deadline to its own expiry.
+- Queries: `GET /api/v1/events` with URL parameters. Filters for exact `collection` or `collection_glob`, comma-separated `labels` (AND), `owner`, `since`/`until`, `expires_since`/`expires_until`; newest first, opaque `next_cursor`, 1-100 rows per page, ETag/`If-None-Match` returns `304 Not Modified`.
+- Counts: `GET /api/v1/events/count` takes the same filters and returns `{"count":N}` uncached.
+- Storage: `STORAGE_LIMIT` default 20GB covers envelopes + blobs claimed by live events. Admission starts at the budget itself; eviction target is 85%. Unclaimed blobs are capped at 10% of the budget and 100 blobs. Events evict first, largest footprint first. `PROTECTION` JSON rules exempt matching records from pressure eviction; TTL still applies.
+- Battery: 1,000,000-unit tank. Event costs 1 unit, blob 100 units, pushed events ×10. `REGEN` sets units per minute. Tiers: `readwrite` ≥750,000, `sync_disabled` below that, `read_only` below 100.
+- Sync: `SYNC` takes up to 4 peer base URLs; peers exchange signed `POST /api/v1/sync` requests with range reconciliation.
+- API: POST /api/v1/events, GET /api/v1/events, GET /api/v1/events/count, GET /api/v1/events/{id}, GET /api/v1/events/{id}/size, POST /api/v1/sync, PUT /api/v1/blobs, GET /api/v1/blobs/{hash}, HEAD /api/v1/blobs/{hash}, GET /api/v1/health, GET /api/v1/node
+- OpenAPI: GET /api/v1/openapi.json. Route index: GET /api/v1/. GET / is the HTML status dashboard.
 - Not Nostr: no NIPs, no WebSocket, no kinds/tags/replaceable events.
 
 ## Optional
