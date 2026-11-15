@@ -489,33 +489,230 @@
     margin-top: 1.25rem; overflow: hidden;
     border: 1px solid var(--line); border-radius: .95rem;
     background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
   }
-  .visit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-  .visit {
-    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .85rem;
-    max-height: 4.75rem; padding: .85rem 1.25rem;
+
+  /* self node banner */
+  .visitor-self {
+    padding: 1.15rem 1.35rem;
+    background: #fafafb;
     border-bottom: 1px solid var(--line);
-    opacity: var(--o, 1);
-    transition: background .2s ease, opacity 1.4s ease, max-height 1.4s ease, padding 1.4s ease, transform 1.4s ease, border-color 1.4s ease;
+    display: flex; flex-direction: column; gap: .75rem;
   }
-  .visit:last-child { border-bottom: 0; }
-  .visit:hover { background: #fafafa; }
-  .visit-flag { font-size: 1.15rem; line-height: 1; }
-  .visit-place { display: flex; align-items: baseline; gap: .5rem; min-width: 0; }
-  .visit-city { font-size: 1rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .visit-country {
-    font-family: var(--mono); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--subtle);
+  .visitor-self-status {
+    display: flex; align-items: center; gap: .55rem;
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .visitor-self-tag { font-weight: 600; color: var(--ink); }
+  .visitor-self-badge {
+    margin-left: auto; padding: .2rem .55rem; border-radius: 999px;
+    background: rgba(14, 14, 16, .05); color: var(--subtle);
+    font-size: .6875rem; letter-spacing: .04em; text-transform: lowercase;
+  }
+  .visitor-self-badge.is-live { background: #ecfdf5; color: #047857; font-weight: 500; }
+  .visitor-self-grid {
+    display: grid; grid-template-columns: 1fr; gap: .75rem 1.5rem;
+  }
+  @media (min-width: 42rem) {
+    .visitor-self-grid { grid-template-columns: 1.1fr 1.4fr; align-items: center; }
+  }
+  .v-self-sub {
+    display: block; font-family: var(--mono); font-size: .625rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--subtle); margin-bottom: .2rem;
+  }
+  .visitor-self-loc {
+    font-size: .9375rem; font-weight: 500; color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .visit-ago { font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .visitor-self-key-bar {
+    display: flex; align-items: center; gap: .5rem;
+    background: #fff; border: 1px solid var(--line); border-radius: .45rem;
+    padding: .3rem .55rem; min-width: 0;
+  }
+  .visitor-self-key {
+    flex: 1; font-family: var(--mono); font-size: .75rem; color: #52525b;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .visitor-copy-btn {
+    appearance: none; -webkit-appearance: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line); border-radius: .35rem; background: #fafafa;
+    padding: .2rem .5rem; font-family: var(--mono); font-size: .6875rem;
+    color: var(--muted); cursor: pointer; transition: background .18s, color .18s, border-color .18s;
+  }
+  .visitor-copy-btn:hover { background: #f4f4f5; color: var(--ink); border-color: var(--line-strong); }
+  .visitor-copy-btn.is-copied { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+
+  /* table header */
+  .visit-table-head {
+    display: none;
+    padding: .65rem 1.35rem; background: #fff; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--subtle);
+  }
+  @media (min-width: 48rem) {
+    .visit-table-head {
+      display: grid;
+      grid-template-columns: minmax(13rem, 1.4fr) minmax(10rem, 1.2fr) 6.5rem 5.5rem 4.5rem;
+      align-items: center; gap: .75rem;
+    }
+  }
+
+  /* skeleton */
+  .visit-skeleton { display: flex; flex-direction: column; }
+  .visit-skeleton[hidden] { display: none; }
+  .v-skel-row {
+    display: grid; grid-template-columns: minmax(10rem, 1.4fr) minmax(8rem, 1.2fr) 5rem 4rem;
+    align-items: center; gap: .85rem; padding: 1rem 1.35rem; border-bottom: 1px solid var(--line);
+  }
+  .v-skel-cell {
+    height: .85rem; border-radius: .25rem;
+    background: linear-gradient(90deg, rgba(14, 14, 16, .04) 25%, rgba(14, 14, 16, .08) 50%, rgba(14, 14, 16, .04) 75%);
+    background-size: 200% 100%;
+    animation: v-shimmer 1.5s infinite;
+  }
+  .v-skel-loc { width: 65%; }
+  .v-skel-key { width: 80%; }
+  .v-skel-pill { width: 50%; }
+  .v-skel-time { width: 70%; }
+  @keyframes v-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* visit rows */
+  .visit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .visit {
+    border-bottom: 1px solid var(--line);
+    opacity: var(--o, 1);
+    transition: background .18s ease, opacity 1.2s ease, border-color .2s ease;
+  }
+  .visit:last-child { border-bottom: 0; }
+  .visit-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: .4rem; column-gap: .75rem;
+    align-items: center;
+    padding: .85rem 1.35rem;
+    cursor: pointer; user-select: none;
+    transition: background .18s ease;
+  }
+  .visit-summary:hover { background: #fafafa; }
+  .visit.is-open .visit-summary { background: #f8fafc; }
+
+  @media (min-width: 48rem) {
+    .visit-summary {
+      grid-template-columns: minmax(13rem, 1.4fr) minmax(10rem, 1.2fr) 6.5rem 5.5rem 4.5rem;
+      row-gap: 0;
+    }
+  }
+
+  .visit-place { display: flex; align-items: center; gap: .55rem; min-width: 0; }
+  .visit-flag { font-size: 1.15rem; line-height: 1; flex: none; }
+  .visit-city { font-size: .9375rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .visit-cc-pill {
+    font-family: var(--mono); font-size: .6875rem; font-weight: 600; letter-spacing: .04em;
+    padding: .15rem .38rem; border-radius: .25rem;
+    background: rgba(14, 14, 16, .05); color: var(--subtle); flex: none;
+  }
+
+  .visit-node { display: flex; align-items: center; min-width: 0; }
+  .visit-key {
+    font-family: var(--mono); font-size: .75rem; color: #52525b;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .visit-integrity { display: flex; align-items: center; }
+  .visit-sig-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .15rem .45rem; border-radius: 999px;
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .03em;
+    background: #ecfdf5; color: #047857; font-weight: 500;
+  }
+  .visit-sig-badge svg { width: .65rem; height: .65rem; flex: none; }
+
+  .visit-time {
+    font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle);
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 47.99rem) {
+    .visit-time { text-align: right; }
+    .visit-node { grid-column: 1 / 2; }
+    .visit-integrity { display: none; }
+  }
+
+  .visit-inspect-cell {
+    display: inline-flex; align-items: center; justify-content: flex-end; gap: .25rem;
+    font-family: var(--mono); font-size: .6875rem; color: var(--subtle);
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .visit-caret {
+    width: .625rem; height: .625rem; transition: transform .22s ease;
+  }
+  .visit.is-open .visit-caret { transform: rotate(180deg); }
+
+  /* visit drawer (expandable JSON inspect) */
+  .visit-drawer {
+    display: none;
+    padding: 0 1.35rem 1.15rem;
+    background: #f8fafc;
+    border-top: 1px dashed var(--line);
+    animation: v-drawer-in .25s ease;
+  }
+  .visit.is-open .visit-drawer { display: block; }
+  @keyframes v-drawer-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+  }
+  .visit-drawer-bar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem;
+    padding: .75rem 0 .55rem;
+  }
+  .visit-drawer-meta { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .v-tag {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .2rem .5rem; border-radius: .3rem;
+    background: rgba(14, 14, 16, .05); font-family: var(--mono); font-size: .6875rem; color: var(--muted);
+  }
+  .v-tag code { color: var(--ink); font-weight: 500; }
+  .visit-drawer-copy {
+    appearance: none; -webkit-appearance: none;
+    border: 1px solid var(--line); border-radius: .35rem; background: #fff;
+    padding: .25rem .6rem; font-family: var(--mono); font-size: .6875rem;
+    color: var(--muted); cursor: pointer; transition: background .18s, color .18s;
+  }
+  .visit-drawer-copy:hover { background: #f4f4f5; color: var(--ink); }
+  .visit-drawer-copy.is-copied { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+
+  .visit-drawer-code {
+    margin: .4rem 0 0; padding: .85rem 1.1rem;
+    border-radius: .6rem; background: #0e0e10;
+    overflow-x: auto; font-family: var(--mono); font-size: .75rem; line-height: 1.6;
+    color: #a1a1aa; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .4);
+  }
+  .visit-drawer-code code { display: block; white-space: pre; }
+
+  /* animations */
   .visit.entering { animation: visit-in .8s cubic-bezier(.16, 1, 0.3, 1) both; }
   .visit.leaving { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; border-color: transparent; transform: translateY(-4px); }
   @keyframes visit-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: var(--o, 1); transform: none; } }
+
   .visit-empty {
-    margin: 0; padding: 1.25rem 1.25rem;
-    font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle);
+    margin: 0; padding: 1.5rem 1.35rem; text-align: center;
+    font-family: var(--mono); font-size: .8125rem; letter-spacing: .04em; color: var(--subtle);
   }
   .visit-empty[hidden] { display: none; }
+
+  /* footer guarantees */
+  .visitor-foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.5rem;
+    padding: .9rem 1.35rem; background: #fafafb; border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .04em; color: var(--subtle);
+  }
+  .visitor-foot-pills { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
+  .v-foot-pill { display: inline-flex; align-items: center; gap: .35rem; }
+  .v-foot-pill svg { width: .65rem; height: .65rem; color: var(--accent); flex: none; }
+  .visitor-foot-count { text-transform: uppercase; letter-spacing: .08em; }
 
   footer {
     display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem;
@@ -784,14 +981,58 @@
     </div>
   </section>
 
-  <section class="visitors" aria-labelledby="visitors-heading">
+  <section class="section visitors" id="visitors" aria-labelledby="visitors-heading">
     <div class="section-head">
       <h2 id="visitors-heading">Recent visitors</h2>
-      <span>city-level · live · last 10</span>
+      <span>ed25519 signed · zero-cookie · 7d ttl</span>
     </div>
     <div class="visitor-board">
+      <div class="visitor-self" id="visitor-self">
+        <div class="visitor-self-status">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span class="visitor-self-tag">YOUR EPHEMERAL NODE</span>
+          <span class="visitor-self-badge" id="visitor-self-badge">initializing…</span>
+        </div>
+        <div class="visitor-self-grid">
+          <div class="visitor-self-loc-wrap">
+            <span class="v-self-sub">broadcast origin</span>
+            <span class="visitor-self-loc" id="visitor-self-loc">Locating city…</span>
+          </div>
+          <div class="visitor-self-key-wrap">
+            <span class="v-self-sub">ed25519 public key</span>
+            <div class="visitor-self-key-bar">
+              <code class="visitor-self-key" id="visitor-self-key" title="Browser-generated ed25519 public key">ed25519:—</code>
+              <button class="visitor-copy-btn" id="visitor-copy-self" type="button" aria-label="Copy your public key">copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="visit-table-head" aria-hidden="true">
+        <span class="vth-loc">Location</span>
+        <span class="vth-key">Signer / Pubkey</span>
+        <span class="vth-sig">Integrity</span>
+        <span class="vth-time">Seen</span>
+        <span class="vth-wire">Wire</span>
+      </div>
+
+      <div class="visit-skeleton" id="visit-skeleton" aria-hidden="true">
+        <div class="v-skel-row"><span class="v-skel-cell v-skel-loc"></span><span class="v-skel-cell v-skel-key"></span><span class="v-skel-cell v-skel-pill"></span><span class="v-skel-cell v-skel-time"></span></div>
+        <div class="v-skel-row"><span class="v-skel-cell v-skel-loc"></span><span class="v-skel-cell v-skel-key"></span><span class="v-skel-cell v-skel-pill"></span><span class="v-skel-cell v-skel-time"></span></div>
+        <div class="v-skel-row"><span class="v-skel-cell v-skel-loc"></span><span class="v-skel-cell v-skel-key"></span><span class="v-skel-cell v-skel-pill"></span><span class="v-skel-cell v-skel-time"></span></div>
+      </div>
+
       <ol class="visit-list" id="visit-list" aria-live="polite"></ol>
-      <p class="visit-empty" id="visit-empty">Locating the last ten visitors…</p>
+      <p class="visit-empty" id="visit-empty" hidden>Nobody here yet — your visit will be the first.</p>
+
+      <div class="visitor-foot">
+        <div class="visitor-foot-pills">
+          <span class="v-foot-pill"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg> Zero cookies or IP tracking</span>
+          <span class="v-foot-pill"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg> Detached Ed25519 signature</span>
+          <span class="v-foot-pill"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg> 7-day TTL relay purge</span>
+        </div>
+        <span class="visitor-foot-count" id="visitor-foot-count">live /api/v1/events</span>
+      </div>
     </div>
   </section>
 
@@ -874,6 +1115,7 @@
   const VISIT_TTL = 7 * 24 * 60 * 60;
   const STORE_IDENTITY = 'rabta.canvas.identity.v1';
   const STORE_VISIT_SENT = 'rabta.visit.sent.v1';
+  const STORE_VISIT_PLACE = 'rabta.visit.place.v1';
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const $ = (id) => document.getElementById(id);
@@ -973,6 +1215,81 @@
     return make(pair.secretKey, pair.publicKey);
   };
 
+  const hexToBytes = (hex) => {
+    if (typeof hex !== 'string' || hex.length % 2 !== 0) return null;
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < hex.length; i += 2) {
+      const byte = parseInt(hex.slice(i, i + 2), 16);
+      if (Number.isNaN(byte)) return null;
+      bytes[i / 2] = byte;
+    }
+    return bytes;
+  };
+
+  const ownerShort = (owner) => {
+    const raw = String(owner || '');
+    if (!raw.startsWith('ed25519:')) return raw ? raw.slice(0, 16) : 'unknown';
+    const hex = raw.slice(8);
+    return 'ed25519:' + hex.slice(0, 4) + '…' + hex.slice(-4);
+  };
+
+  const escapeHtml = (str) => String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
+  const colorizeJson = (obj) => {
+    const raw = JSON.stringify(obj, null, 2);
+    return raw.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+      let cls = 'c-w';
+      if (/^"/.test(match)) {
+        if (/:$/.test(match)) {
+          cls = 'c-f';
+          return '<span class="' + cls + '">' + escapeHtml(match.slice(0, -1)) + '</span><span class="c-d">:</span>';
+        }
+        cls = 'c-v';
+      } else if (/true|false/.test(match)) {
+        cls = 'c-v';
+      } else if (/null/.test(match)) {
+        cls = 'c-d';
+      }
+      return '<span class="' + cls + '">' + escapeHtml(match) + '</span>';
+    });
+  };
+
+  const copyTextToClipboard = async (text) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const verifyEventSignature = (event) => {
+    try {
+      if (!event || typeof event !== 'object' || !window.nacl || !nacl.sign || !nacl.sign.detached) return true;
+      const owner = String(event.owner || '');
+      if (!owner.startsWith('ed25519:')) return false;
+      const pubHex = owner.slice(8);
+      const pubBytes = hexToBytes(pubHex);
+      const sigBytes = hexToBytes(String(event.sig || ''));
+      const idBytes = hexToBytes(String(event.id || ''));
+      if (!pubBytes || !sigBytes || !idBytes || pubBytes.length !== 32 || sigBytes.length !== 64 || idBytes.length !== 32) return false;
+      return nacl.sign.detached.verify(idBytes, sigBytes, pubBytes);
+    } catch {
+      return false;
+    }
+  };
+
   const parseVisit = (event) => {
     if (!event || typeof event !== 'object') return null;
     const labels = Array.isArray(event.labels) ? event.labels : [];
@@ -984,7 +1301,16 @@
     const cc = String(data.cc || '').toUpperCase();
     const at = Number(event.created_at);
     if (!city || !country || !/^[A-Z]{2}$/.test(cc) || !Number.isFinite(at)) return null;
-    return { id: String(event.id || ''), city, country, cc, at };
+    return {
+      id: String(event.id || ''),
+      city,
+      country,
+      cc,
+      at,
+      owner: String(event.owner || ''),
+      sig: String(event.sig || ''),
+      raw: event
+    };
   };
 
   const flagFor = (cc) => {
@@ -1006,42 +1332,135 @@
     row.dataset.at = String(visit.at);
     row.dataset.id = visit.id;
 
+    const summary = document.createElement('div');
+    summary.className = 'visit-summary';
+    summary.setAttribute('role', 'button');
+    summary.setAttribute('tabindex', '0');
+    summary.setAttribute('aria-expanded', 'false');
+    summary.setAttribute('aria-label', 'Toggle inspection for visit from ' + visit.city + ', ' + visit.country);
+
+    const place = document.createElement('div');
+    place.className = 'visit-place';
     const flag = document.createElement('span');
     flag.className = 'visit-flag';
     flag.setAttribute('aria-hidden', 'true');
     flag.textContent = flagFor(visit.cc);
-
-    const place = document.createElement('span');
-    place.className = 'visit-place';
     const city = document.createElement('span');
     city.className = 'visit-city';
     city.textContent = visit.city;
-    const country = document.createElement('span');
-    country.className = 'visit-country';
-    country.textContent = visit.country;
-    place.append(city, country);
+    const cc = document.createElement('span');
+    cc.className = 'visit-cc-pill';
+    cc.textContent = visit.cc;
+    cc.title = visit.country;
+    place.append(flag, city, cc);
 
+    const node = document.createElement('div');
+    node.className = 'visit-node';
+    const key = document.createElement('code');
+    key.className = 'visit-key';
+    key.textContent = ownerShort(visit.owner);
+    key.title = visit.owner;
+    node.appendChild(key);
+
+    const integrity = document.createElement('div');
+    integrity.className = 'visit-integrity';
+    const sigBadge = document.createElement('span');
+    sigBadge.className = 'visit-sig-badge';
+    const isValid = verifyEventSignature(visit.raw);
+    sigBadge.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg><span>' + (isValid ? 'verified' : 'unverified') + '</span>';
+    integrity.appendChild(sigBadge);
+
+    const time = document.createElement('div');
+    time.className = 'visit-time';
     const when = document.createElement('span');
     when.className = 'visit-ago';
     when.textContent = secondsAgo(visit.at);
     when.title = new Date(visit.at * 1000).toLocaleString();
+    time.appendChild(when);
 
-    row.append(flag, place, when);
+    const inspect = document.createElement('div');
+    inspect.className = 'visit-inspect-cell';
+    inspect.innerHTML = '<span>inspect</span><svg class="visit-caret" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 4 5 6 7 4"/></svg>';
+
+    summary.append(place, node, integrity, time, inspect);
+
+    const drawer = document.createElement('div');
+    drawer.className = 'visit-drawer';
+    drawer.hidden = true;
+
+    const bar = document.createElement('div');
+    bar.className = 'visit-drawer-bar';
+    const meta = document.createElement('div');
+    meta.className = 'visit-drawer-meta';
+    meta.innerHTML = [
+      '<span class="v-tag">SHA-256: <code>' + escapeHtml(visit.id.slice(0, 10)) + '…</code></span>',
+      '<span class="v-tag">Sig: <code>' + escapeHtml((visit.sig || '').slice(0, 10)) + '…</code></span>',
+      '<span class="v-tag">TTL: <code>7d</code></span>'
+    ].join('');
+
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'visit-drawer-copy';
+    copyBtn.textContent = 'copy event';
+    copyBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const ok = await copyTextToClipboard(JSON.stringify(visit.raw, null, 2));
+      if (ok) {
+        copyBtn.textContent = 'copied!';
+        copyBtn.classList.add('is-copied');
+        setTimeout(() => {
+          copyBtn.textContent = 'copy event';
+          copyBtn.classList.remove('is-copied');
+        }, 1800);
+      }
+    });
+    bar.append(meta, copyBtn);
+
+    const pre = document.createElement('pre');
+    pre.className = 'visit-drawer-code';
+    pre.innerHTML = '<code>' + colorizeJson(visit.raw) + '</code>';
+
+    drawer.append(bar, pre);
+
+    const toggle = () => {
+      const open = row.classList.toggle('is-open');
+      drawer.hidden = !open;
+      summary.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+
+    summary.addEventListener('click', toggle);
+    summary.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
+      }
+    });
+
+    row.append(summary, drawer);
     return row;
   };
 
   const decorateVisits = () => {
     Array.from(visitList.children).forEach((row, i) => {
-      row.style.setProperty('--o', Math.max(.55, 1 - i * .05).toFixed(2));
+      row.style.setProperty('--o', Math.max(.6, 1 - i * .04).toFixed(2));
       const when = row.querySelector('.visit-ago');
       if (when) when.textContent = secondsAgo(Number(row.dataset.at));
     });
     const empty = visitList.children.length === 0;
-    if (empty) visitEmpty.textContent = 'Nobody here yet — you could be first.';
+    if (empty) visitEmpty.textContent = 'Nobody here yet — your visit will be the first.';
     visitEmpty.hidden = !empty;
   };
 
+  const updateVisitorCount = (count) => {
+    const countEl = $('visitor-foot-count');
+    if (countEl) {
+      countEl.textContent = count ? (count + ' live peer ' + (count === 1 ? 'event' : 'events')) : 'live /api/v1/events';
+    }
+  };
+
   const hydrateVisits = (events) => {
+    const skel = $('visit-skeleton');
+    if (skel) skel.hidden = true;
     const parsed = events.map(parseVisit).filter(Boolean).sort((a, b) => a.at - b.at).slice(-VISITS_LIMIT);
     visitList.textContent = '';
     visitSeen.clear();
@@ -1050,10 +1469,13 @@
       visitList.appendChild(makeVisitRow(visit));
     });
     decorateVisits();
+    updateVisitorCount(parsed.length);
   };
 
   const pushVisit = (visit, animate) => {
     if (!visit || !visit.id || visitSeen.has(visit.id)) return;
+    const skel = $('visit-skeleton');
+    if (skel) skel.hidden = true;
     visitSeen.add(visit.id);
     const row = makeVisitRow(visit);
     if (animate !== false) row.classList.add('entering');
@@ -1068,6 +1490,7 @@
       setTimeout(drop, 1600);
     }
     decorateVisits();
+    updateVisitorCount(Math.min(VISITS_LIMIT, rows.length));
   };
 
   const loadVisits = async () => {
@@ -1171,18 +1594,94 @@
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const body = await res.json().catch(() => null);
     writeText(STORE_VISIT_SENT, '1');
-    return { id: (body && body.id) || envelope.id, city: place.city, country: place.country, cc: place.cc, at };
+    return {
+      id: (body && body.id) || envelope.id,
+      city: place.city,
+      country: place.country,
+      cc: place.cc,
+      at,
+      owner: identity.owner,
+      sig: envelope.sig,
+      raw: envelope
+    };
+  };
+
+  const updateSelfPlace = (place, sent) => {
+    const locEl = $('visitor-self-loc');
+    const badgeEl = $('visitor-self-badge');
+    if (place && place.city) {
+      if (locEl) locEl.textContent = flagFor(place.cc) + ' ' + place.city + ', ' + place.country;
+      if (badgeEl) {
+        badgeEl.textContent = sent ? 'signed & broadcasted' : 'signed & active';
+        badgeEl.classList.add('is-live');
+      }
+    } else {
+      if (locEl) locEl.textContent = 'Private origin (location unavailable)';
+      if (badgeEl) {
+        badgeEl.textContent = 'identity ready';
+        badgeEl.classList.remove('is-live');
+      }
+    }
+  };
+
+  const initSelfCard = () => {
+    const keyEl = $('visitor-self-key');
+    const locEl = $('visitor-self-loc');
+    const badgeEl = $('visitor-self-badge');
+    const copyBtn = $('visitor-copy-self');
+    if (!keyEl) return;
+
+    try {
+      const identity = loadIdentity();
+      if (identity) {
+        keyEl.textContent = identity.owner;
+        keyEl.title = identity.owner;
+      }
+      if (copyBtn && identity) {
+        copyBtn.addEventListener('click', async () => {
+          const ok = await copyTextToClipboard(identity.owner);
+          if (ok) {
+            copyBtn.textContent = 'copied!';
+            copyBtn.classList.add('is-copied');
+            setTimeout(() => {
+              copyBtn.textContent = 'copy';
+              copyBtn.classList.remove('is-copied');
+            }, 1800);
+          }
+        });
+      }
+      let savedPlace = null;
+      try { savedPlace = JSON.parse(readText(STORE_VISIT_PLACE) || 'null'); } catch {}
+      if (savedPlace && savedPlace.city) {
+        if (locEl) locEl.textContent = flagFor(savedPlace.cc) + ' ' + savedPlace.city + ', ' + savedPlace.country;
+        if (badgeEl) {
+          badgeEl.textContent = 'signed & active';
+          badgeEl.classList.add('is-live');
+        }
+      }
+    } catch {}
   };
 
   const initVisitors = async () => {
     if (!visitList) return;
+    initSelfCard();
     try { await loadVisits(); } catch {}
     pollVisits();
     try {
       const place = await locate();
-      const own = place ? await postVisit(place) : null;
-      if (own) pushVisit(own, true);
-    } catch {}
+      if (place) {
+        writeText(STORE_VISIT_PLACE, JSON.stringify(place));
+        const own = await postVisit(place);
+        updateSelfPlace(place, !!own);
+        if (own) pushVisit(own, true);
+      } else {
+        updateSelfPlace(null, false);
+      }
+    } catch {
+      updateSelfPlace(null, false);
+    }
+    const skel = $('visit-skeleton');
+    if (skel) skel.hidden = true;
     setInterval(decorateVisits, 15000);
   };
 
