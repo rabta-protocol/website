@@ -16,6 +16,15 @@ curl -s http://localhost:3232/api/v1/health
 curl -s http://localhost:3232/api/v1/node
 ```
 
+## Public Node
+
+- Base URL: https://1.rabta.space
+- Free, volunteer-run, no accounts, best-effort. Events and blobs carry mandatory TTLs.
+- Dashboard: https://1.rabta.space/
+- Health: https://1.rabta.space/api/v1/health
+- Telemetry: https://1.rabta.space/api/v1/node
+- OpenAPI: https://1.rabta.space/api/v1/openapi.json
+
 ## Key Facts
 
 - Language: Rust 2024, Axum, SQLite (rusqlite bundled)
