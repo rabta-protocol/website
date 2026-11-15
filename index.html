@@ -719,6 +719,7 @@
   const visitEmpty = $('visit-empty');
   const visitSeen = new Set();
   let visitClockOffset = 0;
+  let visitEtag = null;
   let visitTimer = null;
   let visitBusy = false;
 
@@ -734,8 +735,13 @@
 
   const queryEvents = async (collection, limit) => {
     const params = new URLSearchParams({ collection, limit: String(limit) });
-    const res = await fetch(RELAY + '/api/v1/events?' + params, { cache: 'no-store' });
+    const headers = {};
+    if (visitEtag) headers['If-None-Match'] = visitEtag;
+    const res = await fetch(RELAY + '/api/v1/events?' + params, { cache: 'no-store', headers });
     syncRelayClock(res);
+    const etag = res.headers.get('etag');
+    if (etag) visitEtag = etag;
+    if (res.status === 304) return null;
     if (!res.ok) {
       const body = await res.json().catch(() => null);
       throw new Error((body && (body.code || body.error)) || ('HTTP ' + res.status));
@@ -887,6 +893,7 @@
 
   const loadVisits = async () => {
     const body = await queryEvents(VISITS_COLLECTION, 50);
+    if (!body) return;
     hydrateVisits(Array.isArray(body.events) ? body.events : []);
   };
 
@@ -903,6 +910,7 @@
     visitBusy = true;
     try {
       const body = await queryEvents(VISITS_COLLECTION, 50);
+      if (!body) return;
       const visits = (Array.isArray(body.events) ? body.events : [])
         .map(parseVisit)
         .filter(Boolean)
@@ -1102,6 +1110,7 @@
     const owners = new Set();
     const seen = new Set();
     const strokeKeys = new Set();
+    const pageEtags = new Map();
     const outbox = [];
     let posting = false;
     let color = '#3ddc97';
@@ -1250,12 +1259,23 @@
     const fetchPage = async (cursor) => {
       const params = new URLSearchParams({ collection: CANVAS_COLLECTION, limit: '100' });
       if (cursor) params.set('cursor', cursor);
-      const res = await fetch(RELAY + '/api/v1/events?' + params, { cache: 'no-store' });
+      const key = cursor || '';
+      const headers = {};
+      const etag = pageEtags.get(key);
+      if (etag) headers['If-None-Match'] = etag;
+      const res = await fetch(RELAY + '/api/v1/events?' + params, { cache: 'no-store', headers });
       syncRelayClock(res);
+      const nextEtag = res.headers.get('etag');
+      if (res.status === 304) {
+        if (nextEtag) pageEtags.set(key, nextEtag);
+        return { events: [], next_cursor: null };
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         throw new Error((body && (body.code || body.error)) || ('HTTP ' + res.status));
       }
+      if (!cursor) pageEtags.clear();
+      if (nextEtag) pageEtags.set(key, nextEtag);
       return res.json();
     };
 
