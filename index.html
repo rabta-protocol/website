@@ -482,237 +482,244 @@
   .board-note { margin: 0; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; color: var(--subtle); }
   @media (max-width: 30rem) { .board-meta { margin-left: 0; } }
 
-  /* visitors */
-  .visitors { margin-top: 5.5rem; padding-top: 2rem; border-top: 1px solid var(--line); }
-  @media (min-width: 48rem) { .visitors { margin-top: 7rem; padding-top: 2.5rem; } }
-  .visitor-board {
+  /* shoutbox */
+  .shoutbox { margin-top: 5.5rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+  @media (min-width: 48rem) { .shoutbox { margin-top: 7rem; padding-top: 2.5rem; } }
+  .shout-board {
     margin-top: 1.25rem; overflow: hidden;
     border: 1px solid var(--line); border-radius: .95rem;
     background: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
   }
 
-  /* self node banner */
-  .visitor-self {
-    padding: 1.15rem 1.35rem;
+  /* composer */
+  .shout-composer {
+    padding: 1.25rem 1.4rem;
     background: #fafafb;
     border-bottom: 1px solid var(--line);
     display: flex; flex-direction: column; gap: .75rem;
   }
-  .visitor-self-status {
-    display: flex; align-items: center; gap: .55rem;
-    font-family: var(--mono); font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase;
+  .shout-composer-head {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem;
   }
-  .visitor-self-tag { font-weight: 600; color: var(--ink); }
-  .visitor-self-badge {
-    margin-left: auto; padding: .2rem .55rem; border-radius: 999px;
+  .shout-identity-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .shout-identity-label { font-weight: 600; color: var(--ink); }
+  .shout-identity-key {
+    color: #52525b; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .75rem;
+  }
+  .shout-copy-key-btn {
+    appearance: none; -webkit-appearance: none;
+    padding: .15rem .45rem; border: 1px solid var(--line); border-radius: .35rem;
+    background: #fff; color: var(--muted); cursor: pointer;
+    font-family: var(--mono); font-size: .6875rem;
+    transition: background .18s, color .18s, border-color .18s;
+  }
+  .shout-copy-key-btn:hover { background: #f4f4f5; color: var(--ink); border-color: var(--line-strong); }
+  .shout-copy-key-btn.is-copied { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+
+  .shout-word-pill {
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .06em;
+    padding: .2rem .55rem; border-radius: 999px;
     background: rgba(14, 14, 16, .05); color: var(--subtle);
-    font-size: .6875rem; letter-spacing: .04em; text-transform: lowercase;
+    font-variant-numeric: tabular-nums; transition: background .2s, color .2s;
   }
-  .visitor-self-badge.is-live { background: #ecfdf5; color: #047857; font-weight: 500; }
-  .visitor-self-grid {
-    display: grid; grid-template-columns: 1fr; gap: .75rem 1.5rem;
+  .shout-word-pill.is-limit { background: #ecfdf5; color: #047857; font-weight: 600; }
+
+  .shout-form { display: flex; flex-direction: column; gap: .55rem; }
+  .shout-input-wrap { display: flex; gap: .55rem; align-items: stretch; }
+  .shout-input {
+    flex: 1; padding: .65rem .95rem; border: 1px solid var(--line); border-radius: .55rem;
+    background: #fff; font-family: var(--sans); font-size: .9375rem; color: var(--ink);
+    outline: none; transition: border-color .2s, box-shadow .2s;
   }
-  @media (min-width: 42rem) {
-    .visitor-self-grid { grid-template-columns: 1.1fr 1.4fr; align-items: center; }
-  }
-  .v-self-sub {
-    display: block; font-family: var(--mono); font-size: .625rem; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--subtle); margin-bottom: .2rem;
-  }
-  .visitor-self-loc {
-    font-size: .9375rem; font-weight: 500; color: var(--ink);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .visitor-self-key-bar {
-    display: flex; align-items: center; gap: .5rem;
-    background: #fff; border: 1px solid var(--line); border-radius: .45rem;
-    padding: .3rem .55rem; min-width: 0;
-  }
-  .visitor-self-key {
-    flex: 1; font-family: var(--mono); font-size: .75rem; color: #52525b;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .visitor-copy-btn {
+  .shout-input:focus { border-color: var(--ink); box-shadow: 0 0 0 2px rgba(14, 14, 16, .08); }
+  .btn-shout {
     appearance: none; -webkit-appearance: none;
     display: inline-flex; align-items: center; justify-content: center;
-    border: 1px solid var(--line); border-radius: .35rem; background: #fafafa;
-    padding: .2rem .5rem; font-family: var(--mono); font-size: .6875rem;
-    color: var(--muted); cursor: pointer; transition: background .18s, color .18s, border-color .18s;
+    padding: 0 1.25rem; border-radius: .55rem; border: 1px solid var(--ink);
+    background: var(--ink); color: #fff; font-family: var(--sans); font-size: .875rem; font-weight: 500;
+    cursor: pointer; transition: background .2s, transform .15s; white-space: nowrap;
   }
-  .visitor-copy-btn:hover { background: #f4f4f5; color: var(--ink); border-color: var(--line-strong); }
-  .visitor-copy-btn.is-copied { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+  .btn-shout:hover { background: #27272a; }
+  .btn-shout:active { transform: scale(.98); }
+  .btn-shout:disabled { opacity: .5; cursor: not-allowed; }
+
+  .shout-form-meta {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem;
+    font-family: var(--mono); font-size: .6875rem; letter-spacing: .04em; color: var(--subtle);
+  }
+  .shout-rule { color: var(--subtle); }
+  .shout-status { color: var(--subtle); font-variant-numeric: tabular-nums; }
+  .shout-status[data-error] { color: #dc2626; }
 
   /* table header */
-  .visit-table-head {
+  .shout-table-head {
     display: none;
-    padding: .65rem 1.35rem; background: #fff; border-bottom: 1px solid var(--line);
+    padding: .65rem 1.4rem; background: #fff; border-bottom: 1px solid var(--line);
     font-family: var(--mono); font-size: .6875rem; letter-spacing: .08em;
     text-transform: uppercase; color: var(--subtle);
   }
   @media (min-width: 48rem) {
-    .visit-table-head {
+    .shout-table-head {
       display: grid;
-      grid-template-columns: minmax(13rem, 1.4fr) minmax(10rem, 1.2fr) 6.5rem 5.5rem 4.5rem;
+      grid-template-columns: minmax(14rem, 1.8fr) minmax(10rem, 1.2fr) 6.5rem 5.5rem 4.5rem;
       align-items: center; gap: .75rem;
     }
   }
 
   /* skeleton */
-  .visit-skeleton { display: flex; flex-direction: column; }
-  .visit-skeleton[hidden] { display: none; }
-  .v-skel-row {
-    display: grid; grid-template-columns: minmax(10rem, 1.4fr) minmax(8rem, 1.2fr) 5rem 4rem;
-    align-items: center; gap: .85rem; padding: 1rem 1.35rem; border-bottom: 1px solid var(--line);
+  .shout-skeleton { display: flex; flex-direction: column; }
+  .shout-skeleton[hidden] { display: none; }
+  .s-skel-row {
+    display: grid; grid-template-columns: minmax(12rem, 1.8fr) minmax(8rem, 1.2fr) 5rem 4rem;
+    align-items: center; gap: .85rem; padding: 1rem 1.4rem; border-bottom: 1px solid var(--line);
   }
-  .v-skel-cell {
+  .s-skel-cell {
     height: .85rem; border-radius: .25rem;
     background: linear-gradient(90deg, rgba(14, 14, 16, .04) 25%, rgba(14, 14, 16, .08) 50%, rgba(14, 14, 16, .04) 75%);
     background-size: 200% 100%;
-    animation: v-shimmer 1.5s infinite;
+    animation: s-shimmer 1.5s infinite;
   }
-  .v-skel-loc { width: 65%; }
-  .v-skel-key { width: 80%; }
-  .v-skel-pill { width: 50%; }
-  .v-skel-time { width: 70%; }
-  @keyframes v-shimmer {
+  .s-skel-msg { width: 75%; }
+  .s-skel-key { width: 70%; }
+  .s-skel-pill { width: 50%; }
+  .s-skel-time { width: 65%; }
+  @keyframes s-shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
 
-  /* visit rows */
-  .visit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-  .visit {
+  /* shout rows */
+  .shout-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .shout {
     border-bottom: 1px solid var(--line);
     opacity: var(--o, 1);
     transition: background .18s ease, opacity 1.2s ease, border-color .2s ease;
   }
-  .visit:last-child { border-bottom: 0; }
-  .visit-summary {
+  .shout:last-child { border-bottom: 0; }
+  .shout-summary {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     row-gap: .4rem; column-gap: .75rem;
     align-items: center;
-    padding: .85rem 1.35rem;
+    padding: .95rem 1.4rem;
     cursor: pointer; user-select: none;
     transition: background .18s ease;
   }
-  .visit-summary:hover { background: #fafafa; }
-  .visit.is-open .visit-summary { background: #f8fafc; }
+  .shout-summary:hover { background: #fafafa; }
+  .shout.is-open .shout-summary { background: #f8fafc; }
 
   @media (min-width: 48rem) {
-    .visit-summary {
-      grid-template-columns: minmax(13rem, 1.4fr) minmax(10rem, 1.2fr) 6.5rem 5.5rem 4.5rem;
+    .shout-summary {
+      grid-template-columns: minmax(14rem, 1.8fr) minmax(10rem, 1.2fr) 6.5rem 5.5rem 4.5rem;
       row-gap: 0;
     }
   }
 
-  .visit-place { display: flex; align-items: center; gap: .55rem; min-width: 0; }
-  .visit-flag { font-size: 1.15rem; line-height: 1; flex: none; }
-  .visit-city { font-size: .9375rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .visit-cc-pill {
-    font-family: var(--mono); font-size: .6875rem; font-weight: 600; letter-spacing: .04em;
-    padding: .15rem .38rem; border-radius: .25rem;
-    background: rgba(14, 14, 16, .05); color: var(--subtle); flex: none;
+  .shout-msg {
+    font-size: .9375rem; font-weight: 500; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-
-  .visit-node { display: flex; align-items: center; min-width: 0; }
-  .visit-key {
+  .shout-node { display: flex; align-items: center; min-width: 0; }
+  .shout-key {
     font-family: var(--mono); font-size: .75rem; color: #52525b;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  .visit-integrity { display: flex; align-items: center; }
-  .visit-sig-badge {
+  .shout-integrity { display: flex; align-items: center; }
+  .shout-sig-badge {
     display: inline-flex; align-items: center; gap: .3rem;
     padding: .15rem .45rem; border-radius: 999px;
     font-family: var(--mono); font-size: .6875rem; letter-spacing: .03em;
     background: #ecfdf5; color: #047857; font-weight: 500;
   }
-  .visit-sig-badge svg { width: .65rem; height: .65rem; flex: none; }
+  .shout-sig-badge svg { width: .65rem; height: .65rem; flex: none; }
 
-  .visit-time {
+  .shout-time {
     font-family: var(--mono); font-size: .75rem; letter-spacing: .02em; color: var(--subtle);
     white-space: nowrap; font-variant-numeric: tabular-nums;
   }
   @media (max-width: 47.99rem) {
-    .visit-time { text-align: right; }
-    .visit-node { grid-column: 1 / 2; }
-    .visit-integrity { display: none; }
+    .shout-time { text-align: right; }
+    .shout-node { grid-column: 1 / 2; }
+    .shout-integrity { display: none; }
   }
 
-  .visit-inspect-cell {
+  .shout-inspect-cell {
     display: inline-flex; align-items: center; justify-content: flex-end; gap: .25rem;
     font-family: var(--mono); font-size: .6875rem; color: var(--subtle);
     letter-spacing: .04em; text-transform: uppercase;
   }
-  .visit-caret {
+  .shout-caret {
     width: .625rem; height: .625rem; transition: transform .22s ease;
   }
-  .visit.is-open .visit-caret { transform: rotate(180deg); }
+  .shout.is-open .shout-caret { transform: rotate(180deg); }
 
-  /* visit drawer (expandable JSON inspect) */
-  .visit-drawer {
+  /* shout drawer */
+  .shout-drawer {
     display: none;
-    padding: 0 1.35rem 1.15rem;
+    padding: 0 1.4rem 1.15rem;
     background: #f8fafc;
     border-top: 1px dashed var(--line);
-    animation: v-drawer-in .25s ease;
+    animation: s-drawer-in .25s ease;
   }
-  .visit.is-open .visit-drawer { display: block; }
-  @keyframes v-drawer-in {
+  .shout.is-open .shout-drawer { display: block; }
+  @keyframes s-drawer-in {
     from { opacity: 0; transform: translateY(-4px); }
     to { opacity: 1; transform: none; }
   }
-  .visit-drawer-bar {
+  .shout-drawer-bar {
     display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem;
     padding: .75rem 0 .55rem;
   }
-  .visit-drawer-meta { display: flex; flex-wrap: wrap; gap: .4rem; }
-  .v-tag {
+  .shout-drawer-meta { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .s-tag {
     display: inline-flex; align-items: center; gap: .3rem;
     padding: .2rem .5rem; border-radius: .3rem;
     background: rgba(14, 14, 16, .05); font-family: var(--mono); font-size: .6875rem; color: var(--muted);
   }
-  .v-tag code { color: var(--ink); font-weight: 500; }
-  .visit-drawer-copy {
+  .s-tag code { color: var(--ink); font-weight: 500; }
+  .shout-drawer-copy {
     appearance: none; -webkit-appearance: none;
     border: 1px solid var(--line); border-radius: .35rem; background: #fff;
     padding: .25rem .6rem; font-family: var(--mono); font-size: .6875rem;
     color: var(--muted); cursor: pointer; transition: background .18s, color .18s;
   }
-  .visit-drawer-copy:hover { background: #f4f4f5; color: var(--ink); }
-  .visit-drawer-copy.is-copied { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+  .shout-drawer-copy:hover { background: #f4f4f5; color: var(--ink); }
+  .shout-drawer-copy.is-copied { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
 
-  .visit-drawer-code {
+  .shout-drawer-code {
     margin: .4rem 0 0; padding: .85rem 1.1rem;
     border-radius: .6rem; background: #0e0e10;
     overflow-x: auto; font-family: var(--mono); font-size: .75rem; line-height: 1.6;
     color: #a1a1aa; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .4);
   }
-  .visit-drawer-code code { display: block; white-space: pre; }
+  .shout-drawer-code code { display: block; white-space: pre; }
 
   /* animations */
-  .visit.entering { animation: visit-in .8s cubic-bezier(.16, 1, 0.3, 1) both; }
-  .visit.leaving { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; border-color: transparent; transform: translateY(-4px); }
-  @keyframes visit-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: var(--o, 1); transform: none; } }
+  .shout.entering { animation: shout-in .8s cubic-bezier(.16, 1, 0.3, 1) both; }
+  .shout.leaving { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; border-color: transparent; transform: translateY(-4px); }
+  @keyframes shout-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: var(--o, 1); transform: none; } }
 
-  .visit-empty {
-    margin: 0; padding: 1.5rem 1.35rem; text-align: center;
+  .shout-empty {
+    margin: 0; padding: 1.75rem 1.4rem; text-align: center;
     font-family: var(--mono); font-size: .8125rem; letter-spacing: .04em; color: var(--subtle);
   }
-  .visit-empty[hidden] { display: none; }
+  .shout-empty[hidden] { display: none; }
 
   /* footer guarantees */
-  .visitor-foot {
+  .shout-foot {
     display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.5rem;
-    padding: .9rem 1.35rem; background: #fafafb; border-top: 1px solid var(--line);
+    padding: .9rem 1.4rem; background: #fafafb; border-top: 1px solid var(--line);
     font-family: var(--mono); font-size: .6875rem; letter-spacing: .04em; color: var(--subtle);
   }
-  .visitor-foot-pills { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
-  .v-foot-pill { display: inline-flex; align-items: center; gap: .35rem; }
-  .v-foot-pill svg { width: .65rem; height: .65rem; color: var(--accent); flex: none; }
-  .visitor-foot-count { text-transform: uppercase; letter-spacing: .08em; }
+  .shout-foot-pills { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
+  .s-foot-pill { display: inline-flex; align-items: center; gap: .35rem; }
+  .s-foot-pill svg { width: .65rem; height: .65rem; color: var(--accent); flex: none; }
+  .shout-foot-count { text-transform: uppercase; letter-spacing: .08em; }
 
   footer {
     display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem;
@@ -981,57 +988,70 @@
     </div>
   </section>
 
-  <section class="section visitors" id="visitors" aria-labelledby="visitors-heading">
+  <section class="section shoutbox" id="shoutbox" aria-labelledby="shoutbox-heading">
     <div class="section-head">
-      <h2 id="visitors-heading">Recent visitors</h2>
-      <span>ed25519 signed · zero-cookie · 7d ttl</span>
+      <h2 id="shoutbox-heading">Public shoutbox</h2>
+      <span>ed25519 signed · 5 words max · alphanumeric only</span>
     </div>
-    <div class="visitor-board">
-      <div class="visitor-self" id="visitor-self">
-        <div class="visitor-self-status">
-          <span class="live-dot" aria-hidden="true"></span>
-          <span class="visitor-self-tag">YOUR EPHEMERAL NODE</span>
-          <span class="visitor-self-badge" id="visitor-self-badge">initializing…</span>
-        </div>
-        <div class="visitor-self-grid">
-          <div class="visitor-self-loc-wrap">
-            <span class="v-self-sub">broadcast origin</span>
-            <span class="visitor-self-loc" id="visitor-self-loc">Locating city…</span>
+    <div class="shout-board">
+      <div class="shout-composer">
+        <div class="shout-composer-head">
+          <div class="shout-identity-badge">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span class="shout-identity-label">SIGNING KEY</span>
+            <code class="shout-identity-key" id="shout-self-key" title="Browser-generated ed25519 public key">ed25519:—</code>
+            <button class="shout-copy-key-btn" id="shout-copy-key" type="button" aria-label="Copy signing public key">copy</button>
           </div>
-          <div class="visitor-self-key-wrap">
-            <span class="v-self-sub">ed25519 public key</span>
-            <div class="visitor-self-key-bar">
-              <code class="visitor-self-key" id="visitor-self-key" title="Browser-generated ed25519 public key">ed25519:—</code>
-              <button class="visitor-copy-btn" id="visitor-copy-self" type="button" aria-label="Copy your public key">copy</button>
-            </div>
+          <span class="shout-word-pill" id="shout-word-pill">0/5 words</span>
+        </div>
+
+        <form class="shout-form" id="shout-form" autocomplete="off">
+          <div class="shout-input-wrap">
+            <input
+              type="text"
+              class="shout-input"
+              id="shout-input"
+              maxlength="60"
+              placeholder="Shout five words or less…"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              required
+            />
+            <button class="btn-shout" id="shout-send" type="submit">Shout</button>
           </div>
+          <div class="shout-form-meta">
+            <span class="shout-rule">Auto-sanitizes to alphanumeric only (A–Z, 0–9) · max 5 words</span>
+            <span class="shout-status" id="shout-status">ready</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="shout-table-head" aria-hidden="true">
+        <span class="sth-msg">Message (5 words max)</span>
+        <span class="sth-node">Signer Pubkey</span>
+        <span class="sth-sig">Integrity</span>
+        <span class="sth-time">Time</span>
+        <span class="sth-wire">Wire</span>
+      </div>
+
+      <div class="shout-skeleton" id="shout-skeleton" aria-hidden="true">
+        <div class="s-skel-row"><span class="s-skel-cell s-skel-msg"></span><span class="s-skel-cell s-skel-key"></span><span class="s-skel-cell s-skel-pill"></span><span class="s-skel-cell s-skel-time"></span></div>
+        <div class="s-skel-row"><span class="s-skel-cell s-skel-msg"></span><span class="s-skel-cell s-skel-key"></span><span class="s-skel-cell s-skel-pill"></span><span class="s-skel-cell s-skel-time"></span></div>
+        <div class="s-skel-row"><span class="s-skel-cell s-skel-msg"></span><span class="s-skel-cell s-skel-key"></span><span class="s-skel-cell s-skel-pill"></span><span class="s-skel-cell s-skel-time"></span></div>
+      </div>
+
+      <ol class="shout-list" id="shout-list" aria-live="polite"></ol>
+      <p class="shout-empty" id="shout-empty" hidden>No shouts yet — be the first to broadcast five words.</p>
+
+      <div class="shout-foot">
+        <div class="shout-foot-pills">
+          <span class="s-foot-pill"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg> No accounts or cookies</span>
+          <span class="s-foot-pill"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg> Detached Ed25519 signature</span>
+          <span class="s-foot-pill"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg> 7-day TTL relay purge</span>
         </div>
-      </div>
-
-      <div class="visit-table-head" aria-hidden="true">
-        <span class="vth-loc">Location</span>
-        <span class="vth-key">Signer / Pubkey</span>
-        <span class="vth-sig">Integrity</span>
-        <span class="vth-time">Seen</span>
-        <span class="vth-wire">Wire</span>
-      </div>
-
-      <div class="visit-skeleton" id="visit-skeleton" aria-hidden="true">
-        <div class="v-skel-row"><span class="v-skel-cell v-skel-loc"></span><span class="v-skel-cell v-skel-key"></span><span class="v-skel-cell v-skel-pill"></span><span class="v-skel-cell v-skel-time"></span></div>
-        <div class="v-skel-row"><span class="v-skel-cell v-skel-loc"></span><span class="v-skel-cell v-skel-key"></span><span class="v-skel-cell v-skel-pill"></span><span class="v-skel-cell v-skel-time"></span></div>
-        <div class="v-skel-row"><span class="v-skel-cell v-skel-loc"></span><span class="v-skel-cell v-skel-key"></span><span class="v-skel-cell v-skel-pill"></span><span class="v-skel-cell v-skel-time"></span></div>
-      </div>
-
-      <ol class="visit-list" id="visit-list" aria-live="polite"></ol>
-      <p class="visit-empty" id="visit-empty" hidden>Nobody here yet — your visit will be the first.</p>
-
-      <div class="visitor-foot">
-        <div class="visitor-foot-pills">
-          <span class="v-foot-pill"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg> Zero cookies or IP tracking</span>
-          <span class="v-foot-pill"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg> Detached Ed25519 signature</span>
-          <span class="v-foot-pill"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg> 7-day TTL relay purge</span>
-        </div>
-        <span class="visitor-foot-count" id="visitor-foot-count">live /api/v1/events</span>
+        <span class="shout-foot-count" id="shout-foot-count">live /api/v1/events</span>
       </div>
     </div>
   </section>
@@ -1110,12 +1130,10 @@
 (() => {
   const NODE_URL = 'https://1.rabta.space';
   const RELAY = NODE_URL;
-  const VISITS_COLLECTION = 'site/visits';
-  const VISITS_LIMIT = 10;
-  const VISIT_TTL = 7 * 24 * 60 * 60;
+  const SHOUTS_COLLECTION = 'site/shouts';
+  const SHOUTS_LIMIT = 24;
+  const SHOUT_TTL = 7 * 24 * 60 * 60;
   const STORE_IDENTITY = 'rabta.canvas.identity.v1';
-  const STORE_VISIT_SENT = 'rabta.visit.sent.v1';
-  const STORE_VISIT_PLACE = 'rabta.visit.place.v1';
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const $ = (id) => document.getElementById(id);
@@ -1135,33 +1153,41 @@
     return Math.floor(s / 60) + 'm';
   };
 
-  /* ---------- recent visitors ---------- */
-  const visitList = $('visit-list');
-  const visitEmpty = $('visit-empty');
-  const visitSeen = new Set();
-  let visitClockOffset = 0;
-  let visitEtag = null;
-  let visitTimer = null;
-  let visitBusy = false;
+  /* ---------- shoutbox ---------- */
+  const shoutList = $('shout-list');
+  const shoutEmpty = $('shout-empty');
+  const shoutInput = $('shout-input');
+  const shoutForm = $('shout-form');
+  const shoutSend = $('shout-send');
+  const shoutStatus = $('shout-status');
+  const shoutWordPill = $('shout-word-pill');
+  const shoutSkeleton = $('shout-skeleton');
+  const shoutSeen = new Set();
+  let shoutClockOffset = 0;
+  let shoutEtag = null;
+  let shoutTimer = null;
+  let shoutBusy = false;
+  let shoutPosting = false;
+  let shoutStatusTimer = null;
 
-  const visitNow = () => Math.floor(Date.now() / 1000) + visitClockOffset;
+  const shoutNow = () => Math.floor(Date.now() / 1000) + shoutClockOffset;
 
   const syncRelayClock = (response) => {
     const date = response && response.headers ? response.headers.get('date') : null;
     if (!date) return;
     const seconds = Math.floor(Date.parse(date) / 1000);
     if (!Number.isFinite(seconds)) return;
-    visitClockOffset = Math.min(86400, Math.max(-86400, seconds - Math.floor(Date.now() / 1000)));
+    shoutClockOffset = Math.min(86400, Math.max(-86400, seconds - Math.floor(Date.now() / 1000)));
   };
 
   const queryEvents = async (collection, limit) => {
     const params = new URLSearchParams({ collection, limit: String(limit) });
     const headers = {};
-    if (visitEtag) headers['If-None-Match'] = visitEtag;
+    if (shoutEtag) headers['If-None-Match'] = shoutEtag;
     const res = await fetch(RELAY + '/api/v1/events?' + params, { cache: 'no-store', headers });
     syncRelayClock(res);
     const etag = res.headers.get('etag');
-    if (etag) visitEtag = etag;
+    if (etag) shoutEtag = etag;
     if (res.status === 304) return null;
     if (!res.ok) {
       const body = await res.json().catch(() => null);
@@ -1290,35 +1316,42 @@
     }
   };
 
-  const parseVisit = (event) => {
-    if (!event || typeof event !== 'object') return null;
-    const labels = Array.isArray(event.labels) ? event.labels : [];
-    if (!labels.includes('visit')) return null;
-    const data = event.data || {};
-    if (data.v !== 1) return null;
-    const city = String(data.city || '').trim().slice(0, 64);
-    const country = String(data.country || '').trim().slice(0, 64);
-    const cc = String(data.cc || '').toUpperCase();
-    const at = Number(event.created_at);
-    if (!city || !country || !/^[A-Z]{2}$/.test(cc) || !Number.isFinite(at)) return null;
-    return {
-      id: String(event.id || ''),
-      city,
-      country,
-      cc,
-      at,
-      owner: String(event.owner || ''),
-      sig: String(event.sig || ''),
-      raw: event
-    };
+  // Sanitizes text: keeps alphabets and numbers only, max 5 words
+  const cleanShout = (raw) => {
+    if (typeof raw !== 'string') return '';
+    const stripped = raw.replace(/[^a-zA-Z0-9\s]/g, '');
+    const words = stripped.trim().split(/\s+/).filter(Boolean);
+    return words.slice(0, 5).join(' ');
   };
 
-  const flagFor = (cc) => {
-    try { return String.fromCodePoint(...[...cc].map((c) => 0x1F1E6 + c.charCodeAt(0) - 65)); } catch { return '🌍'; }
+  // Live input filter: strips non-alphanumeric, limits to 5 words, preserves single spaces
+  const sanitizeLiveShout = (val) => {
+    if (typeof val !== 'string') return '';
+    let s = val.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s{2,}/g, ' ').replace(/^\s+/, '');
+    const words = s.trim().split(/\s+/).filter(Boolean);
+    if (words.length > 5) {
+      return words.slice(0, 5).join(' ');
+    }
+    if (words.length === 5 && s.endsWith(' ')) {
+      return words.join(' ');
+    }
+    return s;
+  };
+
+  const getWordCount = (val) => {
+    if (!val) return 0;
+    return val.trim().split(/\s+/).filter(Boolean).length;
+  };
+
+  const setShoutStatus = (message, isError) => {
+    if (!shoutStatus) return;
+    shoutStatus.textContent = message;
+    if (isError) shoutStatus.dataset.error = '1';
+    else delete shoutStatus.dataset.error;
   };
 
   const secondsAgo = (at) => {
-    const s = Math.max(0, visitNow() - at);
+    const s = Math.max(0, shoutNow() - at);
     if (s < 10) return 'just now';
     if (s < 60) return s + 's ago';
     if (s < 3600) return Math.floor(s / 60) + 'm ago';
@@ -1326,85 +1359,93 @@
     return Math.floor(s / 86400) + 'd ago';
   };
 
-  const makeVisitRow = (visit) => {
+  const parseShout = (event) => {
+    if (!event || typeof event !== 'object') return null;
+    const labels = Array.isArray(event.labels) ? event.labels : [];
+    if (!labels.includes('shout')) return null;
+    const data = event.data || {};
+    if (data.v !== 1 || typeof data.text !== 'string') return null;
+    const text = cleanShout(data.text);
+    const at = Number(event.created_at);
+    if (!text || !Number.isFinite(at)) return null;
+    return {
+      id: String(event.id || ''),
+      text,
+      at,
+      owner: String(event.owner || ''),
+      sig: String(event.sig || ''),
+      raw: event
+    };
+  };
+
+  const makeShoutRow = (shout) => {
     const row = document.createElement('li');
-    row.className = 'visit';
-    row.dataset.at = String(visit.at);
-    row.dataset.id = visit.id;
+    row.className = 'shout';
+    row.dataset.at = String(shout.at);
+    row.dataset.id = shout.id;
 
     const summary = document.createElement('div');
-    summary.className = 'visit-summary';
+    summary.className = 'shout-summary';
     summary.setAttribute('role', 'button');
     summary.setAttribute('tabindex', '0');
     summary.setAttribute('aria-expanded', 'false');
-    summary.setAttribute('aria-label', 'Toggle inspection for visit from ' + visit.city + ', ' + visit.country);
+    summary.setAttribute('aria-label', 'Toggle inspection for shout: ' + shout.text);
 
-    const place = document.createElement('div');
-    place.className = 'visit-place';
-    const flag = document.createElement('span');
-    flag.className = 'visit-flag';
-    flag.setAttribute('aria-hidden', 'true');
-    flag.textContent = flagFor(visit.cc);
-    const city = document.createElement('span');
-    city.className = 'visit-city';
-    city.textContent = visit.city;
-    const cc = document.createElement('span');
-    cc.className = 'visit-cc-pill';
-    cc.textContent = visit.cc;
-    cc.title = visit.country;
-    place.append(flag, city, cc);
+    const msg = document.createElement('div');
+    msg.className = 'shout-msg';
+    msg.textContent = shout.text;
 
     const node = document.createElement('div');
-    node.className = 'visit-node';
+    node.className = 'shout-node';
     const key = document.createElement('code');
-    key.className = 'visit-key';
-    key.textContent = ownerShort(visit.owner);
-    key.title = visit.owner;
+    key.className = 'shout-key';
+    key.textContent = ownerShort(shout.owner);
+    key.title = shout.owner;
     node.appendChild(key);
 
     const integrity = document.createElement('div');
-    integrity.className = 'visit-integrity';
+    integrity.className = 'shout-integrity';
     const sigBadge = document.createElement('span');
-    sigBadge.className = 'visit-sig-badge';
-    const isValid = verifyEventSignature(visit.raw);
+    sigBadge.className = 'shout-sig-badge';
+    const isValid = verifyEventSignature(shout.raw);
     sigBadge.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.5 6 4.8 8.5 9.5 3.5"/></svg><span>' + (isValid ? 'verified' : 'unverified') + '</span>';
     integrity.appendChild(sigBadge);
 
     const time = document.createElement('div');
-    time.className = 'visit-time';
+    time.className = 'shout-time';
     const when = document.createElement('span');
-    when.className = 'visit-ago';
-    when.textContent = secondsAgo(visit.at);
-    when.title = new Date(visit.at * 1000).toLocaleString();
+    when.className = 'shout-ago';
+    when.textContent = secondsAgo(shout.at);
+    when.title = new Date(shout.at * 1000).toLocaleString();
     time.appendChild(when);
 
     const inspect = document.createElement('div');
-    inspect.className = 'visit-inspect-cell';
-    inspect.innerHTML = '<span>inspect</span><svg class="visit-caret" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 4 5 6 7 4"/></svg>';
+    inspect.className = 'shout-inspect-cell';
+    inspect.innerHTML = '<span>wire</span><svg class="shout-caret" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 4 5 6 7 4"/></svg>';
 
-    summary.append(place, node, integrity, time, inspect);
+    summary.append(msg, node, integrity, time, inspect);
 
     const drawer = document.createElement('div');
-    drawer.className = 'visit-drawer';
+    drawer.className = 'shout-drawer';
     drawer.hidden = true;
 
     const bar = document.createElement('div');
-    bar.className = 'visit-drawer-bar';
+    bar.className = 'shout-drawer-bar';
     const meta = document.createElement('div');
-    meta.className = 'visit-drawer-meta';
+    meta.className = 'shout-drawer-meta';
     meta.innerHTML = [
-      '<span class="v-tag">SHA-256: <code>' + escapeHtml(visit.id.slice(0, 10)) + '…</code></span>',
-      '<span class="v-tag">Sig: <code>' + escapeHtml((visit.sig || '').slice(0, 10)) + '…</code></span>',
-      '<span class="v-tag">TTL: <code>7d</code></span>'
+      '<span class="s-tag">SHA-256: <code>' + escapeHtml(shout.id.slice(0, 10)) + '…</code></span>',
+      '<span class="s-tag">Sig: <code>' + escapeHtml((shout.sig || '').slice(0, 10)) + '…</code></span>',
+      '<span class="s-tag">TTL: <code>7d</code></span>'
     ].join('');
 
     const copyBtn = document.createElement('button');
     copyBtn.type = 'button';
-    copyBtn.className = 'visit-drawer-copy';
+    copyBtn.className = 'shout-drawer-copy';
     copyBtn.textContent = 'copy event';
     copyBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const ok = await copyTextToClipboard(JSON.stringify(visit.raw, null, 2));
+      const ok = await copyTextToClipboard(JSON.stringify(shout.raw, null, 2));
       if (ok) {
         copyBtn.textContent = 'copied!';
         copyBtn.classList.add('is-copied');
@@ -1417,8 +1458,8 @@
     bar.append(meta, copyBtn);
 
     const pre = document.createElement('pre');
-    pre.className = 'visit-drawer-code';
-    pre.innerHTML = '<code>' + colorizeJson(visit.raw) + '</code>';
+    pre.className = 'shout-drawer-code';
+    pre.innerHTML = '<code>' + colorizeJson(shout.raw) + '</code>';
 
     drawer.append(bar, pre);
 
@@ -1440,48 +1481,46 @@
     return row;
   };
 
-  const decorateVisits = () => {
-    Array.from(visitList.children).forEach((row, i) => {
-      row.style.setProperty('--o', Math.max(.6, 1 - i * .04).toFixed(2));
-      const when = row.querySelector('.visit-ago');
+  const decorateShouts = () => {
+    Array.from(shoutList.children).forEach((row, i) => {
+      row.style.setProperty('--o', Math.max(.6, 1 - i * .035).toFixed(2));
+      const when = row.querySelector('.shout-ago');
       if (when) when.textContent = secondsAgo(Number(row.dataset.at));
     });
-    const empty = visitList.children.length === 0;
-    if (empty) visitEmpty.textContent = 'Nobody here yet — your visit will be the first.';
-    visitEmpty.hidden = !empty;
+    const empty = shoutList.children.length === 0;
+    if (empty) shoutEmpty.textContent = 'No shouts yet — be the first to broadcast five words.';
+    shoutEmpty.hidden = !empty;
   };
 
-  const updateVisitorCount = (count) => {
-    const countEl = $('visitor-foot-count');
+  const updateShoutCount = (count) => {
+    const countEl = $('shout-foot-count');
     if (countEl) {
-      countEl.textContent = count ? (count + ' live peer ' + (count === 1 ? 'event' : 'events')) : 'live /api/v1/events';
+      countEl.textContent = count ? (count + ' live ' + (count === 1 ? 'shout' : 'shouts')) : 'live /api/v1/events';
     }
   };
 
-  const hydrateVisits = (events) => {
-    const skel = $('visit-skeleton');
-    if (skel) skel.hidden = true;
-    const parsed = events.map(parseVisit).filter(Boolean).sort((a, b) => a.at - b.at).slice(-VISITS_LIMIT);
-    visitList.textContent = '';
-    visitSeen.clear();
-    parsed.reverse().forEach((visit) => {
-      visitSeen.add(visit.id);
-      visitList.appendChild(makeVisitRow(visit));
+  const hydrateShouts = (events) => {
+    if (shoutSkeleton) shoutSkeleton.hidden = true;
+    const parsed = events.map(parseShout).filter(Boolean).sort((a, b) => a.at - b.at).slice(-SHOUTS_LIMIT);
+    shoutList.textContent = '';
+    shoutSeen.clear();
+    parsed.reverse().forEach((shout) => {
+      shoutSeen.add(shout.id);
+      shoutList.appendChild(makeShoutRow(shout));
     });
-    decorateVisits();
-    updateVisitorCount(parsed.length);
+    decorateShouts();
+    updateShoutCount(parsed.length);
   };
 
-  const pushVisit = (visit, animate) => {
-    if (!visit || !visit.id || visitSeen.has(visit.id)) return;
-    const skel = $('visit-skeleton');
-    if (skel) skel.hidden = true;
-    visitSeen.add(visit.id);
-    const row = makeVisitRow(visit);
+  const pushShout = (shout, animate) => {
+    if (!shout || !shout.id || shoutSeen.has(shout.id)) return;
+    if (shoutSkeleton) shoutSkeleton.hidden = true;
+    shoutSeen.add(shout.id);
+    const row = makeShoutRow(shout);
     if (animate !== false) row.classList.add('entering');
-    visitList.prepend(row);
-    const rows = Array.from(visitList.children);
-    if (rows.length > VISITS_LIMIT) {
+    shoutList.prepend(row);
+    const rows = Array.from(shoutList.children);
+    if (rows.length > SHOUTS_LIMIT) {
       const old = rows[rows.length - 1];
       old.classList.remove('entering');
       old.classList.add('leaving');
@@ -1489,97 +1528,57 @@
       old.addEventListener('transitionend', drop, { once: true });
       setTimeout(drop, 1600);
     }
-    decorateVisits();
-    updateVisitorCount(Math.min(VISITS_LIMIT, rows.length));
+    decorateShouts();
+    updateShoutCount(Math.min(SHOUTS_LIMIT, rows.length));
   };
 
-  const loadVisits = async () => {
-    const body = await queryEvents(VISITS_COLLECTION, 50);
+  const loadShouts = async () => {
+    const body = await queryEvents(SHOUTS_COLLECTION, 50);
     if (!body) return;
-    hydrateVisits(Array.isArray(body.events) ? body.events : []);
+    hydrateShouts(Array.isArray(body.events) ? body.events : []);
   };
 
-  const pollVisits = async () => {
-    clearTimeout(visitTimer);
+  const pollShouts = async () => {
+    clearTimeout(shoutTimer);
     if (document.hidden) {
-      visitTimer = setTimeout(pollVisits, 5000);
+      shoutTimer = setTimeout(pollShouts, 5000);
       return;
     }
-    if (visitBusy) {
-      visitTimer = setTimeout(pollVisits, 1000);
+    if (shoutBusy) {
+      shoutTimer = setTimeout(pollShouts, 1000);
       return;
     }
-    visitBusy = true;
+    shoutBusy = true;
     try {
-      const body = await queryEvents(VISITS_COLLECTION, 50);
+      const body = await queryEvents(SHOUTS_COLLECTION, 50);
       if (!body) return;
-      const visits = (Array.isArray(body.events) ? body.events : [])
-        .map(parseVisit)
+      const shouts = (Array.isArray(body.events) ? body.events : [])
+        .map(parseShout)
         .filter(Boolean)
         .sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1));
-      visits.forEach((visit) => pushVisit(visit, true));
+      shouts.forEach((shout) => pushShout(shout, true));
+      setShoutStatus('ready', false);
     } catch {
+      setShoutStatus('relay polling', false);
     } finally {
-      visitBusy = false;
-      visitTimer = setTimeout(pollVisits, 5000);
+      shoutBusy = false;
+      shoutTimer = setTimeout(pollShouts, 5000);
     }
   };
 
-  const fetchGeo = async (url) => {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
-    try {
-      const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return await res.json();
-    } finally {
-      clearTimeout(timeout);
-    }
-  };
-
-  const countryName = (raw, cc) => {
-    if (typeof raw === 'string' && raw.trim().length > 2) return raw.trim();
-    try { return new Intl.DisplayNames(['en'], { type: 'region' }).of(cc) || cc; } catch { return cc; }
-  };
-
-  const normalizePlace = (raw) => {
-    if (!raw || typeof raw !== 'object' || raw.success === false) return null;
-    const city = typeof raw.city === 'string' ? raw.city.trim() : '';
-    const rawCountry = typeof raw.country === 'string' ? raw.country.trim() : '';
-    const cc = String(raw.country_code || (rawCountry.length === 2 ? rawCountry : '')).toUpperCase();
-    if (!city || !/^[A-Z]{2}$/.test(cc)) return null;
-    const country = countryName(raw.country_name || (rawCountry.length > 2 ? rawCountry : ''), cc);
-    return { city: city.slice(0, 64), country: country.slice(0, 64), cc };
-  };
-
-  const locate = async () => {
-    const sources = [
-      'https://ipwho.is/',
-      'https://ipapi.co/json/',
-      'https://ipinfo.io/json',
-      'https://get.geojs.io/v1/ip/geo.json'
-    ];
-    const tasks = sources.map((url) => fetchGeo(url).then((raw) => {
-      const place = normalizePlace(raw);
-      return place || Promise.reject(new Error('no city'));
-    }));
-    try { return await Promise.any(tasks); } catch { return null; }
-  };
-
-  const postVisit = async (place) => {
-    if (readText(STORE_VISIT_SENT)) return null;
+  const postShout = async (text) => {
     if (!window.nacl) throw new Error('nacl unavailable');
     if (!window.crypto || !window.crypto.subtle) throw new Error('crypto unavailable');
     const identity = loadIdentity();
-    const at = visitNow();
+    const at = shoutNow();
     const fields = {
-      collection: VISITS_COLLECTION,
+      collection: SHOUTS_COLLECTION,
       created_at: at,
-      expires_at: at + VISIT_TTL,
+      expires_at: at + SHOUT_TTL,
       owner: identity.owner,
-      labels: ['visit'],
+      labels: ['shout'],
       blobs: [],
-      data: { v: 1, city: place.city, country: place.country, cc: place.cc }
+      data: { v: 1, text }
     };
     const bytes = new TextEncoder().encode(canonical(fields));
     const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
@@ -1591,14 +1590,14 @@
       body: JSON.stringify(envelope)
     });
     syncRelayClock(res);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => null);
+      throw new Error((errBody && (errBody.code || errBody.error)) || ('HTTP ' + res.status));
+    }
     const body = await res.json().catch(() => null);
-    writeText(STORE_VISIT_SENT, '1');
     return {
       id: (body && body.id) || envelope.id,
-      city: place.city,
-      country: place.country,
-      cc: place.cc,
+      text,
       at,
       owner: identity.owner,
       sig: envelope.sig,
@@ -1606,34 +1605,14 @@
     };
   };
 
-  const updateSelfPlace = (place, sent) => {
-    const locEl = $('visitor-self-loc');
-    const badgeEl = $('visitor-self-badge');
-    if (place && place.city) {
-      if (locEl) locEl.textContent = flagFor(place.cc) + ' ' + place.city + ', ' + place.country;
-      if (badgeEl) {
-        badgeEl.textContent = sent ? 'signed & broadcasted' : 'signed & active';
-        badgeEl.classList.add('is-live');
-      }
-    } else {
-      if (locEl) locEl.textContent = 'Private origin (location unavailable)';
-      if (badgeEl) {
-        badgeEl.textContent = 'identity ready';
-        badgeEl.classList.remove('is-live');
-      }
-    }
-  };
-
-  const initSelfCard = () => {
-    const keyEl = $('visitor-self-key');
-    const locEl = $('visitor-self-loc');
-    const badgeEl = $('visitor-self-badge');
-    const copyBtn = $('visitor-copy-self');
-    if (!keyEl) return;
+  const initShoutbox = async () => {
+    if (!shoutList) return;
+    const keyEl = $('shout-self-key');
+    const copyBtn = $('shout-copy-key');
 
     try {
       const identity = loadIdentity();
-      if (identity) {
+      if (identity && keyEl) {
         keyEl.textContent = identity.owner;
         keyEl.title = identity.owner;
       }
@@ -1650,43 +1629,69 @@
           }
         });
       }
-      let savedPlace = null;
-      try { savedPlace = JSON.parse(readText(STORE_VISIT_PLACE) || 'null'); } catch {}
-      if (savedPlace && savedPlace.city) {
-        if (locEl) locEl.textContent = flagFor(savedPlace.cc) + ' ' + savedPlace.city + ', ' + savedPlace.country;
-        if (badgeEl) {
-          badgeEl.textContent = 'signed & active';
-          badgeEl.classList.add('is-live');
-        }
-      }
     } catch {}
-  };
 
-  const initVisitors = async () => {
-    if (!visitList) return;
-    initSelfCard();
-    try { await loadVisits(); } catch {}
-    pollVisits();
-    try {
-      const place = await locate();
-      if (place) {
-        writeText(STORE_VISIT_PLACE, JSON.stringify(place));
-        const own = await postVisit(place);
-        updateSelfPlace(place, !!own);
-        if (own) pushVisit(own, true);
-      } else {
-        updateSelfPlace(null, false);
-      }
-    } catch {
-      updateSelfPlace(null, false);
+    if (shoutInput) {
+      shoutInput.addEventListener('input', () => {
+        const cleaned = sanitizeLiveShout(shoutInput.value);
+        if (cleaned !== shoutInput.value) {
+          shoutInput.value = cleaned;
+        }
+        const count = getWordCount(shoutInput.value);
+        if (shoutWordPill) {
+          shoutWordPill.textContent = count + '/5 words';
+          shoutWordPill.classList.toggle('is-limit', count === 5);
+        }
+      });
     }
-    const skel = $('visit-skeleton');
-    if (skel) skel.hidden = true;
-    setInterval(decorateVisits, 15000);
+
+    if (shoutForm) {
+      shoutForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (shoutPosting || !shoutInput) return;
+        const text = cleanShout(shoutInput.value);
+        if (!text) {
+          shoutInput.focus();
+          return;
+        }
+        shoutPosting = true;
+        if (shoutSend) {
+          shoutSend.disabled = true;
+          shoutSend.textContent = 'Signing…';
+        }
+        setShoutStatus('Signing detached Ed25519…', false);
+        try {
+          const shout = await postShout(text);
+          pushShout(shout, true);
+          shoutInput.value = '';
+          if (shoutWordPill) {
+            shoutWordPill.textContent = '0/5 words';
+            shoutWordPill.classList.remove('is-limit');
+          }
+          setShoutStatus('Live on relay', false);
+          clearTimeout(shoutStatusTimer);
+          shoutStatusTimer = setTimeout(() => setShoutStatus('ready', false), 2500);
+        } catch (err) {
+          setShoutStatus('Failed: ' + (err.message || 'relay error'), true);
+        } finally {
+          shoutPosting = false;
+          if (shoutSend) {
+            shoutSend.disabled = false;
+            shoutSend.textContent = 'Shout';
+          }
+          shoutInput.focus();
+        }
+      });
+    }
+
+    try { await loadShouts(); } catch {}
+    pollShouts();
+    if (shoutSkeleton) shoutSkeleton.hidden = true;
+    setInterval(decorateShouts, 15000);
   };
 
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) pollVisits();
+    if (!document.hidden) pollShouts();
   });
 
   /* ---------- run your own relay ---------- */
@@ -2344,13 +2349,13 @@
       .from('.install .section-head, .run-panel', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.3')
       .from('.features .section-head, .feature', { y: 20, opacity: 0, stagger: .04, duration: .5 }, '-=.3')
       .from('.demo .section-head, .board-toolbar, .board-frame, .board-note', { y: 16, opacity: 0, stagger: .05, duration: .5 }, '-=.25')
-      .from('.visitors .section-head, .visitor-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.18')
+      .from('.shoutbox .section-head, .shout-board', { y: 18, opacity: 0, stagger: .06, duration: .55 }, '-=.18')
       .from('.relays .section-head, .relay-table-wrap', { y: 16, opacity: 0, stagger: .05, duration: .45 }, '-=.25')
       .from('footer', { opacity: 0, duration: .4 }, '-=.4');
   };
 
   const boot = () => {
-    const start = () => { initRunPanel(); hero(); initNodeShowcase(); initVisitors(); initRelays(); initCanvasDemo(); };
+    const start = () => { initRunPanel(); hero(); initNodeShowcase(); initShoutbox(); initRelays(); initCanvasDemo(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };
