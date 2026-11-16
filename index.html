@@ -179,119 +179,6 @@
   .rt-sub { font-size: .6875rem; color: var(--subtle); font-variant-numeric: tabular-nums; }
   .relay-note { margin: 1rem 0 0; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; color: var(--subtle); }
 
-  /* free public node */
-  .node-panel {
-    display: grid; gap: 1.25rem; align-items: stretch;
-    padding: 1.55rem 1.65rem;
-    border: 1px solid var(--line); border-radius: .95rem;
-    background: linear-gradient(180deg, #fff, #fafafa);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
-  }
-  @media (min-width: 56rem) { .node-panel { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); } }
-  .node-title { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem .65rem; }
-  .node-title h3 {
-    margin: 0; font-size: clamp(1.3rem, 2.2vw, 1.55rem); font-weight: 600;
-    letter-spacing: -.03em; line-height: 1.2;
-  }
-  .node-title h3 a { color: inherit; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .2s ease; }
-  .node-title h3 a:hover { border-color: var(--line-strong); }
-  .node-dot {
-    width: .55rem; height: .55rem; border-radius: 50%; background: #d4d4d8; flex: none;
-    transition: background .3s ease, box-shadow .3s ease;
-  }
-  .node-showcase.is-live .node-dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(16, 185, 129, .15); }
-  .node-showcase.is-offline .node-dot { background: #f87171; box-shadow: 0 0 0 3px rgba(239, 68, 68, .12); }
-  .node-status {
-    padding: .2rem .5rem; border: 1px solid var(--line); border-radius: 999px;
-    font-family: var(--mono); font-size: .625rem; letter-spacing: .08em; text-transform: uppercase;
-    color: var(--subtle); white-space: nowrap;
-  }
-  .node-showcase.is-live .node-status { color: #047857; border-color: rgba(16, 185, 129, .3); background: #ecfdf5; }
-  .node-showcase.is-offline .node-status { color: #b91c1c; border-color: rgba(239, 68, 68, .3); background: #fef2f2; }
-  .node-copy > p { margin: .8rem 0 0; color: var(--muted); font-size: .9375rem; line-height: 1.55; }
-  .node-copy > p code {
-    padding: .1rem .32rem; border-radius: .3rem;
-    background: rgba(14, 14, 16, .04); font-family: var(--mono); font-size: .8125em; color: var(--ink);
-  }
-  .node-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin-top: 1.15rem; }
-  .node-copy-btn {
-    padding: .55rem .9rem; border: 1px solid var(--line-strong); border-radius: 999px;
-    background: #fff; cursor: pointer;
-    font-family: var(--mono); font-size: .6875rem; letter-spacing: .05em; color: var(--ink);
-    transition: border-color .2s ease, background .2s ease, color .2s ease;
-  }
-  .node-copy-btn:hover { border-color: var(--ink); background: #fafafa; }
-  .node-copy-btn.is-copied { border-color: rgba(16, 185, 129, .45); background: #ecfdf5; color: #047857; }
-  .node-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.1rem; margin: 1.3rem 0 0; }
-  .node-facts dt {
-    font-family: var(--mono); font-size: .625rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle);
-  }
-  .node-facts dd {
-    margin: .2rem 0 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font-family: var(--mono); font-size: .75rem; color: var(--ink); font-variant-numeric: tabular-nums;
-  }
-  .node-endpoints { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: 1.3rem; }
-  .node-endpoints a { text-decoration: none; }
-  .node-endpoints code {
-    padding: .2rem .48rem; border-radius: .35rem;
-    background: rgba(14, 14, 16, .04); color: var(--subtle);
-    font-family: var(--mono); font-size: .6875rem; white-space: nowrap;
-    transition: background .2s ease, color .2s ease;
-  }
-  .node-endpoints a:hover code { background: rgba(14, 14, 16, .07); color: var(--ink); }
-  .node-copy > p.node-note { margin: .8rem 0 0; font-family: var(--mono); font-size: .6875rem; letter-spacing: .03em; color: var(--subtle); }
-  .node-live {
-    display: flex; flex-direction: column;
-    padding: 1.15rem 1.2rem; border-radius: .8rem;
-    background: #0e0e10; color: #e4e4e7; font-family: var(--mono);
-    box-shadow: 0 10px 24px -16px rgba(0, 0, 0, .35);
-  }
-  .node-live-head {
-    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
-    font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: #71717a;
-  }
-  .node-live-head span:last-child { color: #52525b; letter-spacing: .04em; text-transform: none; }
-  .node-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; margin-top: 1rem; }
-  .node-metrics > div {
-    padding: .65rem .7rem; border: 1px solid rgba(255, 255, 255, .08); border-radius: .6rem;
-    background: rgba(255, 255, 255, .02); min-width: 0;
-  }
-  .node-metrics span { display: block; font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: #71717a; }
-  .node-metrics b {
-    display: block; margin-top: .2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font-size: 1rem; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums;
-  }
-  .node-metrics small {
-    display: block; margin-top: .12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font-size: .625rem; letter-spacing: .02em; color: #71717a; font-variant-numeric: tabular-nums;
-  }
-  .node-battery { margin-top: 1rem; }
-  .node-battery-row {
-    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
-    font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: #71717a;
-  }
-  .node-battery-row b { color: #fff; font-size: .6875rem; letter-spacing: .04em; text-transform: none; }
-  .node-battery-bar {
-    display: block; height: .55rem; margin-top: .45rem;
-    border: 1px solid rgba(255, 255, 255, .1); border-radius: 999px;
-    background: rgba(255, 255, 255, .04); overflow: hidden;
-  }
-  .node-battery-fill {
-    display: block; width: 0; height: 100%; border-radius: 999px;
-    background: linear-gradient(90deg, #6ee7b7, var(--accent));
-    transition: width .6s cubic-bezier(.2, .8, .2, 1), background .3s ease;
-  }
-  .node-showcase.is-low .node-battery-fill { background: linear-gradient(90deg, #fcd34d, #f59e0b); }
-  .node-showcase.is-critical .node-battery-fill { background: linear-gradient(90deg, #fca5a5, #ef4444); }
-  .node-battery-sub { display: block; margin-top: .4rem; font-size: .625rem; letter-spacing: .03em; color: #71717a; }
-  .node-console { margin-top: auto; padding-top: 1rem; }
-  .node-console code {
-    display: block; padding: .55rem .7rem; border: 1px solid rgba(255, 255, 255, .08); border-radius: .55rem;
-    background: rgba(255, 255, 255, .03); color: #6ee7b7;
-    font-family: var(--mono); font-size: .6875rem; white-space: nowrap; overflow-x: auto;
-  }
-  @media (max-width: 26rem) { .node-facts { grid-template-columns: 1fr; } }
-
   /* sections */
   .section { margin-top: 5.5rem; }
   @media (min-width: 48rem) { .section { margin-top: 7rem; } }
@@ -593,24 +480,35 @@
   }
 
   /* shout rows */
-  .shout-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-  .shout {
-    border-bottom: 1px solid var(--line);
-    opacity: var(--o, 1);
-    transition: background .18s ease, opacity 1.2s ease, border-color .2s ease;
+  .shout-list {
+    list-style: none; margin: 0; padding: .35rem .5rem .6rem;
+    display: flex; flex-direction: column; gap: .1rem;
+    max-height: 31rem; overflow: hidden;
   }
+  .shout-list.is-fading {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  }
+  .shout {
+    border-bottom: 0; border-radius: .7rem;
+    opacity: var(--o, 1);
+    transition: background .18s ease, opacity .45s ease, border-color .2s ease;
+  }
+  .shout:hover { opacity: 1; }
   .shout:last-child { border-bottom: 0; }
+  .shout.is-open { background: #f8fafc; }
   .shout-summary {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     row-gap: .4rem; column-gap: .75rem;
     align-items: center;
-    padding: .95rem 1.4rem;
+    padding: .9rem;
+    border-radius: .7rem;
     cursor: pointer; user-select: none;
     transition: background .18s ease;
   }
-  .shout-summary:hover { background: #fafafa; }
-  .shout.is-open .shout-summary { background: #f8fafc; }
+  .shout-summary:hover { background: #f6f6f7; }
+  .shout.is-open .shout-summary { background: transparent; }
 
   @media (min-width: 48rem) {
     .shout-summary {
@@ -661,7 +559,7 @@
   /* shout drawer */
   .shout-drawer {
     display: none;
-    padding: 0 1.4rem 1.15rem;
+    padding: 0 .9rem 1rem;
     background: #f8fafc;
     border-top: 1px dashed var(--line);
     animation: s-drawer-in .25s ease;
@@ -788,57 +686,6 @@
   <span class="c-f">-e</span> <span class="c-w">STORAGE_LIMIT=</span><span class="c-v">20GB</span> <span class="c-d">\</span>
   <span class="c-f">-e</span> <span class="c-w">SYNC=</span><span class="c-v">https://1.rabta.space</span> <span class="c-d">\</span>
   <span class="c-v">ghcr.io/rabta-protocol/rabta:latest</span></code></pre>
-      </div>
-    </div>
-  </section>
-
-  <section class="section node-showcase" id="public-node" aria-labelledby="node-heading">
-    <div class="section-head">
-      <h2 id="node-heading">Free public node</h2>
-      <span>volunteer-run · no accounts · open api</span>
-    </div>
-    <div class="node-panel">
-      <div class="node-copy">
-        <div class="node-title">
-          <span class="node-dot" aria-hidden="true"></span>
-          <h3><a href="https://1.rabta.space/" target="_blank" rel="noreferrer">1.rabta.space</a></h3>
-          <span class="node-status" id="node-status" aria-live="polite">connecting…</span>
-        </div>
-        <p>Use the public relay for demos, prototypes and local-first apps. No signup, no API keys — every event is Ed25519-signed by your key and every blob is sealed client-side in a <code>RABTA1</code> container.</p>
-        <div class="node-actions">
-          <a class="btn btn-ghost" href="https://1.rabta.space/" target="_blank" rel="noreferrer">Open dashboard</a>
-          <button class="node-copy-btn" id="node-copy" type="button">copy base URL</button>
-        </div>
-        <dl class="node-facts">
-          <div><dt title="Ephemeral; rotates when the node restarts">node id</dt><dd id="node-fact-id">—</dd></div>
-          <div><dt>version</dt><dd id="node-fact-version">—</dd></div>
-          <div><dt>ttl window</dt><dd id="node-fact-ttl">—</dd></div>
-          <div><dt>sync</dt><dd id="node-fact-peers">—</dd></div>
-        </dl>
-        <div class="node-endpoints" aria-label="Public API endpoints">
-          <a href="https://1.rabta.space/api/v1/health" target="_blank" rel="noreferrer"><code>GET /api/v1/health</code></a>
-          <a href="https://1.rabta.space/api/v1/node" target="_blank" rel="noreferrer"><code>GET /api/v1/node</code></a>
-          <a href="https://1.rabta.space/api/v1/openapi.json" target="_blank" rel="noreferrer"><code>GET /api/v1/openapi.json</code></a>
-        </div>
-        <p class="node-note">Free and best-effort. Events carry mandatory TTLs; don't use it as permanent storage.</p>
-      </div>
-      <div class="node-live">
-        <div class="node-live-head">
-          <span>live telemetry</span>
-          <span id="node-updated">every 15s</span>
-        </div>
-        <div class="node-metrics">
-          <div><span>events</span><b id="node-events">—</b></div>
-          <div><span>blobs</span><b id="node-blobs">—</b></div>
-          <div><span>storage</span><b id="node-storage">—</b><small id="node-storage-sub"></small></div>
-          <div><span>uptime</span><b id="node-uptime">—</b></div>
-        </div>
-        <div class="node-battery">
-          <div class="node-battery-row"><span>battery</span><b id="node-battery-pct">—</b></div>
-          <span class="node-battery-bar" role="img" aria-label="Node battery level"><span class="node-battery-fill" id="node-battery-fill"></span></span>
-          <span class="node-battery-sub" id="node-battery-sub">write budget</span>
-        </div>
-        <div class="node-console"><code>curl -s https://1.rabta.space/api/v1/node</code></div>
       </div>
     </div>
   </section>
@@ -1483,10 +1330,11 @@
 
   const decorateShouts = () => {
     Array.from(shoutList.children).forEach((row, i) => {
-      row.style.setProperty('--o', Math.max(.6, 1 - i * .035).toFixed(2));
+      row.style.setProperty('--o', Math.max(.08, Math.pow(.8, i)).toFixed(3));
       const when = row.querySelector('.shout-ago');
       if (when) when.textContent = secondsAgo(Number(row.dataset.at));
     });
+    shoutList.classList.toggle('is-fading', shoutList.children.length > 8);
     const empty = shoutList.children.length === 0;
     if (empty) shoutEmpty.textContent = 'No shouts yet — be the first to broadcast five words.';
     shoutEmpty.hidden = !empty;
@@ -2157,119 +2005,6 @@
     loadHistory().then(poll);
   };
 
-  /* ---------- free public node ---------- */
-  const initNodeShowcase = () => {
-    const section = $('public-node');
-    if (!section) return;
-
-    const statusEl = $('node-status');
-    const updatedEl = $('node-updated');
-    const eventsEl = $('node-events');
-    const blobsEl = $('node-blobs');
-    const storageEl = $('node-storage');
-    const storageSubEl = $('node-storage-sub');
-    const uptimeEl = $('node-uptime');
-    const batteryPctEl = $('node-battery-pct');
-    const batteryFillEl = $('node-battery-fill');
-    const batterySubEl = $('node-battery-sub');
-    const idEl = $('node-fact-id');
-    const versionEl = $('node-fact-version');
-    const ttlEl = $('node-fact-ttl');
-    const peersEl = $('node-fact-peers');
-
-    const copyBtn = $('node-copy');
-    let copiedTimer = null;
-    if (copyBtn) {
-      copyBtn.addEventListener('click', async () => {
-        try { await navigator.clipboard.writeText(NODE_URL); } catch {}
-        copyBtn.textContent = 'copied ✓';
-        copyBtn.classList.add('is-copied');
-        clearTimeout(copiedTimer);
-        copiedTimer = setTimeout(() => {
-          copyBtn.textContent = 'copy base URL';
-          copyBtn.classList.remove('is-copied');
-        }, 1600);
-      });
-    }
-
-    const shortId = (value) => {
-      const id = String(value || '');
-      return id.length > 18 ? id.slice(0, 8) + '…' + id.slice(-6) : id;
-    };
-    const ttlLabel = (limits) => {
-      if (!limits) return '—';
-      const min = Number(limits.min_ttl_s);
-      const max = Number(limits.max_ttl_s);
-      if (!Number.isFinite(min) || !Number.isFinite(max)) return '—';
-      const format = (seconds) => seconds >= 86400
-        ? Math.round(seconds / 86400) + 'd'
-        : seconds >= 3600
-          ? Math.round(seconds / 3600) + 'h'
-          : Math.round(seconds) + 's';
-      return format(min) + '–' + format(max);
-    };
-
-    const refresh = async () => {
-      try {
-        const res = await fetch(NODE_URL + '/api/v1/node', { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const body = await res.json();
-        const events = body && body.events ? Number(body.events.live) : NaN;
-        const blobs = body && body.blobs ? Number(body.blobs.live) : NaN;
-        const used = body && body.storage ? Number(body.storage.used_bytes) : NaN;
-        const budget = body && body.storage ? Number(body.storage.budget_bytes) : NaN;
-        const battery = body && body.peers && body.peers.battery ? body.peers.battery : null;
-        const pct = battery && Number(battery.max) > 0
-          ? Math.max(0, Math.min(100, (Number(battery.remaining) / Number(battery.max)) * 100))
-          : null;
-
-        section.classList.add('is-live');
-        section.classList.remove('is-offline');
-        if (statusEl) statusEl.textContent = 'live';
-        if (updatedEl) updatedEl.textContent = 'updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        if (eventsEl) eventsEl.textContent = Number.isFinite(events) ? fmtCount(events) : '—';
-        if (blobsEl) blobsEl.textContent = Number.isFinite(blobs) ? fmtCount(blobs) : '—';
-        if (storageEl) storageEl.textContent = Number.isFinite(used) ? fmtBytes(used) : '—';
-        if (storageSubEl) storageSubEl.textContent = Number.isFinite(budget) ? 'of ' + fmtBytes(budget) : '';
-        if (uptimeEl) uptimeEl.textContent = body && Number.isFinite(Number(body.uptime_s)) ? fmtUptime(Number(body.uptime_s)) : '—';
-
-        if (pct !== null) {
-          if (batteryFillEl) batteryFillEl.style.width = pct.toFixed(1) + '%';
-          if (batteryPctEl) batteryPctEl.textContent = Math.round(pct) + '%';
-          section.classList.toggle('is-low', pct < 50 && pct >= 20);
-          section.classList.toggle('is-critical', pct < 20);
-          if (batterySubEl) {
-            const regen = Number(battery.regen_per_sec) * 60;
-            const mode = battery.mode ? String(battery.mode).replace('_', '-') : '';
-            batterySubEl.textContent = (Number.isFinite(regen) ? 'regen ' + fmtCount(regen) + '/min' : 'write budget') + (mode ? ' · ' + mode : '');
-          }
-        } else {
-          section.classList.remove('is-low', 'is-critical');
-        }
-
-        if (idEl) {
-          const id = String(body && body.node_id ? body.node_id : '');
-          idEl.textContent = shortId(id) || '—';
-          idEl.title = id;
-        }
-        if (versionEl) versionEl.textContent = body && body.version ? 'v' + body.version : '—';
-        if (ttlEl) ttlEl.textContent = ttlLabel(body && body.limits ? body.limits : null);
-        if (peersEl) peersEl.textContent = body && Array.isArray(body.sync) ? (body.sync.length ? body.sync.length + ' configured' : 'standalone') : '—';
-      } catch {
-        section.classList.remove('is-live', 'is-low', 'is-critical');
-        section.classList.add('is-offline');
-        if (statusEl) statusEl.textContent = 'offline';
-        if (updatedEl) updatedEl.textContent = 'retrying…';
-        if (batteryFillEl) batteryFillEl.style.width = '0%';
-        if (batteryPctEl) batteryPctEl.textContent = '—';
-        if (batterySubEl) batterySubEl.textContent = 'unreachable';
-      }
-    };
-
-    refresh();
-    setInterval(() => { if (!document.hidden) refresh(); }, 15000);
-  };
-
   /* ---------- relays ---------- */
   const initRelays = () => {
     const cards = Array.from(document.querySelectorAll('.relay[data-relay]'));
@@ -2355,7 +2090,7 @@
   };
 
   const boot = () => {
-    const start = () => { initRunPanel(); hero(); initNodeShowcase(); initShoutbox(); initRelays(); initCanvasDemo(); };
+    const start = () => { initRunPanel(); hero(); initShoutbox(); initRelays(); initCanvasDemo(); };
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true });
   };
