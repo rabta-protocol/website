@@ -1928,7 +1928,7 @@
       }
       const sid = typeof data.sid === 'string' && /^[0-9a-f]{1,64}$/i.test(data.sid) ? data.sid.toLowerCase() : '';
       const seq = Number.isInteger(data.seq) && data.seq >= 0 && data.seq < 100000 ? data.seq : 0;
-      const at = Number.isFinite(event.created_at) ? event.created_at : visitNow();
+      const at = Number.isFinite(event.created_at) ? event.created_at : shoutNow();
       return { id: event.id, owner, color: data.color.toLowerCase(), width: clamp(Math.round(w), 1, 48), points, sid, seq, at };
     };
 
@@ -2048,7 +2048,7 @@
 
     const commitStroke = async (finished) => {
       if (!finished || !finished.points.length) return;
-      const at = visitNow() - 1;
+      const at = shoutNow() - 1;
       const sid = randomHex(8);
       const chunks = [];
       for (let start = 0; start < finished.points.length;) {
@@ -2239,7 +2239,7 @@
           section.classList.toggle('is-low', pct < 50 && pct >= 20);
           section.classList.toggle('is-critical', pct < 20);
           if (batterySubEl) {
-            const regen = Number(battery.regen_per_min);
+            const regen = Number(battery.regen_per_sec) * 60;
             const mode = battery.mode ? String(battery.mode).replace('_', '-') : '';
             batterySubEl.textContent = (Number.isFinite(regen) ? 'regen ' + fmtCount(regen) + '/min' : 'write budget') + (mode ? ' · ' + mode : '');
           }
@@ -2307,7 +2307,7 @@
             card.classList.toggle('is-critical', pct < 20);
           }
           if (subEl) {
-            const regen = battery ? Number(battery.regen_per_min) : NaN;
+            const regen = battery ? Number(battery.regen_per_sec) * 60 : NaN;
             const mode = battery && battery.mode ? String(battery.mode) : '';
             subEl.textContent = Number.isFinite(regen)
               ? 'regen ' + fmtCount(regen) + '/min' + (mode ? ' · ' + mode.replace('_', '-') : '')
